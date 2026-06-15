@@ -1,4 +1,41 @@
 var ws, wsUri;
+var currentPage = 1;
+
+/* =========================================================
+ * LOG TABLE UI CONFIG
+ * ปรับค่าตรงนี้ได้เองโดยไม่ต้องไล่แก้ CSS ด้านล่าง
+ * ========================================================= */
+const LOGX_UI = {
+  rowsPerPage: 20,
+
+  // ความกว้างของพื้นที่หน้า LOG
+  // ตัวอย่าง: "min(96vw, 2800px)", "98vw", "1800px"
+  pageWidth: "min(96vw, 2800px)",
+  pageMarginLeft: "auto",
+  pageMarginRight: "auto",
+
+  // ขนาดตาราง
+  tableFontSize: "12px",
+  tableHeaderFontSize: "11px",
+  tableCellPadding: "9px 8px",
+
+  // เส้นประแบ่งช่องในตาราง
+  tableGridLine: "1px dashed rgba(95, 116, 140, 0.75)",
+
+  // "nowrap" = ไม่ตัดบรรทัด / "normal" = ยอมตัดบรรทัด ลดการเบียด
+  tableWhiteSpace: "nowrap",
+
+  // "auto" = คอลัมน์ยืดตามข้อมูล / "fixed" = คอลัมน์เท่า ๆ กัน
+  tableLayout: "auto",
+
+  searchMinWidth: "280px",
+  searchFlexBasis: "420px",
+
+  tableOuterPadding: "16px 18px 18px 18px",
+  tableInnerPadding: "0 14px 14px 14px"
+};
+
+const itemsPerPage = LOGX_UI.rowsPerPage;
 window.tableData = [];
 window.filteredTableData = null;
 window.stationSet = new Set();
@@ -329,6 +366,13 @@ function installEventLogExplorerStyle() {
   style.id = "event-log-explorer-style";
   style.textContent = `
     #dataloggerButtons, #table-pagination { display:none !important; }
+    #site_content {
+      width:${LOGX_UI.pageWidth} !important;
+      max-width:none !important;
+      margin-left:${LOGX_UI.pageMarginLeft} !important;
+      margin-right:${LOGX_UI.pageMarginRight} !important;
+      overflow:visible !important;
+    }
     #dataloggerContainer { min-height:auto !important; display:block !important; width:100% !important; }
 
     .logx-root, .logx-root * { box-sizing:border-box; }
@@ -364,18 +408,19 @@ function installEventLogExplorerStyle() {
 
     .logx-toolbar { display:flex; align-items:center; gap:10px; flex-wrap:wrap; padding:12px 18px; background:#132136; border-top:1px solid #233650; border-bottom:1px solid #233650; }
     .logx-label { color:#8fa2b8; font-size:11px; margin-bottom:8px; display:block; }
-    .logx-search { flex:1 1 420px; min-width:280px; height:34px; color:#e5edf7; background:#0d1826; border:1px solid #2c4260; border-radius:9px; padding:0 12px; outline:none; }
+    .logx-search { flex:1 1 ${LOGX_UI.searchFlexBasis}; min-width:${LOGX_UI.searchMinWidth}; height:34px; color:#e5edf7; background:#0d1826; border:1px solid #2c4260; border-radius:9px; padding:0 12px; outline:none; }
     .logx-search:focus { border-color:#2bb7f6; box-shadow:0 0 0 2px rgba(43,183,246,.15); }
 
-    .logx-layout { padding:16px 18px 18px 18px; }
+    .logx-layout { padding:${LOGX_UI.tableOuterPadding}; }
     .logx-panel { background:#0d1826; border:1px solid #233650; border-radius:14px; overflow:visible; width:100%; }
     .logx-panel-head { padding:14px 14px 8px 14px; }
     .logx-panel-title { margin:0; color:#e5edf7; font-size:16px; font-weight:700; }
 
-    .logx-table-wrap { overflow:visible; padding:0 14px 14px 14px; }
-    .logx-event-table { width:100%; table-layout:auto; border-collapse:separate; border-spacing:0; font-size:11px; color:#e5edf7; }
-    .logx-event-table th, .logx-event-table td { padding:10px 8px; border-bottom:1px solid #20324a; vertical-align:top; white-space:normal; word-break:break-word; }
-    .logx-event-table th { position:sticky; top:0; z-index:2; background:#15263a; color:#e5edf7; font-size:11px; font-weight:700; }
+    .logx-table-wrap { overflow:visible; padding:${LOGX_UI.tableInnerPadding}; }
+    .logx-event-table { width:100%; table-layout:${LOGX_UI.tableLayout}; border-collapse:separate; border-spacing:0; font-size:${LOGX_UI.tableFontSize}; color:#e5edf7; }
+    .logx-event-table th, .logx-event-table td { padding:${LOGX_UI.tableCellPadding}; border-right:${LOGX_UI.tableGridLine}; border-bottom:${LOGX_UI.tableGridLine}; vertical-align:middle; white-space:${LOGX_UI.tableWhiteSpace}; }
+    .logx-event-table th:last-child, .logx-event-table td:last-child { border-right:none; }
+    .logx-event-table th { background:#15263a; color:#e5edf7; font-size:${LOGX_UI.tableHeaderFontSize}; font-weight:700; }
     .logx-event-table th.logx-fwd { background:#12384a; }
     .logx-event-table th.logx-rwd { background:#123a2d; }
     .logx-event-table th.logx-cond { background:#3a2618; }
@@ -391,11 +436,15 @@ function installEventLogExplorerStyle() {
     .logx-cond-text { color:#f59e0b; }
     .logx-muted-text { color:#8fa2b8; }
     .logx-footer { display:flex; align-items:center; justify-content:space-between; gap:10px; padding:10px 14px 14px 14px; color:#8fa2b8; font-size:12px; }
+    .logx-page-buttons { display:flex; align-items:center; gap:6px; }
+    .logx-page-btn { height:30px; padding:0 12px; border-radius:8px; border:1px solid #31506e; background:#0b131c; color:#e5edf7; font-size:12px; font-weight:700; cursor:pointer; }
+    .logx-page-btn:disabled { opacity:.45; cursor:not-allowed; }
+    .logx-page-active { background:#2bb7f6; color:#071316; border-color:#2bb7f6; }
     .logx-empty { padding:36px 12px; color:#8fa2b8; text-align:center; }
 
     @media (max-width: 1400px) {
       .logx-metrics, .logx-chart-grid { grid-template-columns:1fr; }
-      .logx-event-table { font-size:10px; }
+      .logx-event-table { font-size:calc(${LOGX_UI.tableFontSize} - 1px); }
       .logx-event-table th, .logx-event-table td { padding:8px 6px; }
     }
   `;
@@ -457,11 +506,12 @@ async function loadDataLog() {
 
     rebuildStationSetFromTable();
     refreshStationDropdown();
+    currentPage = 1;
     renderTable();
   } catch (e) {
     console.error("loadDataLog error:", e);
     const container = document.getElementById("logxEventBody");
-    if (container) container.innerHTML = `<tr><td colspan="22" class="logx-empty">Error loading Data Log.</td></tr>`;
+    if (container) container.innerHTML = `<tr><td colspan="19" class="logx-empty">Error loading Data Log.</td></tr>`;
   }
 }
 
@@ -515,7 +565,7 @@ function buildDataloggerTable() {
 
         <div class="logx-toolbar">
           <span class="logx-label" style="margin:0;">Search</span>
-          <input id="logxTextSearch" class="logx-search" type="text" placeholder="Station / frequency / status / connection / note">
+          <input id="logxTextSearch" class="logx-search" type="text" placeholder="Station / frequency / connection">
           <span class="logx-pill">All Records</span>
           <span class="logx-pill logx-pill-blue">Forward</span>
           <span class="logx-pill logx-pill-green">Reflected</span>
@@ -536,7 +586,6 @@ function buildDataloggerTable() {
                     <th>Start Time</th>
                     <th>End Time</th>
                     <th>Site</th>
-                    <th>Device</th>
                     <th>Station</th>
                     <th>Freq MHz</th>
                     <th class="logx-fwd">FWD MAX W</th>
@@ -551,13 +600,11 @@ function buildDataloggerTable() {
                     <th class="logx-cond">RSSI</th>
                     <th class="logx-cond">Threshold W</th>
                     <th class="logx-cond">Duration sec</th>
-                    <th class="logx-cond">Status</th>
                     <th class="logx-cond">Connection</th>
-                    <th>Message / Note</th>
                   </tr>
                 </thead>
                 <tbody id="logxEventBody">
-                  <tr><td colspan="22" class="logx-empty">Loading event log...</td></tr>
+                  <tr><td colspan="19" class="logx-empty">Loading event log...</td></tr>
                 </tbody>
               </table>
             </div>
@@ -574,6 +621,7 @@ function buildDataloggerTable() {
   if (textSearch) {
     textSearch.addEventListener("input", () => {
       window.logTextFilter = textSearch.value || "";
+      currentPage = 1;
       renderTable();
     });
   }
@@ -589,7 +637,6 @@ function rowSearchText(row, idx) {
     getDateTime(row),
     getEndTime(row),
     getSiteName(row),
-    getDeviceName(row),
     getStationName(row),
     getFrequencyMHz(row),
     getForwardMaxW(row),
@@ -604,9 +651,7 @@ function rowSearchText(row, idx) {
     getRssiDbm(row),
     getThreshold(row),
     getDuration(row),
-    getStatus(row),
-    getConnectionText(row),
-    getMessage(row)
+    getConnectionText(row)
   ].join(" ").toLowerCase();
 }
 
@@ -621,6 +666,7 @@ function logxClearTextSearch() {
   const input = document.getElementById("logxTextSearch");
   if (input) input.value = "";
   window.logTextFilter = "";
+  currentPage = 1;
   renderTable();
 }
 
@@ -734,24 +780,31 @@ function renderEventList(rows) {
   const tbody = document.getElementById("logxEventBody");
   if (!tbody) return;
 
+  const totalPages = Math.ceil(rows.length / itemsPerPage) || 1;
+  if (currentPage > totalPages) currentPage = totalPages;
+  if (currentPage < 1) currentPage = 1;
+
+  const startIdx = (currentPage - 1) * itemsPerPage;
+  const pageData = rows.slice(startIdx, startIdx + itemsPerPage);
+
   if (!rows.length) {
-    tbody.innerHTML = `<tr><td colspan="22" class="logx-empty">No event log data</td></tr>`;
-    renderPagination(0);
+    tbody.innerHTML = `<tr><td colspan="19" class="logx-empty">No event log data</td></tr>`;
+    renderPagination(0, 1);
     return;
   }
 
-  tbody.innerHTML = rows.map((row, idx) => {
+  tbody.innerHTML = pageData.map((row, idx) => {
+    const absoluteIndex = startIdx + idx;
     const status = getStatus(row);
-    const connection = getConnectionText(row);
     const rowState = status === "Alarm" ? "logx-row-alarm" : status === "Warning" ? "logx-row-warning" : "";
+    const connection = getConnectionText(row);
 
     return `
-      <tr class="${rowState}" data-log-key="${escapeHtml(getRowKey(row, idx))}">
-        <td class="logx-num">${idx + 1}</td>
+      <tr class="${rowState}" data-log-key="${escapeHtml(getRowKey(row, absoluteIndex))}">
+        <td class="logx-num">${absoluteIndex + 1}</td>
         <td>${escapeHtml(getDateTime(row))}</td>
         <td>${escapeHtml(getEndTime(row))}</td>
         <td>${escapeHtml(getSiteName(row))}</td>
-        <td>${escapeHtml(getDeviceName(row))}</td>
         <td><strong>${escapeHtml(getStationName(row))}</strong></td>
         <td class="logx-num">${escapeHtml(getFrequencyMHz(row))}</td>
         <td class="logx-num logx-fwd-text">${escapeHtml(getForwardMaxW(row))}</td>
@@ -766,20 +819,59 @@ function renderEventList(rows) {
         <td class="logx-num logx-muted-text">${escapeHtml(getRssiDbm(row))}</td>
         <td class="logx-num">${escapeHtml(getThreshold(row))}</td>
         <td class="logx-num">${escapeHtml(getDuration(row))}</td>
-        <td>${status ? badgeHtml(status, statusKind(status)) : ""}</td>
         <td>${connection ? badgeHtml(connection, connectionKind(connection)) : ""}</td>
-        <td>${escapeHtml(getMessage(row))}</td>
       </tr>`;
   }).join("");
 
-  renderPagination(rows.length);
+  renderPagination(rows.length, totalPages);
 }
 
-function renderPagination(totalRows) {
+function renderPagination(totalRows, totalPages) {
   const info = document.getElementById("logxPageInfo");
   const pagination = document.getElementById("logxPagination");
-  if (info) info.textContent = `Showing ${totalRows} records`;
-  if (pagination) pagination.innerHTML = "";
+
+  if (info) {
+    if (!totalRows) info.textContent = "Showing 0 records";
+    else {
+      const start = (currentPage - 1) * itemsPerPage + 1;
+      const end = Math.min(currentPage * itemsPerPage, totalRows);
+      info.textContent = `Showing ${start}–${end} of ${totalRows} records · Rows per page: ${itemsPerPage}`;
+    }
+  }
+
+  if (!pagination) return;
+  pagination.className = "logx-page-buttons";
+  pagination.innerHTML = "";
+
+  const first = document.createElement("button");
+  first.className = "logx-page-btn";
+  first.textContent = "First";
+  first.disabled = currentPage <= 1;
+  first.onclick = () => { currentPage = 1; renderTable(); };
+
+  const prev = document.createElement("button");
+  prev.className = "logx-page-btn";
+  prev.textContent = "Previous";
+  prev.disabled = currentPage <= 1;
+  prev.onclick = () => { currentPage--; renderTable(); };
+
+  const cur = document.createElement("button");
+  cur.className = "logx-page-btn logx-page-active";
+  cur.textContent = `${currentPage} / ${totalPages}`;
+
+  const next = document.createElement("button");
+  next.className = "logx-page-btn";
+  next.textContent = "Next";
+  next.disabled = currentPage >= totalPages;
+  next.onclick = () => { currentPage++; renderTable(); };
+
+  const last = document.createElement("button");
+  last.className = "logx-page-btn";
+  last.textContent = "Last";
+  last.disabled = currentPage >= totalPages;
+  last.onclick = () => { currentPage = totalPages; renderTable(); };
+
+  pagination.append(first, prev, cur, next, last);
 }
 
 function eventLogExportRows(data) {
@@ -788,7 +880,6 @@ function eventLogExportRows(data) {
     getDateTime(it),
     getEndTime(it),
     getSiteName(it),
-    getDeviceName(it),
     getStationName(it),
     getFrequencyMHz(it),
     getForwardMaxW(it),
@@ -803,9 +894,7 @@ function eventLogExportRows(data) {
     getRssiDbm(it),
     getThreshold(it),
     getDuration(it),
-    getStatus(it),
-    getConnectionText(it),
-    getMessage(it)
+    getConnectionText(it)
   ]);
 }
 
@@ -814,10 +903,10 @@ function exportAll() {
   if (!data?.length) return alert("No data to export.");
 
   const header = [
-    "No.", "Start Time", "End Time", "Site", "Device", "Station", "Frequency MHz",
+    "No.", "Start Time", "End Time", "Site", "Station", "Frequency MHz",
     "Forward MAX-HOLD (W)", "Forward MAX-HOLD (dBm)", "Forward AVG/RMS (W)", "Forward AVG/RMS (dBm)",
     "Reflected MAX-HOLD (W)", "Reflected MAX-HOLD (dBm)", "Reflected AVG/RMS (W)", "Reflected AVG/RMS (dBm)",
-    "VSWR", "RSSI (dBm)", "Threshold (W)", "Duration (sec)", "Status / Alarm", "Connection", "Message / Note"
+    "VSWR", "RSSI (dBm)", "Threshold (W)", "Duration (sec)", "Connection"
   ];
 
   const csv = [header, ...eventLogExportRows(data)].map(a => a.map(csvEscape).join(",")).join("\n");
