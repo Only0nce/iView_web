@@ -87,32 +87,11 @@ include('ListAudioGain.php')
 	  }
 	}
 	?>
-
-	
        
 	<div class="chartDiv">
 		<h3 align="left">Data Logger</h3>
 	</div>
-	<div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; margin-bottom: 20px; gap: 10px;">
-		<div style="margin-top: 0px; font-weight: bold; color: #FA057E;"></div>
-		<div style="display: flex; gap: 10px;">
-			<button id="delete-all-btn" class="systembutton btn-danger">Delete All</button>
-			<button id="export-all-btn" class="systembutton btn-success">Export All</button>
-		</div>
-	</div>
 
-	<div style="display: flex; flex-wrap: wrap; align-items: center; margin-bottom: 10px;">
-		<span>Search</span>
-		<input type="date" id="searchDateStart" class="search-input" placeholder="Start Date" style="margin: 0px 10px;">
-		<span>to</span>
-		<input type="date" id="searchDateEnd" class="search-input" placeholder="End Date" style="margin: 0px 10px;">
-		<!-- <input type="time" id="searchTime" class="search-input" placeholder="Time"> -->
-		<select id="searchStation" class="search-input" style="margin: 0px 10px;">
-			<option value="">-- Select Station --</option>
-		</select>
-		<button id="reset-btn" class="systembutton btn-warning" style="margin: 0px 10px; padding: 10px 0px">Reset</button>
-	</div>
-	
 	<div id="dataloggerButtons" style="margin-bottom:10px;"></div>
 	<div id="dataloggerContainer"></div>
 	<div id="table-pagination" class="center">
