@@ -13,7 +13,7 @@ var ws, wsUri;
 var currentPage = 1;
 
 const LOGX_UI = {
-  rowsPerPage: 10,
+  rowsPerPage: 20,
 
   // Page width. Keep centered.
   pageWidth: "min(96vw, 2800px)",
@@ -402,6 +402,7 @@ function installEventLogExplorerStyle() {
     .logx-btn:hover { transform:translateY(-1px); }
     .logx-btn-blue { background:#0f8bc4; }
     .logx-btn-green { background:#129a59; border-color:#22c55e; }
+    .logx-btn-red { background:#9f1d2f; border-color:#ef476f; }
 
     .logx-pill { display:inline-flex; align-items:center; gap:6px; min-height:24px; padding:0 10px; border-radius:999px; border:1px solid #29435e; background:#1c2a3b; color:#8fa2b8; font-size:11px; font-weight:700; white-space:nowrap; }
     .logx-pill::before { content:""; width:6px; height:6px; border-radius:50%; background:#8fa2b8; flex:0 0 auto; }
@@ -670,8 +671,7 @@ function buildDataloggerTable() {
       <section class="logx-card" id="logxOverview">
         <div class="logx-card-head">
           <div>
-            <h2 class="logx-card-title">Logger Trend Overview</h2>
-            <div class="logx-card-subtitle">Displays Forward, Reflected, VSWR, RSSI, and Duration trends from the current filtered dataset.</div>
+            <h2 class="logx-card-title">Logger Trend Overview</h2>            
           </div>
           <div class="logx-actions">
             <span class="logx-pill logx-pill-blue">Forward</span>
@@ -753,6 +753,7 @@ function buildDataloggerTable() {
           <div class="logx-actions">
             <button type="button" class="logx-btn" onclick="logxClearTextSearch()">Clear Search</button>
             <button type="button" class="logx-btn logx-btn-green" onclick="exportAll()">CSV</button>
+            <button type="button" class="logx-btn logx-btn-red" onclick="deleteAllRows()">Delete All</button>
           </div>
         </div>
 
@@ -1817,6 +1818,37 @@ function renderPagination(totalRows, totalPages) {
     makeButton("Next", currentPage >= totalPages, () => goPage(currentPage + 1)),
     makeButton("Last", currentPage >= totalPages, () => goPage(totalPages))
   );
+}
+
+// =========================
+// Delete all datalogger records
+// =========================
+async function deleteAllRows() {
+  if (!confirm("Delete ALL datalogger records?\n\nThis will permanently remove every log row from the database.")) return;
+  if (!confirm("Final confirmation: delete ALL event log data permanently?")) return;
+
+  try {
+    const resp = await fetch("/delete_all_data_log.php", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        deleteAll: true,
+        confirm: "DELETE_ALL_DATALOGGER"
+      })
+    });
+
+    const data = await resp.json();
+    if (!data || data.success !== true) {
+      throw new Error(data?.message || "Delete all failed");
+    }
+
+    alert(`Deleted ${data.deleted || 0} row(s).`);
+    currentPage = 1;
+    await loadDataLog();
+  } catch (e) {
+    console.error("deleteAllRows error:", e);
+    alert("Delete all failed: " + (e?.message || String(e)));
+  }
 }
 
 // =========================
