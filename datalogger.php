@@ -88,10 +88,6 @@ include('ListAudioGain.php')
 	  }
 	}
 	?>
-       
-	<div class="chartDiv">
-		<h3 align="left">Data Logger</h3>
-	</div>
 
 	<div id="dataloggerButtons" style="margin-bottom:10px;"></div>
 	<div id="dataloggerContainer"></div>
