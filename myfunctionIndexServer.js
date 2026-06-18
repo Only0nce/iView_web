@@ -65,6 +65,124 @@ function colorFromSeverity(sev) {
 }
 
 
+// ===== Home dashboard visual helpers (UI only) =====
+function setDatasetState(id, state) {
+  const el = $(id);
+  if (el) el.dataset.state = state;
+}
+
+function getVswrState(value) {
+  const v = Number(value);
+  if (!Number.isFinite(v)) return "idle";
+  if (v >= 2.0) return "alert";
+  if (v >= 1.5) return "warn";
+  return "ok";
+}
+
+function getRssiState(value) {
+  const v = Number(value);
+  if (!Number.isFinite(v)) return "idle";
+  if (v <= -115) return "alert";
+  if (v <= -95) return "warn";
+  return "ok";
+}
+
+function getPowerState(value) {
+  const v = Number(value);
+  if (!Number.isFinite(v)) return "idle";
+  if (v <= 0) return "warn";
+  return "ok";
+}
+
+function formatTimeFromPayload(obj) {
+  const raw = obj.timestamp || obj.timeList || "";
+  if (raw && String(raw).length >= 5) return String(raw).slice(-8);
+  const now = new Date();
+  return now.toTimeString().slice(0, 8);
+}
+
+function setPill(id, state, text) {
+  const el = $(id);
+  if (!el) return;
+  el.dataset.state = state;
+  el.innerHTML = text;
+}
+
+function updateHomeOverviewPanel(id, obj, data) {
+  const rssiState = getRssiState(data.rssiDb);
+  const vswrState = getVswrState(data.swr);
+  const powerState = getPowerState(data.fwd);
+  const overallState = !data.connectionStatus ? "offline" :
+    (rssiState === "alert" || vswrState === "alert" ? "alert" :
+    (rssiState === "warn" || vswrState === "warn" || powerState === "warn" ? "warn" : "ok"));
+
+  const overallText = overallState === "ok" ? "OK" :
+    (overallState === "offline" ? "OFFLINE" : overallState.toUpperCase());
+
+  setPill("overviewSeverity" + id, overallState, overallText);
+  setPill("rssiState" + id, rssiState, rssiState === "ok" ? "OK" : (rssiState === "idle" ? "--" : (rssiState === "alert" ? "ALERT" : "WEAK")));
+  setPill("vswrState" + id, vswrState, vswrState === "ok" ? "OK" : (vswrState === "idle" ? "--" : vswrState.toUpperCase()));
+  setPill("reflectedState" + id, vswrState === "alert" ? "alert" : "ok", vswrState === "alert" ? "ALERT" : "OK");
+  setPill("rxStatusState" + id, data.connectionStatus ? (overallState === "ok" ? "ok" : "warn") : "offline", data.connectionStatus ? (overallState === "ok" ? "OK" : "WEAK") : "OFFLINE");
+
+  setHTML("rxStatusValue" + id, data.connectionStatus ? (overallState === "ok" ? "ACTIVE" : "CO_WARN") : "OFFLINE");
+  setHTML("lastUpdate" + id, formatTimeFromPayload(obj));
+
+  setDatasetState("overviewSeverity" + id, overallState);
+  setDatasetState("rssiState" + id, rssiState);
+  setDatasetState("vswrState" + id, vswrState);
+  setDatasetState("rxStatusValue" + id, data.connectionStatus ? (overallState === "ok" ? "ok" : "warn") : "offline");
+  setDatasetState("deviceDashboard" + id, data.connectionStatus ? "online" : "offline");
+  setTrendOfflineState(id, data.visible && !data.connectionStatus);
+
+  const dash = $("deviceDashboard" + id);
+  if (dash) dash.style.display = data.visible ? "block" : "";
+  syncDashboardDensity();
+}
+
+
+function setTrendOfflineState(id, isOffline) {
+  const trendCard = $("card_plot" + id);
+  const overlay = $("trendOfflineOverlay" + id);
+  const offline = !!isOffline;
+
+  if (trendCard) trendCard.classList.toggle("is-offline", offline);
+  if (overlay) overlay.setAttribute("aria-hidden", offline ? "false" : "true");
+}
+
+
+function updateRoleSummaryPanel(obj) {
+  const roleName = (obj.roleName ?? "--").toString();
+  const allDevice = Number(obj.all_device ?? 0);
+  const connect = Number(obj.connect ?? 0);
+  const disconnect = Number(obj.disconnect ?? 0);
+
+  setHTML("roleNameDisplay", roleName || "--");
+  setHTML("roleDeviceSummary", "All: " + allDevice + " | Connect: " + connect + " | Disconnect: " + disconnect);
+  syncDashboardDensity(allDevice);
+}
+
+
+function isDashboardDeviceVisible(row) {
+  if (!row) return false;
+  const visibleChild = row.querySelector('.rf-device-overview[style*="block"], .rf-trend-card[style*="block"], .rf-radio-control[style*="block"]');
+  return !!visibleChild;
+}
+
+function syncDashboardDensity(forceCount) {
+  const rows = Array.from(document.querySelectorAll('.rf-device-row'));
+  const visibleCount = Number.isFinite(Number(forceCount)) && Number(forceCount) > 0
+    ? Number(forceCount)
+    : rows.filter(isDashboardDeviceVisible).length;
+
+  // Always keep the index page in 2 columns x 8 rows layout without compact shrinking.
+  // rf-dashboard-wall is intentionally removed because it is the old compressed wall mode.
+  document.body.classList.remove('rf-dashboard-wall');
+  document.body.classList.add('rf-dashboard-2x8');
+  document.body.style.setProperty('--rf-visible-devices', String(visibleCount));
+}
+
+
 WebSocketTest();
 // window.onload = function(){
 //   myCanvasfwd(0)
@@ -175,6 +293,7 @@ function processMsg(message) {
     const card = $("card_uart" + ttyId);
     if (card) card.style.display = "block";
     setHTML("sqlLevel" + ttyId, "SQL:" + obj.SETMSqllv);
+    setHTML("sqlMirrorValue" + ttyId, obj.SETMSqllv);
     current_sql = obj.SETMSqllv;
   }
 
@@ -206,6 +325,10 @@ function processMsg(message) {
     }
   }
 
+  else if (obj.menuID == "view_update_Page") {
+    updateRoleSummaryPanel(obj);
+  }
+
   /* ---------- วางแทนบล็อคเดิมทั้งก้อนนี้ ---------- */
   else if (obj.menuID == "view_transmitter_list") {
     // ---- ไม่มี return กลางทาง ----
@@ -217,8 +340,10 @@ function processMsg(message) {
   
       // คำนวณค่า
       let swrmax = 2;
-      let stationName = obj.stationName + " " + (obj.frequency/1e6).toFixed(4) + " MHz";
-      if (obj.frequency == 0) stationName = obj.stationName;
+      const rawStationName = String(obj.stationName ?? "").trim();
+      const frequencyMHz = Number(obj.frequency || 0) / 1e6;
+      const frequencyText = Number(obj.frequency || 0) > 0 ? frequencyMHz.toFixed(4) + " MHz" : "";
+      let stationName = frequencyText ? (rawStationName + " " + frequencyText).trim() : rawStationName;
   
       const fwd    = Number((obj.fwdPowerWatt*1.0).toFixed(2));
       let   fwdmax = Number((obj.maxFwdPowerWatt*1.0).toFixed(2));
@@ -254,10 +379,34 @@ function processMsg(message) {
   
       // กัน null แบบไม่ return
       const get = (x) => document.getElementById(x);
+
+      // UI-only mirrors for the SVG-style index dashboard
+      updateHomeOverviewPanel(id, obj, {
+        fwd: fwd,
+        rwd: rwd,
+        swr: swr,
+        rssiDb: rssiDb,
+        connectionStatus: connectionStatus,
+        visible: visible
+      });
   
-      // อัปเดตชื่อการ์ด
+      // อัปเดตชื่อการ์ด: แยกชื่ออุปกรณ์และความถี่คนละบรรทัด + hover แสดงชื่อเต็ม
       const titleEl = get(ids.title);
-      if (titleEl) titleEl.innerHTML = stationName;
+      const deviceNameEl = get("deviceName" + id);
+      const deviceFrequencyEl = get("deviceFrequency" + id);
+      if (titleEl) {
+        const safeTitle = stationName || "RF Device " + id;
+        titleEl.setAttribute("aria-label", safeTitle);
+        titleEl.removeAttribute("title");
+        titleEl.removeAttribute("data-full-title");
+
+        if (deviceNameEl || deviceFrequencyEl) {
+          if (deviceNameEl) deviceNameEl.textContent = rawStationName || "RF Device " + id;
+          if (deviceFrequencyEl) deviceFrequencyEl.textContent = frequencyText || "-- MHz";
+        } else {
+          titleEl.textContent = safeTitle;
+        }
+      }
   
       // normalize max
       if (fwd > fwdmax) fwdmax = fwd;
@@ -332,12 +481,14 @@ function processMsg(message) {
           if (fwdValEl)  fwdValEl.innerHTML = String(fwd_dB);
           if (rwdValEl)  rwdValEl.innerHTML = String(rwd_dB);
           if (fwdUnitEl) fwdUnitEl.innerHTML = "Forward Power (dBm)";
-          if (rwdUnitEl) rwdUnitEl.innerHTML = "RSSI (dBm)";
+          if (rwdUnitEl) rwdUnitEl.innerHTML = "RSSI";
+          setHTML("rwdMetricUnit" + id, "dBm");
         } else {
           if (fwdValEl)  fwdValEl.innerHTML = String(fwd);
           if (rwdValEl)  rwdValEl.innerHTML = String(rwd);
           if (fwdUnitEl) fwdUnitEl.innerHTML = "Forward Power (W)";
-          if (rwdUnitEl) rwdUnitEl.innerHTML = "RSSI (dBm)";
+          if (rwdUnitEl) rwdUnitEl.innerHTML = "RSSI";
+          setHTML("rwdMetricUnit" + id, "W");
         }
         if (swrValEl) swrValEl.innerHTML = String(swr);
   
@@ -411,6 +562,11 @@ function setUnit(unit) {
     setStyle("unitWattActive", "backgroundColor", "#009688FF");
     setStyle("unitDBActive", "left", "calc(100% - 160px)");
     setStyle("unitDBActive", "backgroundColor", "#00968840");
+  }
+
+  // UI-only unit labels for reflected metric. Live values continue to use the existing data flow.
+  for (let i = 1; i <= 16; i++) {
+    setHTML("rwdMetricUnit" + i, dBUnit ? "dBm" : "W");
   }
 }
 
@@ -962,14 +1118,15 @@ function drawMyPlot(fwd, rwd, vswr, time, id, dBUnit) {
   var data = [trace1, trace2, trace3];
 
   var layout = {
-    legend: { orientation: "h", x: 0.5, y: 1.15, xanchor: 'center' },
-    margin: { l: 45, r: 45, t: 10, b: 40 },
+    legend: { orientation: "h", x: 0.5, y: 1.12, xanchor: 'center', font: { size: 11 } },
+    margin: { l: 38, r: 38, t: 8, b: 32 },
     paper_bgcolor: '#21323E',
     plot_bgcolor: '#21323E',
-    font: { color: '#FFFFFF' },
+    font: { color: '#FFFFFF', size: 11 },
     xaxis: {
-      title: { text: 'Time (m)', font: { color: '#FFFFFF' } },
+      title: { text: 'Time (m)', font: { color: '#FFFFFF', size: 11 } },
       color: '#FFFFFF',
+      tickfont: { size: 10 },
       showline: true,
       linecolor: '#FFFFFF',
       linewidth: 2,
@@ -977,16 +1134,18 @@ function drawMyPlot(fwd, rwd, vswr, time, id, dBUnit) {
       type: 'date'
     },
     yaxis: {
-      title: { text: 'Power (' + powerUnit + ')', font: { color: '#FFFFFF' } },
+      title: { text: 'Power (' + powerUnit + ')', font: { color: '#FFFFFF', size: 11 } },
       color: '#FFFFFF',
+      tickfont: { size: 10 },
       showline: true,
       linecolor: '#FFFFFF',
       linewidth: 2,
       zeroline: false,
     },
     yaxis2: {
-      title: { text: 'VSWR', font: { color: '#FFFFFF' } },
+      title: { text: 'VSWR', font: { color: '#FFFFFF', size: 11 } },
       color: '#FFFFFF',
+      tickfont: { size: 10 },
       overlaying: 'y',
       side: 'right',
       showline: true,
@@ -996,7 +1155,7 @@ function drawMyPlot(fwd, rwd, vswr, time, id, dBUnit) {
     }
   };
 
-  Plotly.react(targetId, data, layout, { responsive: true });
+  Plotly.react(targetId, data, layout, { responsive: true, displayModeBar: false });
 }
 
 
