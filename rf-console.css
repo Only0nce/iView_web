@@ -1,0 +1,617 @@
+html {
+  background: #08111e;
+}
+
+body.rf-console {
+  min-height: 100vh !important;
+  height: auto !important;
+  margin: 0;
+  background: #08111e !important;
+  background-image: none !important;
+  animation: none !important;
+  color: #e5edf7 !important;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-size: 14px;
+}
+
+body.rf-console *,
+body.rf-console *::before,
+body.rf-console *::after {
+  box-sizing: border-box;
+}
+
+body.rf-console {
+  --rf-page: #08111e;
+  --rf-card: #101b2b;
+  --rf-panel: #0d1826;
+  --rf-panel-2: #132136;
+  --rf-ink: #e5edf7;
+  --rf-ink-strong: #f4f8fc;
+  --rf-muted: #a7b6c8;
+  --rf-muted-2: #8fa2b8;
+  --rf-border: #29435e;
+  --rf-border-strong: #31506e;
+  --rf-focus: #7dd3fc;
+  --rf-blue: #2bb7f6;
+  --rf-green: #43d39e;
+  --rf-orange: #ffb020;
+  --rf-red: #ff6b6b;
+}
+
+body.rf-console #main {
+  width: 100%;
+}
+
+body.rf-console #header {
+  width: min(96vw, 2800px);
+  margin: 0 auto;
+}
+
+body.rf-console #logo,
+body.rf-console #menubar {
+  width: 100% !important;
+  max-width: 100% !important;
+}
+
+body.rf-console #logo {
+  height: 80px;
+}
+
+body.rf-console #logo #logo_text {
+  left: 10px;
+  right: 0;
+}
+
+body.rf-console #logo_text h1,
+body.rf-console #logo_text h1 a,
+body.rf-console #logo_text h1 a:hover {
+  color: var(--rf-ink-strong);
+  letter-spacing: 0;
+  text-decoration: none;
+}
+
+body.rf-console #logo_text h1 a .logo_colour {
+  color: var(--rf-ink-strong) !important;
+}
+
+body.rf-console ul#menu {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  overflow-x: auto;
+  overflow-y: hidden;
+  white-space: nowrap;
+  margin: 0;
+  padding: 0 0 6px;
+}
+
+body.rf-console ul#menu li {
+  flex: 0 0 auto;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+body.rf-console ul#menu li a {
+  min-height: 36px;
+  height: auto !important;
+  display: flex !important;
+  align-items: center;
+  justify-content: center;
+  margin: 0;
+  padding: 9px 12px 7px;
+  border-radius: 8px;
+  color: #fff;
+  letter-spacing: 0;
+  font: 700 12px/1.2 system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  text-transform: uppercase;
+  text-decoration: none;
+  background: transparent;
+}
+
+body.rf-console ul#menu li a:focus-visible,
+body.rf-console button:focus-visible,
+body.rf-console input:focus-visible,
+body.rf-console select:focus-visible {
+  outline: 3px solid var(--rf-focus);
+  outline-offset: 2px;
+}
+
+body.rf-console ul#menu li a:hover,
+body.rf-console ul#menu li.selected a,
+body.rf-console ul#menu li.selected a:hover {
+  color: #06243a !important;
+  background: #dbeafe !important;
+}
+
+body.rf-console #site_content {
+  width: min(96vw, 2800px) !important;
+  max-width: 2800px !important;
+  height: auto !important;
+  min-height: calc(100vh - 160px);
+  margin: 0 auto !important;
+  padding: 16px 0 32px !important;
+  overflow: visible !important;
+}
+
+body.rf-console h1,
+body.rf-console h2,
+body.rf-console h3,
+body.rf-console h4,
+body.rf-console h5,
+body.rf-console h6 {
+  color: var(--rf-ink-strong);
+  font-family: inherit;
+  letter-spacing: 0;
+}
+
+body.rf-console-config #site_content {
+  display: grid;
+  grid-template-columns: minmax(240px, 300px) minmax(0, 1fr);
+  gap: 18px;
+  align-items: start;
+}
+
+body.rf-console-config .sidebar,
+body.rf-console-config #network_content,
+body.rf-console-config .sidebar2 {
+  float: none;
+}
+
+body.rf-console-config .sidebar {
+  width: auto;
+  padding: 16px;
+  border: 1px solid var(--rf-border);
+  border-radius: 12px;
+  background: var(--rf-card);
+}
+
+body.rf-console-config .sidebar h3,
+body.rf-console-config .sidebar h4,
+body.rf-console-config #network_content h3 {
+  margin: 0 0 14px;
+  font-size: 16px;
+  line-height: 1.25;
+  font-weight: 800;
+  text-align: left;
+}
+
+body.rf-console-config .sidebar h3:not(:first-child),
+body.rf-console-config .sidebar h4 {
+  margin-top: 22px;
+  padding-top: 16px;
+  border-top: 1px solid var(--rf-border);
+}
+
+body.rf-console-config #network_content {
+  width: auto;
+  min-width: 0;
+  margin: 0;
+  padding: 18px 20px 20px;
+  border: 1px solid var(--rf-border);
+  border-radius: 12px;
+  background: var(--rf-card);
+}
+
+body.rf-console-config #network_content > h3:first-child {
+  margin-bottom: 18px;
+}
+
+body.rf-console-config #network_content hr {
+  height: 1px;
+  margin: 24px -20px 18px;
+  border: 0;
+  background: var(--rf-border);
+}
+
+body.rf-console-config .sidebar2 {
+  display: none;
+}
+
+body.rf-console .form-group {
+  margin: 0 0 16px;
+  position: relative;
+}
+
+body.rf-console .selected_list,
+body.rf-console .systemdiv,
+body.rf-console .sampleselected {
+  float: none;
+  width: 100%;
+  margin: 0 0 14px;
+  text-align-last: initial;
+}
+
+body.rf-console .selected_list span,
+body.rf-console .systemdiv span {
+  float: none !important;
+  display: block;
+  margin: 0 0 6px;
+  color: var(--rf-muted);
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1.35;
+}
+
+body.rf-console .form-control,
+body.rf-console .systemselect,
+body.rf-console input[type="text"],
+body.rf-console input[type="datetime-local"],
+body.rf-console input[type="file"],
+body.rf-console select {
+  position: relative;
+  display: block;
+  width: 100%;
+  min-height: 42px;
+  height: auto;
+  margin: 0;
+  padding: 0 10px;
+  border: 1px solid #2c4260;
+  border-radius: 8px;
+  background: var(--rf-panel);
+  color: var(--rf-ink);
+  font: 500 13px/1.35 system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  text-align: left;
+  text-align-last: initial;
+  outline: none;
+  transition: border-color .18s ease, background .18s ease;
+}
+
+body.rf-console input[type="file"] {
+  padding: 9px 10px;
+}
+
+body.rf-console .form-control::placeholder,
+body.rf-console input::placeholder {
+  color: #b7c4d4;
+  opacity: 1;
+  text-align: left;
+}
+
+body.rf-console .form-control:focus,
+body.rf-console .systemselect:focus,
+body.rf-console input:focus,
+body.rf-console select:focus {
+  border-color: var(--rf-blue);
+  background: #0b1726;
+  background-position: initial;
+  background-size: initial;
+}
+
+body.rf-console .form-control:disabled,
+body.rf-console input:disabled,
+body.rf-console button:disabled {
+  opacity: .72;
+  cursor: not-allowed;
+}
+
+body.rf-console .button,
+body.rf-console .button2,
+body.rf-console button {
+  min-height: 40px;
+  border: 1px solid var(--rf-border-strong);
+  border-radius: 8px;
+  background: #1b2a3b;
+  color: #fff;
+  font: 800 12px/1.1 system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  cursor: pointer;
+  transition: background .18s ease, border-color .18s ease, transform .18s ease;
+}
+
+body.rf-console .button2 {
+  width: 100%;
+  height: auto;
+  padding: 0 14px;
+}
+
+body.rf-console .button:hover,
+body.rf-console .button2:hover,
+body.rf-console button:hover {
+  background: #20354d;
+  border-color: #4a6c8d;
+}
+
+body.rf-console .button:active,
+body.rf-console .button2:active,
+body.rf-console button:active {
+  transform: translateY(1px);
+}
+
+body.rf-console #footer {
+  width: min(96vw, 2800px);
+  height: auto;
+  margin: 0 auto;
+  padding: 8px 0 24px;
+  color: var(--rf-muted-2);
+  background: transparent;
+  font: 600 11px/1.4 system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  letter-spacing: 0;
+}
+
+body.rf-console #footer h4 {
+  margin: 0;
+  padding: 0;
+  color: var(--rf-muted-2);
+  font: inherit;
+}
+
+body.rf-console-home #site_content {
+  display: block;
+}
+
+body.rf-console-home #site_content > .container {
+  position: relative !important;
+  top: auto !important;
+  left: auto !important;
+  width: 100% !important;
+  height: auto !important;
+  min-height: 74px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 0 0 14px;
+  padding: 16px 20px;
+  border: 1px solid var(--rf-border);
+  border-radius: 12px;
+  background: var(--rf-card);
+}
+
+body.rf-console-home .truelanLabel {
+  position: relative !important;
+  top: auto !important;
+  left: auto !important;
+  width: auto !important;
+  height: auto !important;
+  flex: 1 1 auto;
+  margin: 0;
+  color: var(--rf-ink-strong);
+  font-size: 18px;
+  line-height: 1.25;
+  font-weight: 800;
+  text-align: left;
+}
+
+body.rf-console-home #unitWattActive,
+body.rf-console-home #unitDBActive {
+  position: relative !important;
+  top: auto !important;
+  left: auto !important;
+  width: 72px;
+  min-height: 40px;
+  padding: 0 14px !important;
+  border: 1px solid var(--rf-border-strong);
+  border-radius: 8px;
+  color: #fff;
+  font-size: 13px;
+  font-weight: 800;
+}
+
+body.rf-console-home .container1 {
+  position: relative !important;
+  top: auto !important;
+  left: auto !important;
+  width: 100% !important;
+  height: auto !important;
+  min-height: 260px;
+  display: grid !important;
+  grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+  gap: 14px;
+  align-items: stretch;
+  align-content: start;
+  margin: 0;
+}
+
+body.rf-console-home .card,
+body.rf-console-home .cardRssi {
+  width: auto !important;
+  min-width: 0;
+  min-height: 270px;
+  height: 270px;
+  margin: 0;
+  border: 1px solid var(--rf-border);
+  border-radius: 12px;
+  background: var(--rf-card);
+  color: var(--rf-ink);
+  overflow: hidden;
+  transition: border-color .18s ease, background .18s ease;
+}
+
+body.rf-console-home .card:hover,
+body.rf-console-home .cardRssi:hover {
+  border-color: #3f6283;
+  background: #122033;
+}
+
+body.rf-console-home [id^="card_plot"] {
+  min-height: 370px;
+  height: 370px;
+}
+
+body.rf-console-home .title {
+  top: 14px;
+  margin: 0;
+  color: var(--rf-ink-strong);
+  font-size: 15px;
+  line-height: 1.25;
+  font-weight: 800;
+}
+
+body.rf-console-home .fwdLabel {
+  top: 48px;
+  margin: 0;
+  color: var(--rf-blue);
+  font-size: 42px;
+  line-height: 1;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+}
+
+body.rf-console-home .rwdLabel,
+body.rf-console-home .vswrLabel {
+  color: var(--rf-ink-strong);
+  font-size: 26px;
+  line-height: 1;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+}
+
+body.rf-console-home .fwdpowerw,
+body.rf-console-home .rwdpowerlabel,
+body.rf-console-home .vswrlabel {
+  color: var(--rf-muted);
+  font-size: 12px;
+  font-weight: 700;
+}
+
+body.rf-console-home .barfwd,
+body.rf-console-home .barrwd,
+body.rf-console-home .barvswr {
+  height: 8px;
+  overflow: hidden;
+  border-radius: 999px;
+}
+
+body.rf-console-home .emptybar {
+  border-radius: 999px;
+  background: #26384e;
+}
+
+body.rf-console-home .filledbar {
+  border-radius: 999px;
+  transition: background .22s ease;
+}
+
+body.rf-console-home .cardDisconnect {
+  border-radius: 12px;
+  background: rgba(8, 17, 30, .9);
+  opacity: 1;
+}
+
+body.rf-console-home .cardDisconnectLabel {
+  top: 178px;
+  color: var(--rf-ink-strong);
+  font-size: 18px;
+  font-weight: 800;
+}
+
+body.rf-console-home .imgCenter {
+  top: 66px;
+  width: 90px;
+  height: auto;
+  left: calc(50% - 45px);
+}
+
+body.rf-console-home .powerButton,
+body.rf-console-home .upDownButton,
+body.rf-console-home .contentButton {
+  border: 1px solid var(--rf-border-strong);
+  background: #1b2a3b;
+  color: var(--rf-ink);
+  font-size: 12px;
+  font-weight: 800;
+}
+
+body.rf-console-home .powerButton:hover,
+body.rf-console-home .upDownButton:hover,
+body.rf-console-home .contentButton:hover {
+  background: #20354d;
+  border-color: #4a6c8d;
+}
+
+body.rf-console-home .divTempShow,
+body.rf-console-home .divTrxShow {
+  color: var(--rf-muted);
+  font-size: 12px;
+  font-weight: 700;
+}
+
+body.rf-console-home [id^="myPlot"] {
+  width: 100%;
+  height: 330px;
+  margin: 0;
+  padding: 10px;
+  border: 1px solid #26384e;
+  border-radius: 8px;
+  background: #0b1420;
+}
+
+@media (max-width: 1100px) {
+  body.rf-console-config #site_content {
+    grid-template-columns: 1fr;
+  }
+
+  body.rf-console-config .sidebar {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 14px;
+  }
+
+  body.rf-console-config .sidebar h3,
+  body.rf-console-config .sidebar h4 {
+    grid-column: 1 / -1;
+  }
+}
+
+@media (max-width: 760px) {
+  body.rf-console #header,
+  body.rf-console #site_content,
+  body.rf-console #footer {
+    width: calc(100vw - 24px) !important;
+  }
+
+  body.rf-console #logo {
+    height: auto;
+    min-height: 70px;
+  }
+
+  body.rf-console #logo_text h1,
+  body.rf-console #logo_text h1 a {
+    font-size: 28px;
+    line-height: 1.12;
+  }
+
+  body.rf-console-home #site_content > .container {
+    align-items: stretch;
+    flex-wrap: wrap;
+    padding: 14px;
+  }
+
+  body.rf-console-home .truelanLabel {
+    flex-basis: 100%;
+  }
+
+  body.rf-console-home .container1 {
+    grid-template-columns: 1fr;
+  }
+
+  body.rf-console-home [id^="card_plot"] {
+    grid-column: auto;
+  }
+
+  body.rf-console .button,
+  body.rf-console .button2,
+  body.rf-console button,
+  body.rf-console .form-control,
+  body.rf-console .systemselect,
+  body.rf-console input,
+  body.rf-console select {
+    min-height: 44px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  body.rf-console *,
+  body.rf-console *::before,
+  body.rf-console *::after {
+    animation-duration: .01ms !important;
+    animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
+    transition-duration: .01ms !important;
+  }
+
+  body.rf-console .button:active,
+  body.rf-console .button2:active,
+  body.rf-console button:active {
+    transform: none;
+  }
+}

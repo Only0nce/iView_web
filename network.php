@@ -24,20 +24,14 @@ include('ListAudioGain.php')
     <meta name="keywords" content="Audio Streamer, Music Streamer" />
     <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
     <link rel="stylesheet" type="text/css" href="style.css" title="style" />
+    <link rel="stylesheet" type="text/css" href="rf-console.css?v=<?php echo time(); ?>" />
     <script src="jquery.min.js"></script>
     <script type="text/javascript" src="jquery-latest.min.js"></script>
     <script type="text/javascript" src="jquery-ui.js"></script>
     <script type="text/javascript" src="myfunctionNetwork.js?v=<?php echo time(); ?>"></script>
-    <style type="text/css">
-    /*
-  .selected_list {
-}
-*/
-    </style>
 </head>
-</style>
 
-<body>
+<body class="rf-console rf-console-config rf-console-network">
     <div id="main">
         <div id="header">
             <div id="logo">
@@ -130,14 +124,14 @@ include('ListAudioGain.php')
 			?>
                         </select>
                     </div>
-                    <div id="showIP" style.display="none">
-                        <div class="selected_list" style.visibility="hidden"> <span style="float: left">IP Address
+                    <div id="showIP" style="display:none;">
+                        <div class="selected_list" style="visibility:hidden;"> <span style="float: left">IP Address
                             </span><br>
                             <input id="ipaddress" name="ipaddress" class="form-control" type="text"
                                 placeholder="IP Address" value='<?php echo $ipaddress; ?>' />
                         </div>
 
-                        <div class="selected_list" style.visibility="hidden">
+                        <div class="selected_list" style="visibility:hidden;">
                             <span>Subnet Mask</span>
                             <input class="form-control" type="text" id="subnet" name="subnet" placeholder="Subnet Mask"
                                 value='<?php echo $subnet; ?>' />
@@ -158,11 +152,11 @@ include('ListAudioGain.php')
                     </div>
                 </div>
                 <div class="selected_list"><span></span>
-                    <button class="button button2" type="submit" id="update" name="update"
+                    <button class="button button2" type="button" id="update" name="update"
                         onClick="updateNetwork()">Apply</button>
                 </div>
                 <div class="selected_list"><span></span>
-                    <button class="button button2" type="submit" id="restartnetwork" name="restartnetwork"
+                    <button class="button button2" type="button" id="restartnetwork" name="restartnetwork"
                         onClick="restartnetwork()">Networking Restart</button>
                 </div>
 
@@ -305,7 +299,10 @@ include('ListAudioGain.php')
 -->
 
                 <!-- </div> -->
-     
+            </div>
+        </div>
+    </div>
+
 </body>
 
 </html>

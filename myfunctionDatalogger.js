@@ -382,6 +382,44 @@ function installEventLogExplorerStyle() {
   const style = document.createElement("style");
   style.id = "event-log-explorer-style";
   style.textContent = `
+    html { background:#08111e; }
+    body {
+      min-height:100vh !important;
+      height:auto !important;
+      background:#08111e !important;
+      background-image:none !important;
+      animation:none !important;
+      color:#e5edf7 !important;
+    }
+    #header {
+      width:min(96vw, 2800px);
+      margin:0 auto;
+    }
+    #logo, #menubar {
+      width:100% !important;
+      max-width:100% !important;
+    }
+    #logo_text h1 a .logo_colour {
+      color:#f4f8fc !important;
+    }
+    ul#menu li a {
+      min-height:36px;
+      height:auto !important;
+      display:flex !important;
+      align-items:center;
+      border-radius:8px;
+      letter-spacing:0;
+    }
+    ul#menu li a:focus-visible {
+      outline:3px solid #7dd3fc;
+      outline-offset:2px;
+    }
+    ul#menu li a:hover,
+    ul#menu li.selected a,
+    ul#menu li.selected a:hover {
+      color:#06243a !important;
+      background:#dbeafe !important;
+    }
     #dataloggerButtons, #table-pagination { display:none !important; }
     #site_content {
       width:${LOGX_UI.pageWidth} !important;
@@ -389,83 +427,146 @@ function installEventLogExplorerStyle() {
       margin-left:${LOGX_UI.pageMarginLeft} !important;
       margin-right:${LOGX_UI.pageMarginRight} !important;
       overflow:visible !important;
+      padding-top:16px !important;
+      padding-bottom:32px !important;
     }
     #dataloggerContainer { min-height:auto !important; display:block !important; width:100% !important; }
 
     .logx-root, .logx-root * { box-sizing:border-box; }
-    .logx-root { width:100%; color:#e5edf7; font-family:Arial, Helvetica, sans-serif; margin-top:14px; }
-    .logx-card { background:#101b2b; border:1px solid #233650; border-radius:14px; box-shadow:0 16px 35px rgba(0,0,0,.28); margin-bottom:18px; overflow:hidden; }
-    .logx-card-head { display:flex; align-items:flex-start; justify-content:space-between; gap:12px; padding:16px 18px 10px 18px; }
-    .logx-card-title { font-size:18px; line-height:1.2; margin:0; color:#e5edf7; font-weight:700; }
-    .logx-actions { display:flex; gap:8px; flex-wrap:wrap; align-items:center; }
-    .logx-btn { height:30px; border-radius:15px; padding:0 14px; font-size:12px; font-weight:700; color:#fff; cursor:pointer; border:1px solid #31506e; background:#1b2a3b; transition:background .15s ease, transform .15s ease; }
-    .logx-btn:hover { transform:translateY(-1px); }
+    .logx-root {
+      --logx-page:#08111e;
+      --logx-card:#101b2b;
+      --logx-panel:#0d1826;
+      --logx-panel-2:#132136;
+      --logx-ink:#e5edf7;
+      --logx-ink-strong:#f4f8fc;
+      --logx-muted:#a7b6c8;
+      --logx-muted-2:#8fa2b8;
+      --logx-border:#29435e;
+      --logx-border-strong:#31506e;
+      --logx-focus:#7dd3fc;
+      --logx-blue:#2bb7f6;
+      --logx-green:#43d39e;
+      --logx-orange:#ffb020;
+      --logx-red:#ff6b6b;
+      --logx-purple:#9b5cff;
+      width:100%;
+      color:var(--logx-ink);
+      font-family:system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      margin-top:14px;
+      font-size:14px;
+    }
+    .logx-card {
+      background:var(--logx-card);
+      border:1px solid var(--logx-border);
+      border-radius:12px;
+      margin-bottom:18px;
+      overflow:hidden;
+    }
+    .logx-card-head { display:flex; align-items:flex-start; justify-content:space-between; gap:16px; padding:18px 20px 12px 20px; }
+    .logx-card-title { font-size:18px; line-height:1.25; margin:0; color:var(--logx-ink-strong); font-weight:700; text-wrap:balance; }
+    .logx-card-subtitle { margin:6px 0 0; color:var(--logx-muted); font-size:12px; line-height:1.45; max-width:72ch; text-wrap:pretty; }
+    .logx-actions { display:flex; gap:8px; flex-wrap:wrap; align-items:center; justify-content:flex-end; }
+    .logx-btn {
+      min-height:40px;
+      border-radius:8px;
+      padding:0 14px;
+      font-size:12px;
+      font-weight:700;
+      color:#fff;
+      cursor:pointer;
+      border:1px solid var(--logx-border-strong);
+      background:#1b2a3b;
+      transition:background .18s ease, border-color .18s ease, transform .18s ease;
+    }
+    .logx-btn:hover { background:#20354d; border-color:#4a6c8d; }
+    .logx-btn:active { transform:translateY(1px); }
+    .logx-btn:focus-visible,
+    .logx-chip:focus-visible,
+    .logx-search:focus-visible,
+    .logx-filter-input:focus-visible,
+    .logx-filter-select:focus-visible,
+    .logx-page-btn:focus-visible {
+      outline:3px solid var(--logx-focus);
+      outline-offset:2px;
+    }
     .logx-btn-blue { background:#0f8bc4; }
     .logx-btn-green { background:#129a59; border-color:#22c55e; }
     .logx-btn-red { background:#9f1d2f; border-color:#ef476f; }
 
-    .logx-pill { display:inline-flex; align-items:center; gap:6px; min-height:24px; padding:0 10px; border-radius:999px; border:1px solid #29435e; background:#1c2a3b; color:#8fa2b8; font-size:11px; font-weight:700; white-space:nowrap; }
-    .logx-pill::before { content:""; width:6px; height:6px; border-radius:50%; background:#8fa2b8; flex:0 0 auto; }
-    .logx-pill-blue { background:#123d5a; color:#2bb7f6; } .logx-pill-blue::before { background:#2bb7f6; }
-    .logx-pill-green { background:#123a2d; color:#43d39e; } .logx-pill-green::before { background:#22c55e; }
-    .logx-pill-orange { background:#452d0c; color:#ffb020; } .logx-pill-orange::before { background:#f59e0b; }
-    .logx-pill-red { background:#451a1a; color:#ff6b6b; } .logx-pill-red::before { background:#ef4444; }
+    .logx-pill { display:inline-flex; align-items:center; gap:7px; min-height:28px; padding:0 10px; border-radius:999px; border:1px solid var(--logx-border); background:#1c2a3b; color:var(--logx-muted); font-size:12px; font-weight:700; white-space:nowrap; }
+    .logx-pill::before { content:""; width:7px; height:7px; border-radius:50%; background:var(--logx-muted-2); flex:0 0 auto; }
+    .logx-pill-blue { background:#123d5a; color:var(--logx-blue); } .logx-pill-blue::before { background:var(--logx-blue); }
+    .logx-pill-green { background:#123a2d; color:var(--logx-green); } .logx-pill-green::before { background:#22c55e; }
+    .logx-pill-orange { background:#452d0c; color:var(--logx-orange); } .logx-pill-orange::before { background:#f59e0b; }
+    .logx-pill-red { background:#451a1a; color:var(--logx-red); } .logx-pill-red::before { background:#ef4444; }
     .logx-pill-neutral { background:#1c2a3b; color:#cbd5e1; } .logx-pill-neutral::before { background:#94a3b8; }
 
-    .logx-overview-body { padding:0 18px 18px 18px; }
-    .logx-metrics { display:grid; grid-template-columns:repeat(6, minmax(120px, 1fr)); gap:10px; margin-bottom:12px; }
-    .logx-metric { min-height:78px; background:#122033; border:1px solid #233650; border-radius:12px; padding:12px 12px 10px 16px; position:relative; overflow:hidden; }
+    .logx-overview-body { padding:0 20px 20px 20px; }
+    .logx-metrics { display:grid; grid-template-columns:repeat(auto-fit, minmax(170px, 1fr)); gap:10px; margin-bottom:12px; }
+    .logx-metric { min-height:84px; background:#122033; border:1px solid var(--logx-border); border-radius:10px; padding:13px 12px 11px 16px; position:relative; overflow:hidden; }
     .logx-metric::before { content:""; position:absolute; left:0; top:0; bottom:0; width:4px; background:var(--accent, #2bb7f6); }
-    .logx-metric-label { color:#8fa2b8; font-size:11px; margin-bottom:7px; }
+    .logx-metric-label { color:var(--logx-muted); font-size:12px; margin-bottom:8px; }
     .logx-metric-value { color:var(--accent, #2bb7f6); font-size:24px; font-weight:800; line-height:1; }
-    .logx-metric-sub { color:#65788f; font-size:10px; margin-top:7px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+    .logx-metric-sub { color:var(--logx-muted); font-size:12px; margin-top:8px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
 
-    .logx-control-grid { display:grid; grid-template-columns:repeat(4, minmax(180px, 1fr)); gap:10px; margin-bottom:12px; }
-    .logx-control-box { min-height:74px; background:#0f1b2c; border:1px solid #233650; border-radius:12px; padding:10px 12px; }
-    .logx-control-title { color:#8fa2b8; font-size:11px; font-weight:700; margin-bottom:8px; }
-    .logx-chip-row { display:flex; gap:7px; flex-wrap:wrap; align-items:center; }
-    .logx-chip { min-height:26px; padding:0 12px; border-radius:999px; border:1px solid #29435e; background:#1c2a3b; color:#b8c4d2; font-size:11px; font-weight:800; cursor:pointer; }
+    .logx-control-grid { display:grid; grid-template-columns:repeat(auto-fit, minmax(220px, 1fr)); gap:10px; margin-bottom:12px; }
+    .logx-control-box { min-height:82px; background:#0f1b2c; border:1px solid var(--logx-border); border-radius:10px; padding:11px 12px; }
+    .logx-control-title { color:var(--logx-muted); font-size:12px; font-weight:700; margin-bottom:9px; }
+    .logx-chip-row { display:flex; gap:8px; flex-wrap:wrap; align-items:center; }
+    .logx-chip { min-height:36px; padding:0 12px; border-radius:8px; border:1px solid var(--logx-border); background:#1c2a3b; color:#d7e2ee; font-size:12px; font-weight:800; cursor:pointer; }
     .logx-chip:hover { background:#20354d; }
     .logx-chip-active { background:#1599d3 !important; color:#ffffff !important; border-color:#1fb6ff !important; }
     .logx-chip-green.logx-chip-active { background:#159a59 !important; border-color:#22c55e !important; }
     .logx-chip-orange.logx-chip-active { background:#d97706 !important; border-color:#f59e0b !important; }
 
-    .logx-chart-card { border:1px solid #233650; border-radius:14px; background:#0d1826; padding:12px; margin-top:12px; overflow:hidden; }
+    .logx-chart-card { border:1px solid var(--logx-border); border-radius:12px; background:var(--logx-panel); padding:14px; margin-top:12px; overflow:hidden; }
     .logx-chart-title-row { display:flex; justify-content:space-between; align-items:flex-start; gap:10px; margin-bottom:8px; }
-    .logx-chart-title { font-size:14px; color:#e5edf7; font-weight:800; }
-    .logx-chart-sub { font-size:11px; color:#8fa2b8; margin-top:3px; }
+    .logx-chart-title { font-size:14px; color:var(--logx-ink-strong); font-weight:800; }
+    .logx-chart-sub { font-size:12px; color:var(--logx-muted); margin-top:4px; }
     .logx-chart-legend { display:flex; gap:8px; flex-wrap:wrap; align-items:center; }
-    .logx-chart-legend .logx-pill { min-height:22px; }
-    .logx-big-svg { width:100%; height:310px; display:block; background:#0b1420; border:1px solid #26384e; border-radius:10px; }
-    .logx-small-svg { width:100%; height:170px; display:block; background:#0b1420; border:1px solid #26384e; border-radius:10px; }
+    .logx-chart-legend .logx-pill { min-height:26px; }
+    .logx-big-svg { width:100%; height:310px; display:block; background:#0b1420; border:1px solid #26384e; border-radius:8px; }
+    .logx-small-svg { width:100%; height:170px; display:block; background:#0b1420; border:1px solid #26384e; border-radius:8px; }
     #logxMainTrend { width:100%; min-height:330px; }
     #logxRssiTrend, #logxDurationTrend { width:100%; min-height:190px; }
     .logx-plotly-holder { width:100%; min-height:inherit; }
     .logx-small-chart-grid { display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-top:12px; }
-    .logx-chart-empty { min-height:140px; display:flex; align-items:center; justify-content:center; color:#8fa2b8; background:#0b1420; border:1px solid #26384e; border-radius:10px; }
+    .logx-chart-empty { min-height:140px; display:flex; align-items:center; justify-content:center; color:var(--logx-muted); background:#0b1420; border:1px solid #26384e; border-radius:8px; }
 
     .logx-chart-grid { display:grid; grid-template-columns:1.25fr 1fr 1fr; gap:10px; }
-    .logx-mini-chart { min-height:110px; border:1px solid #233650; border-radius:12px; background:#0d1826; padding:10px; overflow:hidden; }
-    .logx-mini-title { font-size:12px; color:#e5edf7; font-weight:700; margin-bottom:7px; }
+    .logx-mini-chart { min-height:110px; border:1px solid var(--logx-border); border-radius:10px; background:var(--logx-panel); padding:10px; overflow:hidden; }
+    .logx-mini-title { font-size:12px; color:var(--logx-ink-strong); font-weight:700; margin-bottom:7px; }
     .logx-svg { width:100%; height:70px; display:block; background:#0b1420; border:1px solid #26384e; border-radius:8px; }
 
-    .logx-toolbar { display:flex; align-items:center; gap:8px; flex-wrap:wrap; padding:12px 18px; background:#132136; border-top:1px solid #233650; border-bottom:1px solid #233650; }
-    .logx-label { color:#8fa2b8; font-size:11px; margin-bottom:8px; display:block; }
-    .logx-toolbar-label { color:#8fa2b8; font-size:11px; white-space:nowrap; }
-    .logx-search { flex:1 1 ${LOGX_UI.searchFlexBasis}; min-width:${LOGX_UI.searchMinWidth}; height:34px; color:#e5edf7; background:#0d1826; border:1px solid #2c4260; border-radius:9px; padding:0 12px; outline:none; }
-    .logx-search:focus { border-color:#2bb7f6; box-shadow:0 0 0 2px rgba(43,183,246,.15); }
-    .logx-filter-input, .logx-filter-select { height:34px; color:#e5edf7; background:#0d1826; border:1px solid #2c4260; border-radius:9px; padding:0 10px; outline:none; font-size:12px; }
-    .logx-filter-input:focus, .logx-filter-select:focus { border-color:#2bb7f6; box-shadow:0 0 0 2px rgba(43,183,246,.15); }
-    .logx-filter-date { flex:0 0 190px; min-width:170px; }
-    .logx-filter-select { flex:0 0 170px; min-width:150px; }
+    .logx-toolbar {
+      display:grid;
+      grid-template-columns:minmax(260px, 1.6fr) repeat(4, minmax(150px, .7fr)) auto;
+      gap:10px;
+      align-items:end;
+      padding:14px 20px;
+      background:var(--logx-panel-2);
+      border-top:1px solid var(--logx-border);
+      border-bottom:1px solid var(--logx-border);
+    }
+    .logx-filter-field { min-width:0; }
+    .logx-filter-field-wide { min-width:260px; }
+    .logx-filter-label { color:var(--logx-muted); font-size:12px; margin-bottom:6px; display:block; font-weight:700; }
+    .logx-filter-summary { display:flex; gap:8px; flex-wrap:wrap; align-items:center; justify-content:flex-end; }
+    .logx-search { width:100%; min-width:0; height:42px; color:var(--logx-ink); background:var(--logx-panel); border:1px solid #2c4260; border-radius:8px; padding:0 12px; outline:none; font-size:14px; }
+    .logx-search::placeholder { color:#b7c4d4; opacity:1; }
+    .logx-search:focus { border-color:var(--logx-blue); }
+    .logx-filter-input, .logx-filter-select { width:100%; height:42px; color:var(--logx-ink); background:var(--logx-panel); border:1px solid #2c4260; border-radius:8px; padding:0 10px; outline:none; font-size:13px; }
+    .logx-filter-input:focus, .logx-filter-select:focus { border-color:var(--logx-blue); }
 
     .logx-layout { padding:${LOGX_UI.tableOuterPadding}; }
-    .logx-panel { background:#0d1826; border:1px solid #233650; border-radius:14px; overflow:visible; width:100%; }
+    .logx-panel { background:var(--logx-panel); border:1px solid var(--logx-border); border-radius:12px; overflow:hidden; width:100%; }
     .logx-panel-head { padding:14px 14px 8px 14px; }
-    .logx-panel-title { margin:0; color:#e5edf7; font-size:16px; font-weight:700; }
+    .logx-panel-title { margin:0; color:var(--logx-ink-strong); font-size:16px; font-weight:700; }
 
-    .logx-table-wrap { overflow:visible; padding:${LOGX_UI.tableInnerPadding}; }
-    .logx-event-table { width:100%; table-layout:${LOGX_UI.tableLayout}; border-collapse:collapse; border-spacing:0; font-size:${LOGX_UI.tableFontSize}; color:#243241; }
+    .logx-table-wrap { overflow-x:auto; overflow-y:visible; padding:${LOGX_UI.tableInnerPadding}; scrollbar-gutter:stable; }
+    .logx-table-wrap:focus-visible { outline:3px solid var(--logx-focus); outline-offset:2px; }
+    .logx-event-table { width:100%; min-width:1680px; table-layout:${LOGX_UI.tableLayout}; border-collapse:collapse; border-spacing:0; font-size:${LOGX_UI.tableFontSize}; color:#243241; }
     .logx-event-table th, .logx-event-table td {
       padding:${LOGX_UI.tableCellPadding};
       border-right:${LOGX_UI.tableGridLine};
@@ -477,7 +578,7 @@ function installEventLogExplorerStyle() {
     }
     .logx-event-table th:first-child, .logx-event-table td:first-child { border-left:${LOGX_UI.tableGridLine}; }
     .logx-event-table thead tr:first-child th { border-top:${LOGX_UI.tableGridLine}; }
-    .logx-event-table th { background:#17304a; color:#f4f8fc; font-size:${LOGX_UI.tableHeaderFontSize}; font-weight:700; text-align:left; }
+    .logx-event-table th { background:#17304a; color:#f4f8fc; font-size:${LOGX_UI.tableHeaderFontSize}; font-weight:700; text-align:left; position:sticky; top:0; z-index:1; }
     .logx-event-table th.logx-fwd { background:#114a66; }
     .logx-event-table th.logx-rwd { background:#12523a; }
     .logx-event-table th.logx-cond { background:#5a3515; }
@@ -492,22 +593,22 @@ function installEventLogExplorerStyle() {
     .logx-fwd-text { color:#1388d6; font-weight:600; }
     .logx-rwd-text { color:#15935a; font-weight:600; }
     .logx-cond-text { color:#c67a00; font-weight:600; }
-    .logx-muted-text { color:#6a7684; font-weight:500; }
+    .logx-muted-text { color:#4f6174; font-weight:600; }
     .logx-event-table td:nth-child(4),
     .logx-event-table td:nth-child(5) {
       color:#1f2d3d;
       font-weight:700;
     }
-    .logx-footer { display:flex; align-items:center; justify-content:space-between; gap:10px; padding:10px 14px 14px 14px; color:#8fa2b8; font-size:12px; }
+    .logx-footer { display:flex; align-items:center; justify-content:space-between; gap:10px; padding:12px 14px 14px 14px; color:var(--logx-muted); font-size:12px; }
     .logx-page-buttons { display:flex; align-items:center; gap:8px; flex-wrap:wrap; }
     .logx-page-btn {
-      min-width:34px;
-      height:34px;
+      min-width:40px;
+      height:40px;
       padding:0 12px;
       border-radius:8px;
-      border:1px solid #31506e;
+      border:1px solid var(--logx-border-strong);
       background:#102033;
-      color:#e5edf7;
+      color:var(--logx-ink);
       font-size:14px;
       font-weight:700;
       cursor:pointer;
@@ -515,23 +616,62 @@ function installEventLogExplorerStyle() {
     }
     .logx-page-btn:hover:not(:disabled) { background:#18324a; border-color:#4a6c8d; }
     .logx-page-btn:disabled { opacity:.45; cursor:not-allowed; }
-    .logx-page-active { background:#e91e9b !important; color:#ffffff !important; border-color:#e91e9b !important; }
+    .logx-page-active { background:#0f8bc4 !important; color:#ffffff !important; border-color:#1fb6ff !important; }
     .logx-page-first { background:#7b1b72; border-color:#8f2a86; color:#ffffff; }
     .logx-page-ellipsis {
       min-width:24px;
-      height:34px;
+      height:40px;
       display:inline-flex;
       align-items:center;
       justify-content:center;
-      color:#8fa2b8;
+      color:var(--logx-muted);
       font-weight:700;
     }
-    .logx-empty { padding:36px 12px; color:#8fa2b8; text-align:center; }
+    .logx-empty { padding:36px 12px; color:var(--logx-muted); text-align:center; }
 
     @media (max-width: 1400px) {
-      .logx-metrics, .logx-chart-grid, .logx-control-grid, .logx-small-chart-grid { grid-template-columns:1fr; }
-      .logx-event-table { font-size:10px; }
+      .logx-toolbar { grid-template-columns:repeat(2, minmax(0, 1fr)); }
+      .logx-filter-field-wide, .logx-filter-summary { grid-column:1 / -1; }
+      .logx-filter-summary { justify-content:flex-start; }
+      .logx-small-chart-grid { grid-template-columns:1fr; }
+      .logx-event-table { font-size:12px; }
       .logx-event-table th, .logx-event-table td { padding:8px 6px; }
+    }
+    @media (max-width: 760px) {
+      #site_content { width:calc(100vw - 24px) !important; }
+      .logx-card-head,
+      .logx-chart-title-row,
+      .logx-footer {
+        flex-direction:column;
+        align-items:stretch;
+      }
+      .logx-actions,
+      .logx-chart-legend,
+      .logx-page-buttons {
+        justify-content:flex-start;
+      }
+      .logx-toolbar { grid-template-columns:1fr; }
+      .logx-filter-field,
+      .logx-filter-field-wide,
+      .logx-filter-summary { grid-column:auto; }
+      .logx-overview-body,
+      .logx-card-head,
+      .logx-toolbar { padding-left:14px; padding-right:14px; }
+      .logx-layout { padding:14px; }
+      .logx-btn,
+      .logx-chip,
+      .logx-page-btn { min-height:44px; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      .logx-root *,
+      .logx-root *::before,
+      .logx-root *::after {
+        animation-duration:.01ms !important;
+        animation-iteration-count:1 !important;
+        scroll-behavior:auto !important;
+        transition-duration:.01ms !important;
+      }
+      .logx-btn:active { transform:none; }
     }
   `;
   document.head.appendChild(style);
@@ -671,9 +811,10 @@ function buildDataloggerTable() {
       <section class="logx-card" id="logxOverview">
         <div class="logx-card-head">
           <div>
-            <h2 class="logx-card-title">Logger Trend Overview</h2>            
+            <h2 class="logx-card-title">Logger Trend Overview</h2>
+            <p class="logx-card-subtitle">Scan filtered RF power, VSWR, RSSI, and duration trends without changing the saved log order.</p>
           </div>
-          <div class="logx-actions">
+          <div class="logx-actions" aria-label="Trend series legend">
             <span class="logx-pill logx-pill-blue">Forward</span>
             <span class="logx-pill logx-pill-green">Reflected</span>
             <span class="logx-pill logx-pill-orange">VSWR</span>
@@ -681,36 +822,36 @@ function buildDataloggerTable() {
         </div>
         <div class="logx-overview-body">
           <div class="logx-control-grid">
-            <div class="logx-control-box">
-              <div class="logx-control-title">Aggregate</div>
+            <div class="logx-control-box" role="group" aria-labelledby="logxAggregateTitle">
+              <div class="logx-control-title" id="logxAggregateTitle">Aggregate</div>
               <div class="logx-chip-row">
-                <button class="logx-chip" data-trend-type="aggregate" data-trend-value="raw" onclick="setTrendOption('aggregate','raw')">Raw</button>
-                <button class="logx-chip" data-trend-type="aggregate" data-trend-value="daily" onclick="setTrendOption('aggregate','daily')">Daily</button>
-                <button class="logx-chip" data-trend-type="aggregate" data-trend-value="weekly" onclick="setTrendOption('aggregate','weekly')">Weekly</button>
-                <button class="logx-chip" data-trend-type="aggregate" data-trend-value="monthly" onclick="setTrendOption('aggregate','monthly')">Monthly</button>
+                <button type="button" class="logx-chip" data-trend-type="aggregate" data-trend-value="raw" aria-pressed="true" onclick="setTrendOption('aggregate','raw')">Raw</button>
+                <button type="button" class="logx-chip" data-trend-type="aggregate" data-trend-value="daily" aria-pressed="false" onclick="setTrendOption('aggregate','daily')">Daily</button>
+                <button type="button" class="logx-chip" data-trend-type="aggregate" data-trend-value="weekly" aria-pressed="false" onclick="setTrendOption('aggregate','weekly')">Weekly</button>
+                <button type="button" class="logx-chip" data-trend-type="aggregate" data-trend-value="monthly" aria-pressed="false" onclick="setTrendOption('aggregate','monthly')">Monthly</button>
               </div>
             </div>
-            <div class="logx-control-box">
-              <div class="logx-control-title">Zoom</div>
+            <div class="logx-control-box" role="group" aria-labelledby="logxZoomTitle">
+              <div class="logx-control-title" id="logxZoomTitle">Zoom</div>
               <div class="logx-chip-row">
-                <button class="logx-chip" data-trend-type="zoom" data-trend-value="24h" onclick="setTrendOption('zoom','24h')">24H</button>
-                <button class="logx-chip" data-trend-type="zoom" data-trend-value="7d" onclick="setTrendOption('zoom','7d')">7D</button>
-                <button class="logx-chip" data-trend-type="zoom" data-trend-value="30d" onclick="setTrendOption('zoom','30d')">30D</button>
-                <button class="logx-chip" data-trend-type="zoom" data-trend-value="all" onclick="setTrendOption('zoom','all')">All</button>
+                <button type="button" class="logx-chip" data-trend-type="zoom" data-trend-value="24h" aria-pressed="false" onclick="setTrendOption('zoom','24h')">24H</button>
+                <button type="button" class="logx-chip" data-trend-type="zoom" data-trend-value="7d" aria-pressed="false" onclick="setTrendOption('zoom','7d')">7D</button>
+                <button type="button" class="logx-chip" data-trend-type="zoom" data-trend-value="30d" aria-pressed="false" onclick="setTrendOption('zoom','30d')">30D</button>
+                <button type="button" class="logx-chip" data-trend-type="zoom" data-trend-value="all" aria-pressed="true" onclick="setTrendOption('zoom','all')">All</button>
               </div>
             </div>
-            <div class="logx-control-box">
-              <div class="logx-control-title">Power Unit</div>
+            <div class="logx-control-box" role="group" aria-labelledby="logxPowerUnitTitle">
+              <div class="logx-control-title" id="logxPowerUnitTitle">Power Unit</div>
               <div class="logx-chip-row">
-                <button class="logx-chip logx-chip-green" data-trend-type="unit" data-trend-value="watt" onclick="setTrendOption('unit','watt')">Watt</button>
-                <button class="logx-chip" data-trend-type="unit" data-trend-value="dbm" onclick="setTrendOption('unit','dbm')">dBm</button>
+                <button type="button" class="logx-chip logx-chip-green" data-trend-type="unit" data-trend-value="watt" aria-pressed="true" onclick="setTrendOption('unit','watt')">Watt</button>
+                <button type="button" class="logx-chip" data-trend-type="unit" data-trend-value="dbm" aria-pressed="false" onclick="setTrendOption('unit','dbm')">dBm</button>
               </div>
             </div>
-            <div class="logx-control-box">
-              <div class="logx-control-title">Power Value</div>
+            <div class="logx-control-box" role="group" aria-labelledby="logxPowerValueTitle">
+              <div class="logx-control-title" id="logxPowerValueTitle">Power Value</div>
               <div class="logx-chip-row">
-                <button class="logx-chip" data-trend-type="powerValue" data-trend-value="max" onclick="setTrendOption('powerValue','max')">MAX-HOLD</button>
-                <button class="logx-chip" data-trend-type="powerValue" data-trend-value="rms" onclick="setTrendOption('powerValue','rms')">RMS</button>
+                <button type="button" class="logx-chip" data-trend-type="powerValue" data-trend-value="max" aria-pressed="true" onclick="setTrendOption('powerValue','max')">MAX-HOLD</button>
+                <button type="button" class="logx-chip" data-trend-type="powerValue" data-trend-value="rms" aria-pressed="false" onclick="setTrendOption('powerValue','rms')">RMS</button>
               </div>
             </div>
           </div>
@@ -749,73 +890,88 @@ function buildDataloggerTable() {
 
       <section class="logx-card" id="logxExplorer">
         <div class="logx-card-head">
-          <div><h2 class="logx-card-title">Event Log Explorer</h2></div>
+          <div>
+            <h2 class="logx-card-title">Event Log Explorer</h2>
+            <p class="logx-card-subtitle">Filter saved RF events by date, site, station, frequency, and connection state.</p>
+          </div>
           <div class="logx-actions">
             <button type="button" class="logx-btn" onclick="logxClearTextSearch()">Clear Search</button>
-            <button type="button" class="logx-btn logx-btn-green" onclick="exportAll()">CSV</button>
+            <button type="button" class="logx-btn logx-btn-green" onclick="exportAll()">Export CSV</button>
             <button type="button" class="logx-btn logx-btn-red" onclick="deleteAllRows()">Delete All</button>
           </div>
         </div>
 
-        <div class="logx-toolbar">
-          <span class="logx-label" style="margin:0;">Search</span>
-          <input id="logxTextSearch" class="logx-search" type="text" placeholder="frequency / connection">
+        <div class="logx-toolbar" role="search" aria-label="Event log filters">
+          <div class="logx-filter-field logx-filter-field-wide">
+            <label class="logx-filter-label" for="logxTextSearch">Search</label>
+            <input id="logxTextSearch" class="logx-search" type="search" placeholder="Frequency or connection" autocomplete="off">
+          </div>
 
-          <span class="logx-toolbar-label">From</span>
-          <input id="logxDateStart" class="logx-filter-input logx-filter-date" type="datetime-local">
+          <div class="logx-filter-field">
+            <label class="logx-filter-label" for="logxDateStart">From</label>
+            <input id="logxDateStart" class="logx-filter-input logx-filter-date" type="datetime-local">
+          </div>
 
-          <span class="logx-toolbar-label">To</span>
-          <input id="logxDateEnd" class="logx-filter-input logx-filter-date" type="datetime-local">
+          <div class="logx-filter-field">
+            <label class="logx-filter-label" for="logxDateEnd">To</label>
+            <input id="logxDateEnd" class="logx-filter-input logx-filter-date" type="datetime-local">
+          </div>
 
-          <span class="logx-toolbar-label">Site</span>
-          <select id="logxSiteFilter" class="logx-filter-select"><option value="">All Site</option></select>
+          <div class="logx-filter-field">
+            <label class="logx-filter-label" for="logxSiteFilter">Site</label>
+            <select id="logxSiteFilter" class="logx-filter-select"><option value="">All Site</option></select>
+          </div>
 
-          <span class="logx-toolbar-label">Station</span>
-          <select id="logxStationFilter" class="logx-filter-select"><option value="">All Station</option></select>
+          <div class="logx-filter-field">
+            <label class="logx-filter-label" for="logxStationFilter">Station</label>
+            <select id="logxStationFilter" class="logx-filter-select"><option value="">All Station</option></select>
+          </div>
 
-          <span class="logx-pill">All Records</span>
-          <span class="logx-pill logx-pill-blue">Forward</span>
-          <span class="logx-pill logx-pill-green">Reflected</span>
-          <span class="logx-pill logx-pill-orange">VSWR</span>
-          <span class="logx-pill logx-pill-red">Alarm</span>
+          <div class="logx-filter-summary" aria-label="Table legend">
+            <span class="logx-pill">All Records</span>
+            <span class="logx-pill logx-pill-blue">Forward</span>
+            <span class="logx-pill logx-pill-green">Reflected</span>
+            <span class="logx-pill logx-pill-orange">VSWR</span>
+            <span class="logx-pill logx-pill-red">Alarm</span>
+          </div>
         </div>
 
         <div class="logx-layout">
           <div class="logx-panel">
             <div class="logx-panel-head"><h3 class="logx-panel-title">Event List</h3></div>
-            <div class="logx-table-wrap">
-              <table class="logx-event-table">
+            <div class="logx-table-wrap" tabindex="0" aria-label="Scrollable event log table">
+              <table class="logx-event-table" aria-label="Event log records">
                 <thead>
                   <tr>
-                    <th>No.</th>
-                    <th>Start Time</th>
-                    <th>End Time</th>
-                    <th>Site</th>
-                    <th>Station</th>
-                    <th>Freq MHz</th>
-                    <th class="logx-fwd">FWD MAX W</th>
-                    <th class="logx-fwd">FWD MAX dBm</th>
-                    <th class="logx-fwd">FWD AVG/RMS W</th>
-                    <th class="logx-fwd">FWD AVG/RMS dBm</th>
-                    <th class="logx-rwd">RWD MAX W</th>
-                    <th class="logx-rwd">RWD MAX dBm</th>
-                    <th class="logx-rwd">RWD AVG/RMS W</th>
-                    <th class="logx-rwd">RWD AVG/RMS dBm</th>
-                    <th class="logx-cond">VSWR</th>
-                    <th class="logx-cond">RSSI</th>
-                    <th class="logx-cond">Threshold W</th>
-                    <th class="logx-cond">Duration sec</th>
-                    <th class="logx-cond">Connection</th>
+                    <th scope="col">No.</th>
+                    <th scope="col">Start Time</th>
+                    <th scope="col">End Time</th>
+                    <th scope="col">Site</th>
+                    <th scope="col">Station</th>
+                    <th scope="col">Freq MHz</th>
+                    <th scope="col" class="logx-fwd">FWD MAX W</th>
+                    <th scope="col" class="logx-fwd">FWD MAX dBm</th>
+                    <th scope="col" class="logx-fwd">FWD AVG/RMS W</th>
+                    <th scope="col" class="logx-fwd">FWD AVG/RMS dBm</th>
+                    <th scope="col" class="logx-rwd">RWD MAX W</th>
+                    <th scope="col" class="logx-rwd">RWD MAX dBm</th>
+                    <th scope="col" class="logx-rwd">RWD AVG/RMS W</th>
+                    <th scope="col" class="logx-rwd">RWD AVG/RMS dBm</th>
+                    <th scope="col" class="logx-cond">VSWR</th>
+                    <th scope="col" class="logx-cond">RSSI</th>
+                    <th scope="col" class="logx-cond">Threshold W</th>
+                    <th scope="col" class="logx-cond">Duration sec</th>
+                    <th scope="col" class="logx-cond">Connection</th>
                   </tr>
                 </thead>
-                <tbody id="logxEventBody">
+                <tbody id="logxEventBody" aria-live="polite">
                   <tr><td colspan="19" class="logx-empty">Loading event log...</td></tr>
                 </tbody>
               </table>
             </div>
             <div class="logx-footer">
               <div id="logxPageInfo">Showing 0 records</div>
-              <div class="logx-page-buttons" id="logxPagination"></div>
+              <nav class="logx-page-buttons" id="logxPagination" aria-label="Event log pagination"></nav>
             </div>
           </div>
         </div>
@@ -980,7 +1136,9 @@ function refreshTrendControlState() {
   document.querySelectorAll(".logx-chip[data-trend-type]").forEach(btn => {
     const type = btn.getAttribute("data-trend-type");
     const value = btn.getAttribute("data-trend-value");
-    btn.classList.toggle("logx-chip-active", map[type] === value);
+    const active = map[type] === value;
+    btn.classList.toggle("logx-chip-active", active);
+    btn.setAttribute("aria-pressed", active ? "true" : "false");
   });
 }
 
@@ -1749,6 +1907,14 @@ function renderEventList(rows) {
   renderPagination(rows.length, totalPages);
 }
 
+function paginationLabel(text, totalPages) {
+  if (text === "First") return "Go to first page";
+  if (text === "Prev") return "Go to previous page";
+  if (text === "Next") return "Go to next page";
+  if (text === "Last") return `Go to last page, page ${totalPages}`;
+  return `Go to page ${text}`;
+}
+
 function renderPagination(totalRows, totalPages) {
   const info = document.getElementById("logxPageInfo");
   const pagination = document.getElementById("logxPagination");
@@ -1772,6 +1938,8 @@ function renderPagination(totalRows, totalPages) {
     btn.className = `logx-page-btn ${active ? "logx-page-active" : ""} ${extraClass}`.trim();
     btn.textContent = text;
     btn.disabled = disabled;
+    if (active) btn.setAttribute("aria-current", "page");
+    btn.setAttribute("aria-label", active ? `Page ${text}, current page` : paginationLabel(text, totalPages));
     btn.onclick = handler;
     return btn;
   };

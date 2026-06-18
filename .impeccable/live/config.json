@@ -1,0 +1,39 @@
+{
+  "files": [
+    "index.php",
+    "datalogger.php",
+    "network.php",
+    "wifi.php",
+    "role.php",
+    "cal.php",
+    "thrulan.php",
+    "snmp_update.php",
+    "update.php",
+    "login.php",
+    "changepass.php",
+    "channel.php",
+    "controler.php",
+    "radio.php",
+    "radioctrl.php",
+    "monitor.php",
+    "chart.php",
+    "rfmetercal.php",
+    "ctrlinfo.php",
+    "index_server.php",
+    "index_client.php",
+    "index_server_iGo.php",
+    "newIndex.php",
+    "reboot.php",
+    "chatclient.php",
+    "chatclient2.php",
+    "*.html",
+    "addons/**/*.html"
+  ],
+  "exclude": [
+    "js/canvasjs-2.3.2/examples/**/*.html",
+    "READ_ME/**"
+  ],
+  "insertBefore": "</body>",
+  "commentSyntax": "html",
+  "cspChecked": true
+}
