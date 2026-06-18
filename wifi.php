@@ -21,10 +21,11 @@ if($_SESSION['Status'] != "ADMIN")
     <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
     <link rel="stylesheet" type="text/css" href="style.css" title="style" />
     <link rel="stylesheet" type="text/css" href="wifi_theme.css?v=<?php echo time(); ?>" />
+    <link rel="stylesheet" type="text/css" href="rf-console.css?v=<?php echo time(); ?>" />
     <script src="jquery.min.js"></script>
     <script type="text/javascript" src="myfunctionWifiManager.js?v=<?php echo time(); ?>" defer></script>
 </head>
-<body>
+<body class="rf-console rf-console-wifi">
     <div id="main">
         <div id="header">
             <div id="logo">

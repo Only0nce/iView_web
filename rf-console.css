@@ -36,6 +36,22 @@ body.rf-console {
   --rf-green: #43d39e;
   --rf-orange: #ffb020;
   --rf-red: #ff6b6b;
+  --rf-primary: var(--rf-blue);
+  --rf-success: var(--rf-green);
+  --rf-warning: var(--rf-orange);
+  --rf-danger: var(--rf-red);
+  --rf-radius-sm: 6px;
+  --rf-radius: 8px;
+  --rf-radius-lg: 12px;
+  --rf-space-1: 4px;
+  --rf-space-2: 8px;
+  --rf-space-3: 12px;
+  --rf-space-4: 16px;
+  --rf-space-5: 20px;
+  --rf-space-6: 24px;
+  --rf-shadow-panel: 0 8px 20px rgba(0, 0, 0, .22);
+  --rf-duration: 180ms;
+  --rf-ease: cubic-bezier(.22, 1, .36, 1);
 }
 
 body.rf-console #main {
@@ -57,6 +73,15 @@ body.rf-console #logo {
   height: 80px;
 }
 
+body.rf-console #logo h1,
+body.rf-console #logo h2 {
+  margin: 0;
+  border: 0;
+  color: var(--rf-ink-strong);
+  font: 800 24px/1.2 system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  text-transform: none;
+}
+
 body.rf-console #logo #logo_text {
   left: 10px;
   right: 0;
@@ -66,6 +91,7 @@ body.rf-console #logo_text h1,
 body.rf-console #logo_text h1 a,
 body.rf-console #logo_text h1 a:hover {
   color: var(--rf-ink-strong);
+  padding-top: 22px;
   letter-spacing: 0;
   text-decoration: none;
 }
@@ -613,5 +639,746 @@ body.rf-console-home [id^="myPlot"] {
   body.rf-console .button2:active,
   body.rf-console button:active {
     transform: none;
+  }
+}
+
+/* Shared RF console components */
+body.rf-console a {
+  color: var(--rf-blue);
+}
+
+body.rf-console label {
+  color: var(--rf-muted);
+  font: 700 12px/1.35 system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+
+body.rf-console input[type="number"],
+body.rf-console input[type="password"],
+body.rf-console input[type="search"],
+body.rf-console input[type="datetime-local"],
+body.rf-console input[type="file"] {
+  position: relative;
+  display: block;
+  width: 100%;
+  min-height: 42px;
+  height: auto;
+  margin: 0;
+  padding: 0 10px;
+  border: 1px solid #2c4260;
+  border-radius: var(--rf-radius);
+  background: var(--rf-panel);
+  color: var(--rf-ink);
+  font: 500 13px/1.35 system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  text-align: left;
+  outline: none;
+  transition: border-color var(--rf-duration) var(--rf-ease), background var(--rf-duration) var(--rf-ease);
+}
+
+body.rf-console input[type="number"]:focus,
+body.rf-console input[type="password"]:focus,
+body.rf-console input[type="search"]:focus,
+body.rf-console input[type="datetime-local"]:focus,
+body.rf-console input[type="file"]:focus {
+  border-color: var(--rf-focus);
+  background: #0b1726;
+}
+
+body.rf-console input[type="checkbox"],
+body.rf-console input[type="radio"] {
+  accent-color: var(--rf-blue);
+}
+
+body.rf-console .rf-panel,
+body.rf-console .cal-profile-wrapper,
+body.rf-console .wifi-panel,
+body.rf-console-auth .form {
+  border: 1px solid var(--rf-border);
+  border-radius: var(--rf-radius-lg);
+  background: var(--rf-card);
+  box-shadow: none;
+}
+
+body.rf-console .rf-status,
+body.rf-console .device-status-badge,
+body.rf-console .wifi-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  min-height: 28px;
+  padding: 0 10px;
+  border: 1px solid var(--rf-border);
+  border-radius: 999px;
+  background: #1c2a3b;
+  color: var(--rf-muted);
+  font: 800 11px/1 system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  letter-spacing: 0;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+body.rf-console .rf-status::before,
+body.rf-console .device-status-badge::before,
+body.rf-console .wifi-badge::before {
+  content: "";
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: currentColor;
+}
+
+body.rf-console .rf-status-success,
+body.rf-console .device-card.connected .device-status-badge,
+body.rf-console .wifi-badge-on {
+  border-color: rgba(67, 211, 158, .55);
+  background: #123a2d;
+  color: var(--rf-green);
+}
+
+body.rf-console .wifi-badge-hotspot-on {
+  border-color: rgba(43, 183, 246, .55);
+  background: #123d5a;
+  color: var(--rf-blue);
+}
+
+body.rf-console .rf-status-danger,
+body.rf-console .wifi-badge-off {
+  border-color: rgba(255, 107, 107, .45);
+  background: #451a1a;
+  color: #ff9b9b;
+}
+
+body.rf-console .button2[id*="delete"],
+body.rf-console #deletetruelanbutton,
+body.rf-console #removerolebutton,
+body.rf-console .wifi-modal-btn-danger {
+  border-color: rgba(255, 107, 107, .65) !important;
+  background: #9f1d2f !important;
+  color: #fff !important;
+}
+
+body.rf-console .button2[id*="apply"],
+body.rf-console #newtruelanbutton,
+body.rf-console #saverolebutton,
+body.rf-console #wifiJoinBtn,
+body.rf-console #wifiAdvSave {
+  border-color: rgba(43, 183, 246, .65);
+  background: #0f6f9c;
+  color: #fff;
+}
+
+/* Shared editor pages: Power Sensor, SNMP, Role */
+body.rf-console-editor #site_content {
+  display: grid;
+  grid-template-columns: minmax(230px, 320px) minmax(0, 1fr);
+  gap: var(--rf-space-4);
+  align-items: start;
+}
+
+body.rf-console-editor #site_content > .container,
+body.rf-console-editor .container6,
+body.rf-console-editor .container7,
+body.rf-console-editor .container8,
+body.rf-console-editor .container9,
+body.rf-console-editor .container10 {
+  position: relative !important;
+  top: auto !important;
+  left: auto !important;
+  width: auto !important;
+  height: auto !important;
+  min-height: 0;
+  background: transparent !important;
+}
+
+body.rf-console-editor #site_content > .container {
+  grid-column: 1 / -1;
+  display: flex;
+  align-items: center;
+  padding: var(--rf-space-4) var(--rf-space-5);
+  border: 1px solid var(--rf-border);
+  border-radius: var(--rf-radius-lg);
+  background: var(--rf-card) !important;
+}
+
+body.rf-console-editor .container6 {
+  grid-column: 1;
+  grid-row: 2 / span 5;
+  display: block !important;
+  max-height: calc(100vh - 220px);
+  overflow: auto;
+  padding: var(--rf-space-3);
+  border: 1px solid var(--rf-border);
+  border-radius: var(--rf-radius-lg);
+  background: var(--rf-card) !important;
+}
+
+body.rf-console-editor .container7,
+body.rf-console-editor .container9 {
+  grid-column: 2;
+  display: grid !important;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: var(--rf-space-4);
+}
+
+body.rf-console-editor .container8,
+body.rf-console-editor .container10 {
+  grid-column: 2;
+  display: block !important;
+}
+
+body.rf-console-editor .truelanLabel {
+  position: relative !important;
+  top: auto !important;
+  left: auto !important;
+  width: auto !important;
+  height: auto !important;
+  margin: 0;
+  color: var(--rf-ink-strong);
+  font-size: 18px;
+  line-height: 1.25;
+  font-weight: 800;
+  text-align: left;
+}
+
+body.rf-console-editor .card {
+  width: auto !important;
+  min-width: 0;
+  margin: 0;
+  padding: var(--rf-space-4);
+  border: 1px solid var(--rf-border);
+  border-radius: var(--rf-radius-lg);
+  background: var(--rf-card) !important;
+  color: var(--rf-ink);
+  box-shadow: none;
+}
+
+body.rf-console-editor .container6 > .card {
+  padding: 0;
+  border: 0;
+  background: transparent !important;
+}
+
+body.rf-console-editor .cardTxTab {
+  display: flex !important;
+  align-items: center;
+  gap: var(--rf-space-3);
+  width: 100%;
+  min-height: 58px;
+  margin: 0 0 var(--rf-space-2);
+  padding: var(--rf-space-2) var(--rf-space-3);
+  border: 1px solid var(--rf-border);
+  border-radius: var(--rf-radius);
+  color: var(--rf-ink);
+  cursor: pointer;
+  transition: border-color var(--rf-duration) var(--rf-ease), background var(--rf-duration) var(--rf-ease);
+}
+
+body.rf-console-editor .cardTxTab:hover {
+  border-color: #4a6c8d;
+  background: #15243a !important;
+}
+
+body.rf-console-editor .cardTxTabImage,
+body.rf-console-editor .cardRoleTabImage {
+  position: static;
+  flex: 0 0 auto;
+  width: 34px;
+  height: 34px;
+  object-fit: contain;
+}
+
+body.rf-console-editor .cardTxTabText3 {
+  position: static;
+  width: auto;
+  color: var(--rf-ink-strong);
+  font-size: 13px;
+  font-weight: 800;
+  line-height: 1.25;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+body.rf-console-editor .selected_list {
+  margin-bottom: var(--rf-space-3);
+}
+
+body.rf-console-editor .selected_list br {
+  display: none;
+}
+
+body.rf-console-editor .cardRole {
+  display: grid !important;
+  grid-template-columns: 34px minmax(120px, 1fr) 34px;
+  align-items: center;
+  gap: var(--rf-space-2);
+  min-height: 54px;
+  margin: 0 0 var(--rf-space-2);
+  padding: var(--rf-space-2);
+  border: 1px solid var(--rf-border);
+  border-radius: var(--rf-radius);
+  background: var(--rf-panel) !important;
+}
+
+body.rf-console-editor .cardRoleTextID {
+  color: var(--rf-muted);
+  font-size: 12px;
+  font-weight: 800;
+  text-align: center;
+}
+
+body.rf-console-editor .selectedTrueLan {
+  min-width: 0;
+}
+
+body.rf-console-editor #cardButton {
+  grid-template-columns: 1fr;
+  background: transparent !important;
+  border: 0;
+  padding: 0;
+}
+
+body.rf-console-editor .switch {
+  position: relative;
+  display: inline-block;
+  width: 56px;
+  height: 32px;
+  margin-right: var(--rf-space-2);
+  vertical-align: middle;
+}
+
+body.rf-console-editor .switch input {
+  position: absolute;
+  opacity: 0;
+  width: 0;
+  height: 0;
+  margin: 0;
+}
+
+body.rf-console-editor .slider {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 32px;
+  border: 1px solid var(--rf-border-strong);
+  border-radius: 999px;
+  background: #1b2a3b;
+  cursor: pointer;
+  transition: background var(--rf-duration) var(--rf-ease), border-color var(--rf-duration) var(--rf-ease);
+}
+
+body.rf-console-editor .slider::before {
+  content: "";
+  position: absolute;
+  width: 24px;
+  height: 24px;
+  left: 3px;
+  bottom: 3px;
+  border-radius: 50%;
+  background: #dbeafe;
+  transition: transform var(--rf-duration) var(--rf-ease);
+}
+
+body.rf-console-editor .switch input:checked + .slider {
+  border-color: rgba(67, 211, 158, .65);
+  background: #116042;
+}
+
+body.rf-console-editor .switch input:checked + .slider::before {
+  transform: translateX(24px);
+}
+
+body.rf-console-editor .switch input:focus-visible + .slider {
+  outline: 3px solid var(--rf-focus);
+  outline-offset: 2px;
+}
+
+body.rf-console-editor #rxEnabledStateLabel {
+  color: var(--rf-muted);
+  font-size: 13px;
+  font-weight: 800;
+}
+
+body.rf-console-editor .dropdown {
+  position: relative;
+  display: block;
+  width: 100%;
+  margin: 0 0 var(--rf-space-3);
+}
+
+body.rf-console-editor .dropbtn {
+  width: 100%;
+  min-height: 42px;
+  padding: 0 12px;
+  text-align: left;
+}
+
+body.rf-console-editor .dropbtn::after {
+  content: "";
+}
+
+body.rf-console-editor .dropdown-content {
+  display: none;
+  position: absolute;
+  z-index: 40;
+  top: calc(100% + 6px);
+  left: 0;
+  right: 0;
+  max-height: 260px;
+  overflow: auto;
+  border: 1px solid var(--rf-border);
+  border-radius: var(--rf-radius);
+  background: #0f1b2c;
+  box-shadow: var(--rf-shadow-panel);
+}
+
+body.rf-console-editor .dropdown-content.show {
+  display: block;
+}
+
+body.rf-console-editor .dropdown-content a {
+  display: block;
+  padding: 10px 12px;
+  color: var(--rf-ink);
+  text-decoration: none;
+}
+
+body.rf-console-editor .dropdown-content a:hover {
+  background: #172840;
+}
+
+/* CAL device cards */
+body.rf-console-cal .cal-profile-wrapper {
+  width: 100%;
+  max-width: none;
+  margin: 0;
+  padding: var(--rf-space-5);
+}
+
+body.rf-console-cal .cal-page-title {
+  margin: 0 0 var(--rf-space-2);
+  color: var(--rf-ink-strong);
+  font-size: 18px;
+  line-height: 1.25;
+  font-weight: 800;
+  text-align: left;
+  text-transform: none;
+  letter-spacing: 0;
+}
+
+body.rf-console-cal .cal-page-subtitle {
+  margin: 0 0 var(--rf-space-5);
+  color: var(--rf-muted);
+  font-size: 13px;
+  line-height: 1.45;
+  text-align: left;
+}
+
+body.rf-console-cal .device-card-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: var(--rf-space-4);
+}
+
+body.rf-console-cal .device-card {
+  display: none;
+  min-height: 180px;
+  width: 100%;
+  padding: var(--rf-space-4);
+  border: 1px solid var(--rf-border);
+  border-radius: var(--rf-radius-lg);
+  background: var(--rf-panel);
+  color: var(--rf-ink);
+  text-align: left;
+  cursor: pointer;
+  transition: border-color var(--rf-duration) var(--rf-ease), background var(--rf-duration) var(--rf-ease), transform var(--rf-duration) var(--rf-ease);
+}
+
+body.rf-console-cal .device-card:hover {
+  border-color: #4a6c8d;
+  background: #122033;
+  transform: translateY(-1px);
+}
+
+body.rf-console-cal .device-card-icon {
+  width: 60px;
+  height: 36px;
+}
+
+body.rf-console-cal .device-card-name {
+  color: var(--rf-ink-strong);
+  font-size: 17px;
+  font-weight: 800;
+}
+
+body.rf-console-cal .device-card-freq,
+body.rf-console-cal .device-card-ip {
+  color: var(--rf-muted);
+  font-size: 13px;
+}
+
+body.rf-console-cal .device-card-action {
+  color: var(--rf-blue);
+  font-size: 12px;
+  letter-spacing: 0;
+}
+
+/* WiFi page token alignment */
+body.rf-console-wifi #site_content {
+  display: block;
+}
+
+body.rf-console-wifi #wifi_content {
+  float: none;
+  width: 100%;
+  padding: 0;
+}
+
+body.rf-console-wifi .wifi-title-wrap h3,
+body.rf-console-wifi .wifi-panel-title-row h4,
+body.rf-console-wifi .wifi-modal-header h4 {
+  margin: 0;
+  padding: 0;
+  color: var(--rf-ink-strong);
+  font-size: 16px;
+  line-height: 1.25;
+  font-weight: 800;
+}
+
+body.rf-console-wifi .wifi-panel-kicker,
+body.rf-console-wifi .wifi-label {
+  color: var(--rf-muted);
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0;
+}
+
+body.rf-console-wifi .wifi-current-ssid,
+body.rf-console-wifi .wifi-info-box strong,
+body.rf-console-wifi .wifi-network-name,
+body.rf-console-wifi .wifi-method-title {
+  color: var(--rf-ink-strong);
+}
+
+body.rf-console-wifi .wifi-note,
+body.rf-console-wifi .wifi-subtitle,
+body.rf-console-wifi .wifi-network-meta,
+body.rf-console-wifi .wifi-method-sub {
+  color: var(--rf-muted);
+  line-height: 1.45;
+}
+
+body.rf-console-wifi .wifi-panel,
+body.rf-console-wifi .wifi-info-box,
+body.rf-console-wifi .wifi-network-item,
+body.rf-console-wifi .wifi-empty-state,
+body.rf-console-wifi .wifi-method-card {
+  border-color: var(--rf-border);
+  background: var(--rf-card);
+  box-shadow: none;
+}
+
+body.rf-console-wifi .wifi-info-box,
+body.rf-console-wifi .wifi-network-item,
+body.rf-console-wifi .wifi-method-card {
+  background: var(--rf-panel);
+}
+
+body.rf-console-wifi .wifi-network-item:hover {
+  border-color: #4a6c8d;
+  background: #122033;
+}
+
+body.rf-console-wifi .wifi-tag,
+body.rf-console-wifi .wifi-tag-muted {
+  border-color: var(--rf-border);
+  background: #1c2a3b;
+  color: var(--rf-muted);
+}
+
+body.rf-console-wifi .wifi-tag-primary {
+  border-color: rgba(43, 183, 246, .55);
+  background: #123d5a;
+  color: var(--rf-blue);
+}
+
+body.rf-console-wifi .wifi-tag-success {
+  border-color: rgba(67, 211, 158, .55);
+  background: #123a2d;
+  color: var(--rf-green);
+}
+
+body.rf-console-wifi .wifi-banner {
+  border-color: var(--rf-border);
+  background: #132136;
+  color: var(--rf-ink);
+}
+
+body.rf-console-wifi .wifi-banner-success {
+  border-color: rgba(67, 211, 158, .55);
+  background: #123a2d;
+}
+
+body.rf-console-wifi .wifi-banner-danger {
+  border-color: rgba(255, 107, 107, .55);
+  background: #451a1a;
+}
+
+body.rf-console-wifi .wifi-banner-warning {
+  border-color: rgba(255, 176, 32, .55);
+  background: #452d0c;
+}
+
+body.rf-console-wifi .wifi-banner-info {
+  border-color: rgba(43, 183, 246, .55);
+  background: #123d5a;
+}
+
+body.rf-console-wifi .wifi-modal-overlay {
+  z-index: 60;
+  background: rgba(3, 8, 15, .72);
+}
+
+body.rf-console-wifi .wifi-modal-box {
+  border: 1px solid var(--rf-border);
+  border-radius: var(--rf-radius-lg);
+  background: var(--rf-card);
+  box-shadow: var(--rf-shadow-panel);
+}
+
+body.rf-console-wifi .wifi-modal-header,
+body.rf-console-wifi .wifi-modal-footer {
+  background: var(--rf-panel);
+  border-color: var(--rf-border);
+}
+
+body.rf-console-wifi .wifi-modal-overlay label {
+  color: var(--rf-ink);
+}
+
+body.rf-console-wifi .wifi-modal-overlay input[type="text"],
+body.rf-console-wifi .wifi-modal-overlay input[type="password"] {
+  border-color: #2c4260;
+  background: var(--rf-panel);
+  color: var(--rf-ink);
+}
+
+body.rf-console-wifi .wifi-modal-overlay input[type="text"]:focus,
+body.rf-console-wifi .wifi-modal-overlay input[type="password"]:focus {
+  border-color: var(--rf-focus);
+  background: #0b1726;
+}
+
+body.rf-console-wifi .wifi-modal-close {
+  border-color: var(--rf-border-strong);
+  background: #1b2a3b;
+  color: var(--rf-ink);
+}
+
+body.rf-console-wifi .wifi-modal-error {
+  color: #ff9b9b;
+}
+
+/* Login and password pages */
+body.rf-console-auth {
+  display: flex;
+  min-height: 100vh;
+  flex-direction: column;
+}
+
+body.rf-console-auth .login-page {
+  width: min(92vw, 460px);
+  margin: 8vh auto var(--rf-space-6);
+  padding: 0;
+}
+
+body.rf-console-auth .form {
+  width: 100%;
+  margin: 0;
+  padding: var(--rf-space-6);
+  color: var(--rf-ink);
+}
+
+body.rf-console-auth .form::before {
+  content: "RF Console";
+  display: block;
+  margin-bottom: var(--rf-space-5);
+  color: var(--rf-ink-strong);
+  font-size: 18px;
+  line-height: 1.25;
+  font-weight: 800;
+}
+
+body.rf-console-auth .login-form {
+  margin: 0;
+}
+
+body.rf-console-auth .form-group {
+  margin: 0 0 var(--rf-space-4);
+}
+
+body.rf-console-auth .form-group label {
+  position: static;
+  display: block;
+  width: auto;
+  height: auto;
+  margin: var(--rf-space-2) 0 0;
+  color: var(--rf-muted);
+  line-height: 1.35;
+  text-align: left;
+  text-transform: none;
+}
+
+body.rf-console-auth .form-control {
+  padding: 0 12px;
+}
+
+body.rf-console-auth .button2 {
+  width: 100%;
+  margin-top: var(--rf-space-2);
+}
+
+body.rf-console-auth #footer {
+  margin-top: auto;
+}
+
+@media (max-width: 1100px) {
+  body.rf-console-editor #site_content {
+    grid-template-columns: 1fr;
+  }
+
+  body.rf-console-editor .container6,
+  body.rf-console-editor .container7,
+  body.rf-console-editor .container8,
+  body.rf-console-editor .container9,
+  body.rf-console-editor .container10 {
+    grid-column: 1;
+    grid-row: auto;
+  }
+
+  body.rf-console-editor .container6 {
+    max-height: none;
+  }
+}
+
+@media (max-width: 760px) {
+  body.rf-console-editor .container7,
+  body.rf-console-editor .container9,
+  body.rf-console-cal .device-card-grid {
+    grid-template-columns: 1fr;
+  }
+
+  body.rf-console-wifi .wifi-summary-top,
+  body.rf-console-wifi .wifi-page-head,
+  body.rf-console-wifi .wifi-network-top {
+    flex-direction: column;
+  }
+
+  body.rf-console-wifi .wifi-info-grid,
+  body.rf-console-wifi .wifi-info-grid-wide,
+  body.rf-console-wifi .wifi-method-grid {
+    grid-template-columns: 1fr;
+  }
+
+  body.rf-console-auth .login-page {
+    margin-top: var(--rf-space-6);
   }
 }

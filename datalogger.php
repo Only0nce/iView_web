@@ -22,6 +22,7 @@ include('ListAudioGain.php')
   <meta name="keywords" content="ED137, SIP" />
   <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
   <link rel="stylesheet" type="text/css" href="style.css" title="style" />
+  <link rel="stylesheet" type="text/css" href="rf-console.css?v=<?php echo time(); ?>" />
   <link rel="icon" type="image/png" href="favicon.ico" sizes="16x16" />
   <script src="jquery.min.js"></script>
   <script type="text/javascript" src="jquery-latest.min.js"></script>
@@ -35,7 +36,7 @@ include('ListAudioGain.php')
   </script>
 </head>
 
-<body>
+<body class="rf-console rf-console-log">
 <div id="header">
   <div id="logo">
 	<div id="logo_text">
@@ -89,7 +90,7 @@ include('ListAudioGain.php')
 	}
 	?>
 
-	<div id="dataloggerButtons" style="margin-bottom:10px;"></div>
+	<div id="dataloggerButtons"></div>
 	<div id="dataloggerContainer"></div>
 	<div id="table-pagination" class="center">
 		<ul class="pagination"></ul>
