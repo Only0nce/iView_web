@@ -17,7 +17,7 @@ include('ListAudioGain.php')
 ?>
 <html>
 <head>
-  <title>iView</title>
+  <title>iView RF Power Monitor</title>
   <meta name="description" content="4 Wire to ED-137 Converter" />
   <meta name="keywords" content="ED137, SIP" />
   <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
@@ -38,7 +38,7 @@ include('ListAudioGain.php')
 <div id="header">
   <div id="logo">
 	<div id="logo_text">
-      <h1><a href="index.php"><span class="logo_colour">RF Power Sensor Monitoring System</span></a></h1>
+      <h1><a href="index.php"><span class="logo_colour">iView RF Power Monitor</span></a></h1>
     </div>
   </div>
 <!--
@@ -87,7 +87,7 @@ include('ListAudioGain.php')
 	?>
 
 <div class="container">
-<h3 class="truelanLabel">THRULAN RF POWER SENSOR</h3>
+<h3 class="truelanLabel">iView RF Power Monitor</h3>
 <button id="unitWattActive" name="unitWattActive" onclick="setUnit(false)" style="left: calc(100% - 80px); background-color: #009688FF;" class="w3-button w3-teal w3-large w3-padding-large">W</button>
 <button id="unitDBActive" name="unitDBActive" onclick="setUnit(true)" style="left: calc(100% - 160px); background-color: #00968840;" class="w3-button w3-teal w3-large w3-padding-large">dBm</button>
 </div>

@@ -23,7 +23,7 @@ header("Pragma: no-cache");
 <html>
 
 <head>
-    <title>iView Monitor</title>
+    <title>iView RF Power Monitor</title>
     <meta name="description" content="4 Wire to ED-137 Converter" />
     <meta name="keywords" content="ED137, SIP" />
     <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
@@ -42,7 +42,7 @@ header("Pragma: no-cache");
     <div id="header">
         <div id="logo">
             <div id="logo_text">
-                <h1><a href="index.php"><span class="logo_colour">iView Monitor</span></a></h1>
+                <h1><a href="index.php"><span class="logo_colour">iView RF Power Monitor</span></a></h1>
             </div>
         </div>
         <!--
@@ -50,7 +50,7 @@ header("Pragma: no-cache");
     <h1 class="text-align-center">UHF Multi-coupler </h1>
   </div>
 -->
-        <div id="menubar" role="navigation" aria-label="Primary navigation">
+        <div id="menubar">
             <ul id="menu">
                 <li class="selected"><a href="index.php">HOME</a></li>
                 <li><a href="datalogger.php">LOG</a></li>
@@ -95,7 +95,7 @@ header("Pragma: no-cache");
 
         <div class="container rf-home-toolbar">
             <div class="rf-home-title-block">
-                <h3 class="truelanLabel">THRULAN RF Power Sensor • 16 Devices</h3>
+                <h3 class="truelanLabel">iView RF Power Monitor • 16 Devices</h3>
                 <span class="rf-home-subtitle">Live Monitoring Dashboard</span>
             </div>
             <div class="rf-toolbar-actions">

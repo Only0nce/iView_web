@@ -1298,7 +1298,7 @@ body.rf-console-auth .form {
 }
 
 body.rf-console-auth .form::before {
-  content: "RF Console";
+  content: "iView RF Power Monitor";
   display: block;
   margin-bottom: var(--rf-space-5);
   color: var(--rf-ink-strong);
@@ -3935,62 +3935,262 @@ body.rf-console-home-svg.rf-dashboard-2x8.rf-dashboard-stable-fit .rf-trend-card
 }
 
 /* --------------------------------------------------------------------------
-   Phase 1 UI-only: normalize HOME and CAL outer page shell sizing.
-   Keeps tab switching smoother by using the same viewport, width, min-height,
-   and scrollbar behavior as the rest of the RF console pages.
+   Phase 1 UI-only: CAL Profile device cards use a catalog-style card layout.
+   The top visual area is an empty placeholder until real device artwork exists.
+   Preserves cardTxId*, cardNameId*, cardFreqId*, cardIpId*, cardStatusId*.
    -------------------------------------------------------------------------- */
-html {
-  scrollbar-gutter: stable;
-}
-
-body.rf-console {
-  overflow-y: auto;
-}
-
-body.rf-console-home-svg.rf-dashboard-2x8.rf-dashboard-stable-fit #header,
-body.rf-console-cal #header {
-  width: min(96vw, 2800px) !important;
-  max-width: 2800px !important;
-  margin-left: auto !important;
-  margin-right: auto !important;
-}
-
-body.rf-console-home-svg.rf-dashboard-2x8.rf-dashboard-stable-fit #site_content,
-body.rf-console-cal #site_content {
-  width: min(96vw, 2800px) !important;
-  max-width: 2800px !important;
-  min-height: calc(100vh - 160px) !important;
-  margin-left: auto !important;
-  margin-right: auto !important;
-  padding-top: 16px !important;
-  padding-bottom: 32px !important;
-  overflow: visible !important;
-}
-
 body.rf-console-cal .cal-profile-wrapper {
-  min-height: calc(100vh - 224px);
-  padding: clamp(16px, 1.4vw, 24px) !important;
+  width: 100% !important;
+  max-width: none !important;
+  margin: 0 !important;
+  padding: clamp(18px, 1.6vw, 28px) !important;
   border: 1px solid var(--rf-border);
-  border-radius: var(--rf-radius-lg);
-  background: linear-gradient(180deg, rgba(19, 33, 54, .96), rgba(13, 24, 38, .98));
+  border-radius: 14px;
+  background: linear-gradient(180deg, rgba(16, 27, 43, .94), rgba(9, 18, 32, .98));
   box-shadow: var(--rf-shadow-panel);
 }
 
-body.rf-console-cal .device-card-grid {
-  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)) !important;
-  align-items: stretch;
+body.rf-console-cal .cal-page-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  margin: 0 0 18px;
 }
 
-@media (max-width: 900px) {
-  body.rf-console-home-svg.rf-dashboard-2x8.rf-dashboard-stable-fit #site_content,
-  body.rf-console-cal #site_content {
-    width: min(94vw, 2800px) !important;
-    padding-top: 12px !important;
-    padding-bottom: 24px !important;
+body.rf-console-cal .cal-page-title {
+  margin: 0 0 6px !important;
+  color: var(--rf-ink-strong) !important;
+  font-size: clamp(19px, 1.25vw, 24px) !important;
+  line-height: 1.15 !important;
+  font-weight: 950 !important;
+  letter-spacing: .02em !important;
+}
+
+body.rf-console-cal .cal-page-subtitle {
+  margin: 0 !important;
+  color: var(--rf-muted) !important;
+  font-size: 13px !important;
+  line-height: 1.45 !important;
+}
+
+body.rf-console-cal .cal-page-count {
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  min-height: 30px;
+  padding: 6px 12px;
+  border: 1px solid rgba(43, 183, 246, .34);
+  border-radius: 999px;
+  background: rgba(43, 183, 246, .10);
+  color: var(--rf-primary);
+  font-size: 11px;
+  font-weight: 900;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+}
+
+body.rf-console-cal .device-card-grid {
+  display: grid !important;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 360px)) !important;
+  gap: clamp(16px, 1.4vw, 24px) !important;
+  align-items: stretch !important;
+  justify-content: start !important;
+}
+
+body.rf-console-cal .device-card {
+  display: none;
+  width: 100% !important;
+  min-height: 390px !important;
+  padding: 0 !important;
+  border: 1px solid rgba(49, 80, 110, .92) !important;
+  border-radius: 24px !important;
+  background: linear-gradient(180deg, rgba(14, 27, 44, .98), rgba(9, 18, 32, .99)) !important;
+  color: var(--rf-ink) !important;
+  text-align: left !important;
+  overflow: hidden !important;
+  cursor: pointer !important;
+  box-shadow: 0 18px 42px rgba(0, 0, 0, .24), inset 0 1px 0 rgba(255, 255, 255, .04);
+  transition:
+    border-color var(--rf-duration) var(--rf-ease),
+    box-shadow var(--rf-duration) var(--rf-ease),
+    transform var(--rf-duration) var(--rf-ease),
+    background var(--rf-duration) var(--rf-ease);
+}
+
+body.rf-console-cal .device-card:hover,
+body.rf-console-cal .device-card:focus-visible {
+  border-color: rgba(43, 183, 246, .66) !important;
+  background: linear-gradient(180deg, rgba(16, 35, 56, .99), rgba(10, 22, 38, .99)) !important;
+  box-shadow: 0 22px 52px rgba(0, 0, 0, .30), 0 0 0 3px rgba(43, 183, 246, .12);
+  transform: translateY(-2px);
+}
+
+body.rf-console-cal .device-card:focus-visible {
+  outline: 3px solid var(--rf-focus);
+  outline-offset: 4px;
+}
+
+body.rf-console-cal .device-card-visual {
+  position: relative;
+  height: 210px;
+  display: grid;
+  place-items: center;
+  background:
+    radial-gradient(circle at 50% 34%, rgba(43, 183, 246, .16), transparent 34%),
+    linear-gradient(135deg, rgba(19, 48, 62, .80), rgba(9, 20, 34, .96));
+  border-bottom: 1px solid rgba(49, 80, 110, .74);
+}
+
+body.rf-console-cal .device-card-placeholder {
+  width: calc(100% - 42px);
+  height: calc(100% - 42px);
+  display: grid;
+  place-items: center;
+  border: 1px dashed rgba(143, 162, 184, .32);
+  border-radius: 18px;
+  background:
+    linear-gradient(135deg, rgba(255, 255, 255, .035), rgba(255, 255, 255, .01)),
+    rgba(5, 13, 24, .20);
+}
+
+body.rf-console-cal .device-card-placeholder span {
+  color: rgba(229, 237, 247, .28);
+  font-size: 30px;
+  line-height: 1;
+  font-weight: 950;
+  letter-spacing: .18em;
+}
+
+body.rf-console-cal .device-status-badge {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  display: inline-flex;
+  align-items: center;
+  min-height: 28px;
+  padding: 6px 12px;
+  border: 1px solid rgba(143, 162, 184, .44);
+  border-radius: 999px;
+  background: rgba(15, 23, 42, .70);
+  color: var(--rf-muted);
+  font-size: 11px;
+  font-weight: 950;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  backdrop-filter: blur(8px);
+}
+
+body.rf-console-cal .device-card.connected .device-status-badge {
+  border-color: rgba(67, 211, 158, .50);
+  background: rgba(20, 83, 45, .36);
+  color: var(--rf-success);
+}
+
+body.rf-console-cal .device-card-body {
+  min-height: 180px;
+  display: grid;
+  grid-template-rows: auto auto 1fr auto;
+  gap: 10px;
+  padding: 26px 28px 24px;
+  background: linear-gradient(180deg, rgba(13, 24, 38, .98), rgba(8, 17, 30, .99));
+}
+
+body.rf-console-cal .device-card-kicker {
+  color: var(--rf-muted);
+  font-size: 11px;
+  line-height: 1;
+  font-weight: 900;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+}
+
+body.rf-console-cal .device-card-title-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 14px;
+}
+
+body.rf-console-cal .device-card-name {
+  color: var(--rf-ink-strong) !important;
+  font-size: clamp(25px, 1.7vw, 34px) !important;
+  line-height: 1.04 !important;
+  font-weight: 950 !important;
+  letter-spacing: .025em !important;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+body.rf-console-cal .device-card-arrow {
+  color: var(--rf-muted);
+  font-size: 48px;
+  line-height: 1;
+  font-weight: 300;
+  transform: translateY(-1px);
+  transition: transform var(--rf-duration) var(--rf-ease), color var(--rf-duration) var(--rf-ease);
+}
+
+body.rf-console-cal .device-card:hover .device-card-arrow,
+body.rf-console-cal .device-card:focus-visible .device-card-arrow {
+  color: var(--rf-primary);
+  transform: translate(4px, -1px);
+}
+
+body.rf-console-cal .device-card-meta {
+  display: grid;
+  gap: 5px;
+  color: var(--rf-muted) !important;
+  font-size: 13px !important;
+  line-height: 1.25 !important;
+  font-weight: 800 !important;
+  letter-spacing: .015em;
+}
+
+body.rf-console-cal .device-card-freq,
+body.rf-console-cal .device-card-ip {
+  color: inherit !important;
+}
+
+body.rf-console-cal .device-card-action {
+  align-self: end;
+  color: var(--rf-primary) !important;
+  font-size: 13px !important;
+  line-height: 1.2;
+  font-weight: 950 !important;
+  letter-spacing: .04em;
+}
+
+@media (max-width: 760px) {
+  body.rf-console-cal .cal-page-head {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  body.rf-console-cal .cal-page-count {
+    width: fit-content;
   }
 
   body.rf-console-cal .device-card-grid {
-    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)) !important;
+    grid-template-columns: minmax(0, 1fr) !important;
+  }
+
+  body.rf-console-cal .device-card {
+    min-height: 360px !important;
+    border-radius: 20px !important;
+  }
+
+  body.rf-console-cal .device-card-visual {
+    height: 188px;
+  }
+
+  body.rf-console-cal .device-card-body {
+    padding: 22px 22px 20px;
+  }
+
+  body.rf-console-cal .device-card-name {
+    font-size: 26px !important;
   }
 }
 

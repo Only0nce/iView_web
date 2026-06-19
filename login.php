@@ -2,7 +2,7 @@
 <head>
 	<link rel="stylesheet" type="text/css" href="style.css" title="style" />
 	<link rel="stylesheet" type="text/css" href="rf-console.css?v=<?php echo time(); ?>" />
-<title>iView</title>
+<title>iView RF Power Monitor</title>
 </head>
 <body class="rf-console rf-console-auth rf-console-login">
 

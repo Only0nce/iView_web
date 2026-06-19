@@ -15,7 +15,7 @@ if($_SESSION['Status'] != "ADMIN")
 <!DOCTYPE HTML>
 <html>
 <head>
-    <title>iView - Wi-Fi Manager</title>
+    <title>iView RF Power Monitor - Wi-Fi Manager</title>
     <meta name="description" content="Professional Audio Streamer" />
     <meta name="keywords" content="Audio Streamer, Music Streamer" />
     <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
@@ -30,7 +30,7 @@ if($_SESSION['Status'] != "ADMIN")
         <div id="header">
             <div id="logo">
                 <div id="logo_text">
-                    <h1><a href="index.php"><span class="logo_colour">RF Power Sensor Monitoring System</span></a></h1>
+                    <h1><a href="index.php"><span class="logo_colour">iView RF Power Monitor</span></a></h1>
                 </div>
             </div>
             <div id="menubar">
