@@ -592,6 +592,7 @@ function installEventLogExplorerStyle() {
     .logx-filter-field { min-width:0; }
     .logx-filter-field-wide { min-width:260px; }
     .logx-filter-label { color:var(--logx-muted); font-size:12px; margin-bottom:6px; display:block; font-weight:700; }
+    .logx-sr-only { position:absolute !important; width:1px !important; height:1px !important; padding:0 !important; margin:-1px !important; overflow:hidden !important; clip:rect(0, 0, 0, 0) !important; white-space:nowrap !important; border:0 !important; }
     .logx-filter-summary { display:flex; gap:8px; flex-wrap:wrap; align-items:center; justify-content:flex-end; }
     .logx-search { width:100%; min-width:0; height:42px; color:var(--logx-ink); background:var(--logx-panel); border:1px solid #2c4260; border-radius:8px; padding:0 12px; outline:none; font-size:14px; }
     .logx-search::placeholder { color:#b7c4d4; opacity:1; }
@@ -912,28 +913,28 @@ function buildDataloggerTable() {
 
         <div class="logx-toolbar" role="search" aria-label="Event log filters">
           <div class="logx-filter-field logx-filter-field-wide">
-            <label class="logx-filter-label" for="logxTextSearch">Search</label>
-            <input id="logxTextSearch" class="logx-search" type="search" placeholder="Frequency or connection" autocomplete="off">
+            <label class="logx-filter-label logx-sr-only" for="logxTextSearch">Search</label>
+            <input id="logxTextSearch" class="logx-search" type="search" placeholder="Search frequency or connection" autocomplete="off" aria-label="Search frequency or connection">
           </div>
 
           <div class="logx-filter-field">
-            <label class="logx-filter-label" for="logxDateStart">From</label>
-            <input id="logxDateStart" class="logx-filter-input logx-filter-date" type="datetime-local">
+            <label class="logx-filter-label logx-sr-only" for="logxDateStart">From</label>
+            <input id="logxDateStart" class="logx-filter-input logx-filter-date" type="datetime-local" aria-label="From date and time">
           </div>
 
           <div class="logx-filter-field">
-            <label class="logx-filter-label" for="logxDateEnd">To</label>
-            <input id="logxDateEnd" class="logx-filter-input logx-filter-date" type="datetime-local">
+            <label class="logx-filter-label logx-sr-only" for="logxDateEnd">To</label>
+            <input id="logxDateEnd" class="logx-filter-input logx-filter-date" type="datetime-local" aria-label="To date and time">
           </div>
 
           <div class="logx-filter-field">
-            <label class="logx-filter-label" for="logxSiteFilter">Site</label>
-            <select id="logxSiteFilter" class="logx-filter-select"><option value="">All Site</option></select>
+            <label class="logx-filter-label logx-sr-only" for="logxSiteFilter">Site</label>
+            <select id="logxSiteFilter" class="logx-filter-select" aria-label="Site"><option value="">All Site</option></select>
           </div>
 
           <div class="logx-filter-field">
-            <label class="logx-filter-label" for="logxDeviceFilter">Device</label>
-            <select id="logxDeviceFilter" class="logx-filter-select" required><option value="">Select Device</option></select>
+            <label class="logx-filter-label logx-sr-only" for="logxDeviceFilter">Device</label>
+            <select id="logxDeviceFilter" class="logx-filter-select" required aria-label="Device"><option value="">Select Device</option></select>
           </div>
 
           <div class="logx-filter-summary" aria-label="Table legend">
