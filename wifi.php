@@ -24,6 +24,7 @@ if($_SESSION['Status'] != "ADMIN")
     <link rel="stylesheet" type="text/css" href="rf-console.css?v=<?php echo time(); ?>" />
     <script src="jquery.min.js"></script>
     <script type="text/javascript" src="myfunctionWifiManager.js?v=<?php echo time(); ?>" defer></script>
+  <script type="text/javascript" src="rf-theme.js?v=<?php echo time(); ?>"></script>
 </head>
 <body class="rf-console rf-console-wifi">
     <div id="main">

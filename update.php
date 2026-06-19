@@ -36,6 +36,7 @@ include('timezone.php')
   <link rel="stylesheet" type="text/css" href="jquery.datetimepicker.css">
   <script type="text/javascript" src="jquery.js"></script>
   <script type="text/javascript" src="jquery.datetimepicker.js"></script>
+  <script type="text/javascript" src="rf-theme.js?v=<?php echo time(); ?>"></script>
 </head>
 
 <body class="rf-console rf-console-config rf-console-system">

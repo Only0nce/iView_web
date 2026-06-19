@@ -3,6 +3,7 @@
 	<link rel="stylesheet" type="text/css" href="style.css" title="style" />
 	<link rel="stylesheet" type="text/css" href="rf-console.css?v=<?php echo time(); ?>" />
 <title>iView RF Power Monitor</title>
+  <script type="text/javascript" src="rf-theme.js?v=<?php echo time(); ?>"></script>
 </head>
 <body class="rf-console rf-console-auth rf-console-login">
 

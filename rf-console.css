@@ -4194,3 +4194,414 @@ body.rf-console-cal .device-card-action {
   }
 }
 
+/* --------------------------------------------------------------------------
+   Phase 1 UI-only: project-wide day/night theme support.
+   Default remains dark to preserve existing RF console behavior.
+   rf-theme.js sets html[data-rf-theme="light"|"dark"] and injects a toggle.
+   -------------------------------------------------------------------------- */
+body.rf-console #menubar {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+}
+
+body.rf-console ul#menu {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+body.rf-console .rf-theme-toggle {
+  flex: 0 0 auto;
+  min-height: 32px;
+  margin: 0 0 6px;
+  padding: 7px 12px;
+  border: 1px solid rgba(125, 211, 252, .38);
+  border-radius: 999px;
+  background: rgba(43, 183, 246, .12);
+  color: var(--rf-ink-strong);
+  font: 900 11px/1 system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  cursor: pointer;
+  white-space: nowrap;
+  transition:
+    background var(--rf-duration) var(--rf-ease),
+    border-color var(--rf-duration) var(--rf-ease),
+    color var(--rf-duration) var(--rf-ease),
+    transform var(--rf-duration) var(--rf-ease);
+}
+
+body.rf-console .rf-theme-toggle:hover {
+  border-color: rgba(125, 211, 252, .72);
+  background: rgba(43, 183, 246, .20);
+  transform: translateY(-1px);
+}
+
+body.rf-console .rf-theme-toggle-floating {
+  position: fixed;
+  top: 14px;
+  right: 14px;
+  z-index: 9999;
+  box-shadow: 0 12px 30px rgba(0, 0, 0, .28);
+}
+
+html[data-rf-theme="dark"] body.rf-console {
+  color-scheme: dark;
+}
+
+html[data-rf-theme="light"] body.rf-console {
+  color-scheme: light;
+  --rf-page: #eef4fa;
+  --rf-card: #ffffff;
+  --rf-panel: #f8fbff;
+  --rf-panel-2: #edf4fb;
+  --rf-ink: #142238;
+  --rf-ink-strong: #071525;
+  --rf-muted: #53657c;
+  --rf-muted-2: #6d7f95;
+  --rf-border: #c8d8e8;
+  --rf-border-strong: #9fb7cf;
+  --rf-focus: #0ea5e9;
+  --rf-blue: #0284c7;
+  --rf-green: #059669;
+  --rf-orange: #b7791f;
+  --rf-red: #dc2626;
+  --rf-primary: var(--rf-blue);
+  --rf-success: var(--rf-green);
+  --rf-warning: var(--rf-orange);
+  --rf-danger: var(--rf-red);
+  --rf-shadow-panel: 0 12px 32px rgba(15, 23, 42, .10);
+  background: linear-gradient(180deg, #f7fbff 0%, #e8f1fa 100%) !important;
+  background-image: linear-gradient(180deg, #f7fbff 0%, #e8f1fa 100%) !important;
+  color: var(--rf-ink) !important;
+}
+
+html[data-rf-theme="light"] {
+  background: #eef4fa !important;
+}
+
+html[data-rf-theme="light"] body.rf-console #header,
+html[data-rf-theme="light"] body.rf-console #site_content,
+html[data-rf-theme="light"] body.rf-console .container,
+html[data-rf-theme="light"] body.rf-console .container1,
+html[data-rf-theme="light"] body.rf-console .container6,
+html[data-rf-theme="light"] body.rf-console .container7,
+html[data-rf-theme="light"] body.rf-console .container8,
+html[data-rf-theme="light"] body.rf-console .container9,
+html[data-rf-theme="light"] body.rf-console .container10,
+html[data-rf-theme="light"] body.rf-console .sidebar,
+html[data-rf-theme="light"] body.rf-console .sidebar2,
+html[data-rf-theme="light"] body.rf-console #network_content,
+html[data-rf-theme="light"] body.rf-console .rf-home-toolbar,
+html[data-rf-theme="light"] body.rf-console .rf-device-overview,
+html[data-rf-theme="light"] body.rf-console .rf-trend-card,
+html[data-rf-theme="light"] body.rf-console .rf-radio-control,
+html[data-rf-theme="light"] body.rf-console .rf-metric-card,
+html[data-rf-theme="light"] body.rf-console .rf-overview-footer,
+html[data-rf-theme="light"] body.rf-console .cal-profile-wrapper,
+html[data-rf-theme="light"] body.rf-console .device-card,
+html[data-rf-theme="light"] body.rf-console .form,
+html[data-rf-theme="light"] body.rf-console .logx-card,
+html[data-rf-theme="light"] body.rf-console .logx-panel,
+html[data-rf-theme="light"] body.rf-console .wifi-card,
+html[data-rf-theme="light"] body.rf-console .wifi-panel {
+  background-color: var(--rf-card) !important;
+  color: var(--rf-ink) !important;
+  border-color: var(--rf-border) !important;
+}
+
+html[data-rf-theme="light"] body.rf-console #logo_text h1 a,
+html[data-rf-theme="light"] body.rf-console #logo_text h1 a:hover,
+html[data-rf-theme="light"] body.rf-console #logo_text h1 a .logo_colour,
+html[data-rf-theme="light"] body.rf-console h1,
+html[data-rf-theme="light"] body.rf-console h2,
+html[data-rf-theme="light"] body.rf-console h3,
+html[data-rf-theme="light"] body.rf-console h4,
+html[data-rf-theme="light"] body.rf-console h5,
+html[data-rf-theme="light"] body.rf-console h6,
+html[data-rf-theme="light"] body.rf-console .title,
+html[data-rf-theme="light"] body.rf-console .truelanLabel,
+html[data-rf-theme="light"] body.rf-console .cal-page-title,
+html[data-rf-theme="light"] body.rf-console .device-card-name,
+html[data-rf-theme="light"] body.rf-console .rf-auth-brand h1 {
+  color: var(--rf-ink-strong) !important;
+}
+
+html[data-rf-theme="light"] body.rf-console ul#menu li a {
+  color: var(--rf-ink-strong) !important;
+}
+
+html[data-rf-theme="light"] body.rf-console ul#menu li a:hover,
+html[data-rf-theme="light"] body.rf-console ul#menu li.selected a,
+html[data-rf-theme="light"] body.rf-console ul#menu li.selected a:hover {
+  color: #ffffff !important;
+  background: var(--rf-primary) !important;
+}
+
+html[data-rf-theme="light"] body.rf-console .rf-theme-toggle {
+  border-color: rgba(2, 132, 199, .34);
+  background: rgba(2, 132, 199, .10);
+  color: var(--rf-primary);
+}
+
+html[data-rf-theme="light"] body.rf-console input,
+html[data-rf-theme="light"] body.rf-console select,
+html[data-rf-theme="light"] body.rf-console textarea,
+html[data-rf-theme="light"] body.rf-console .form-control,
+html[data-rf-theme="light"] body.rf-console .logx-filter-input,
+html[data-rf-theme="light"] body.rf-console .logx-filter-select {
+  background-color: #ffffff !important;
+  background-image: none !important;
+  border-color: var(--rf-border) !important;
+  color: var(--rf-ink-strong) !important;
+}
+
+html[data-rf-theme="light"] body.rf-console input::placeholder,
+html[data-rf-theme="light"] body.rf-console textarea::placeholder {
+  color: #7890a8 !important;
+}
+
+html[data-rf-theme="light"] body.rf-console table,
+html[data-rf-theme="light"] body.rf-console th,
+html[data-rf-theme="light"] body.rf-console td,
+html[data-rf-theme="light"] body.rf-console .table,
+html[data-rf-theme="light"] body.rf-console .logx-table {
+  color: var(--rf-ink) !important;
+  border-color: var(--rf-border) !important;
+}
+
+html[data-rf-theme="light"] body.rf-console th,
+html[data-rf-theme="light"] body.rf-console .logx-table thead th {
+  background: #e6f0f9 !important;
+  color: var(--rf-ink-strong) !important;
+}
+
+html[data-rf-theme="light"] body.rf-console td,
+html[data-rf-theme="light"] body.rf-console .logx-table tbody td {
+  background: rgba(255, 255, 255, .78) !important;
+}
+
+html[data-rf-theme="light"] body.rf-console .rf-trend-plot,
+html[data-rf-theme="light"] body.rf-console [id^="myPlot"],
+html[data-rf-theme="light"] body.rf-console #logxMainTrend,
+html[data-rf-theme="light"] body.rf-console #logxRssiTrend,
+html[data-rf-theme="light"] body.rf-console #logxDurationTrend,
+html[data-rf-theme="light"] body.rf-console .device-card-visual {
+  background:
+    linear-gradient(135deg, rgba(232, 241, 250, .98), rgba(246, 250, 255, .98)) !important;
+  border-color: var(--rf-border) !important;
+}
+
+html[data-rf-theme="light"] body.rf-console .rf-metric-card,
+html[data-rf-theme="light"] body.rf-console .rf-forward-block,
+html[data-rf-theme="light"] body.rf-console .device-card-body,
+html[data-rf-theme="light"] body.rf-console .device-card-placeholder {
+  background: #f8fbff !important;
+  border-color: var(--rf-border) !important;
+}
+
+html[data-rf-theme="light"] body.rf-console .emptybar,
+html[data-rf-theme="light"] body.rf-console .rf-progress-line {
+  background: #d7e5f2 !important;
+}
+
+html[data-rf-theme="light"] body.rf-console .device-status-badge,
+html[data-rf-theme="light"] body.rf-console .rf-alert-pill,
+html[data-rf-theme="light"] body.rf-console .rf-mini-pill {
+  background: rgba(255, 255, 255, .72) !important;
+  color: var(--rf-muted) !important;
+}
+
+html[data-rf-theme="light"] body.rf-console .device-card.connected .device-status-badge,
+html[data-rf-theme="light"] body.rf-console [data-state="ok"].rf-alert-pill,
+html[data-rf-theme="light"] body.rf-console [data-state="ok"].rf-mini-pill {
+  background: rgba(5, 150, 105, .12) !important;
+  color: var(--rf-success) !important;
+  border-color: rgba(5, 150, 105, .35) !important;
+}
+
+html[data-rf-theme="light"] body.rf-console [data-state="warn"].rf-alert-pill,
+html[data-rf-theme="light"] body.rf-console [data-state="warn"].rf-mini-pill {
+  background: rgba(183, 121, 31, .13) !important;
+  color: var(--rf-warning) !important;
+  border-color: rgba(183, 121, 31, .34) !important;
+}
+
+html[data-rf-theme="light"] body.rf-console [data-state="alert"].rf-alert-pill,
+html[data-rf-theme="light"] body.rf-console [data-state="alert"].rf-mini-pill {
+  background: rgba(220, 38, 38, .12) !important;
+  color: var(--rf-danger) !important;
+  border-color: rgba(220, 38, 38, .34) !important;
+}
+
+html[data-rf-theme="light"] body.rf-console-auth {
+  background:
+    radial-gradient(circle at 50% 0%, rgba(2, 132, 199, .12), transparent 35%),
+    linear-gradient(180deg, #f7fbff 0%, #e8f1fa 100%) !important;
+}
+
+html[data-rf-theme="light"] body.rf-console-auth .form-group label {
+  background: #ffffff !important;
+  color: var(--rf-muted) !important;
+}
+
+@media (max-width: 760px) {
+  body.rf-console #menubar {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  body.rf-console .rf-theme-toggle {
+    width: fit-content;
+  }
+}
+
+/* --------------------------------------------------------------------------
+   Phase 1 UI-only: offline SVG icon-only theme toggle.
+   Sun = switch to day mode, Moon = switch to night mode.
+   -------------------------------------------------------------------------- */
+body.rf-console .rf-theme-toggle {
+  width: 38px !important;
+  height: 38px !important;
+  min-width: 38px !important;
+  min-height: 38px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  padding: 0 !important;
+  border-radius: 999px !important;
+  line-height: 1 !important;
+  font-size: 0 !important;
+}
+
+body.rf-console .rf-theme-toggle .rf-theme-icon {
+  width: 19px;
+  height: 19px;
+  display: block;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+body.rf-console .rf-theme-toggle .rf-theme-icon-sun circle {
+  fill: currentColor;
+  stroke: none;
+}
+
+body.rf-console .rf-theme-toggle[data-theme="dark"] {
+  color: #fbbf24;
+  border-color: rgba(251, 191, 36, .38);
+  background: rgba(251, 191, 36, .12);
+}
+
+body.rf-console .rf-theme-toggle[data-theme="dark"]:hover {
+  border-color: rgba(251, 191, 36, .72);
+  background: rgba(251, 191, 36, .20);
+}
+
+body.rf-console .rf-theme-toggle[data-theme="light"] {
+  color: #334155;
+  border-color: rgba(51, 65, 85, .22);
+  background: rgba(15, 23, 42, .06);
+}
+
+body.rf-console .rf-theme-toggle[data-theme="light"]:hover {
+  border-color: rgba(51, 65, 85, .42);
+  background: rgba(15, 23, 42, .10);
+}
+
+body.rf-console .rf-theme-toggle-floating {
+  width: 42px !important;
+  height: 42px !important;
+}
+
+/* --------------------------------------------------------------------------
+   Phase 1 UI-only: CAL Profile product image from project root path.
+   Uses img/Thrulan.png inside the catalog card visual area; placeholder stays
+   available only when the image is missing or fails to load.
+   -------------------------------------------------------------------------- */
+body.rf-console-cal .device-card-visual {
+  isolation: isolate;
+}
+
+body.rf-console-cal .device-card-image {
+  position: relative;
+  z-index: 2;
+  width: 100%;
+  height: 100%;
+  display: block;
+  padding: clamp(18px, 1.4vw, 28px);
+  object-fit: contain;
+  object-position: center;
+  filter: drop-shadow(0 18px 18px rgba(0, 0, 0, .34));
+}
+
+body.rf-console-cal .device-card-placeholder {
+  position: absolute;
+  inset: 22px;
+  z-index: 1;
+  opacity: 0;
+  transition: opacity var(--rf-duration) var(--rf-ease);
+}
+
+body.rf-console-cal .device-card-visual.no-device-image .device-card-placeholder {
+  opacity: 1;
+}
+
+html[data-rf-theme="light"] body.rf-console-cal .device-card-image {
+  filter: drop-shadow(0 18px 20px rgba(15, 23, 42, .18));
+}
+
+/* --------------------------------------------------------------------------
+   Phase 1 UI-only: constrain CAL product image inside the top visual box.
+   Prevents img/Thrulan.png from overlapping the lower device information area.
+   -------------------------------------------------------------------------- */
+body.rf-console-cal .device-card-visual {
+  position: relative !important;
+  overflow: hidden !important;
+}
+
+body.rf-console-cal .device-card-image {
+  position: absolute !important;
+  inset: 0 !important;
+  z-index: 2 !important;
+  width: 100% !important;
+  height: 100% !important;
+  max-width: 100% !important;
+  max-height: 100% !important;
+  padding: clamp(20px, 1.8vw, 34px) !important;
+  object-fit: contain !important;
+  object-position: center !important;
+  pointer-events: none !important;
+}
+
+body.rf-console-cal .device-card-placeholder {
+  position: absolute !important;
+  inset: 22px !important;
+  z-index: 1 !important;
+}
+
+body.rf-console-cal .device-card-visual.no-device-image .device-card-placeholder {
+  z-index: 2 !important;
+}
+
+/* --------------------------------------------------------------------------
+   Phase 1 UI-only: enlarge CAL product image while preserving aspect ratio.
+   The image fills more of the visual box without stretching or changing layout.
+   -------------------------------------------------------------------------- */
+body.rf-console-cal .device-card-image {
+  padding: 4px !important;
+  object-fit: contain !important;
+  object-position: center !important;
+  transform: scale(1.85);
+  transform-origin: center;
+}
+
+@media (max-width: 760px) {
+  body.rf-console-cal .device-card-image {
+    transform: scale(1.7);
+  }
+}
+

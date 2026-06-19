@@ -29,6 +29,7 @@ include('ListAudioGain.php')
     <script type="text/javascript" src="jquery-latest.min.js"></script>
     <script type="text/javascript" src="jquery-ui.js"></script>
     <script type="text/javascript" src="myfunctionNetwork.js?v=<?php echo time(); ?>"></script>
+  <script type="text/javascript" src="rf-theme.js?v=<?php echo time(); ?>"></script>
 </head>
 
 <body class="rf-console rf-console-config rf-console-network">

@@ -36,6 +36,7 @@ header("Pragma: no-cache");
     <script type="text/javascript" src="jquery-ui.js"></script>
     <!--  <script type="text/javascript" src="countUp.js"></script>-->
     <script type="text/javascript" src="./plotly-latest.min.js"></script>
+  <script type="text/javascript" src="rf-theme.js?v=<?php echo time(); ?>"></script>
 </head>
 
 <body class="rf-console rf-console-home rf-console-home-svg rf-dashboard-2x8 rf-dashboard-stable-fit">

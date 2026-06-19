@@ -30,6 +30,7 @@ include('ListAudioGain.php')
   <script type="text/javascript" src="jquery-latest.min.js"></script>
   <script type="text/javascript" src="jquery-ui.js"></script>
   <script type="text/javascript" src="cal.js?v=<?php echo time(); ?>"></script>
+  <script type="text/javascript" src="rf-theme.js?v=<?php echo time(); ?>"></script>
 </head>
 
 <body class="rf-console rf-console-cal">
@@ -75,6 +76,7 @@ include('ListAudioGain.php')
 			{
 				echo '<button type="button" class="device-card" id="cardTxId'.$i.'" data-device-index="'.$i.'" onclick="openDeviceCal('.$i.')" aria-label="Open CAL for device '.$i.'">';
 				echo '  <div class="device-card-visual" aria-hidden="true">';
+				echo '    <img class="device-card-image" src="/img/Thrulan.png" alt="" loading="lazy" onerror="this.parentElement.classList.add(&#39;no-device-image&#39;);this.remove();">';
 				echo '    <div class="device-card-placeholder">';
 				echo '      <span>CAL</span>';
 				echo '    </div>';

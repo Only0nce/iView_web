@@ -34,6 +34,7 @@ include('ListAudioGain.php')
   <script type = "text/javascript">
 	  
   </script>
+  <script type="text/javascript" src="rf-theme.js?v=<?php echo time(); ?>"></script>
 </head>
 
 <body class="rf-console rf-console-editor rf-console-snmp">
