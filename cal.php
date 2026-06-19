@@ -18,10 +18,11 @@ include('ListAudioGain.php')
 ?>
 <html>
 <head>
-  <title>iView</title>
+  <title>iView Monitor</title>
   <meta name="description" content="4 Wire to ED-137 Converter" />
   <meta name="keywords" content="ED137, SIP" />
   <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <link rel="stylesheet" type="text/css" href="style.css" title="style" />
   <link rel="stylesheet" type="text/css" href="rf-console.css?v=<?php echo time(); ?>" />
   <link rel="icon" type="image/png" href="favicon.ico" sizes="16x16" />
@@ -35,7 +36,7 @@ include('ListAudioGain.php')
 <div id="header">
   <div id="logo">
 	<div id="logo_text">
-      <h1><a href="index.php"><span class="logo_colour">RF Power Sensor Monitoring System</span></a></h1>
+      <h1><a href="index.php"><span class="logo_colour">iView Monitor</span></a></h1>
     </div>
   </div>
 <!--
@@ -43,7 +44,7 @@ include('ListAudioGain.php')
   	<h1 class="text-align-center">UHF Multi-coupler </h1>
   </div>
 -->
-  <div id="menubar">
+  <div id="menubar" role="navigation" aria-label="Primary navigation">
 	<ul id="menu">
 		<li><a href="index.php">HOME</a></li>
 		<li><a href="datalogger.php">LOG</a></li>

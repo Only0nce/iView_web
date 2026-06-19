@@ -50,7 +50,7 @@ header("Pragma: no-cache");
     <h1 class="text-align-center">UHF Multi-coupler </h1>
   </div>
 -->
-        <div id="menubar">
+        <div id="menubar" role="navigation" aria-label="Primary navigation">
             <ul id="menu">
                 <li class="selected"><a href="index.php">HOME</a></li>
                 <li><a href="datalogger.php">LOG</a></li>

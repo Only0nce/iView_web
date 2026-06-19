@@ -3933,3 +3933,64 @@ body.rf-console-home-svg.rf-dashboard-2x8.rf-dashboard-stable-fit .rf-trend-card
   opacity: .38 !important;
   transition: opacity 180ms ease !important;
 }
+
+/* --------------------------------------------------------------------------
+   Phase 1 UI-only: normalize HOME and CAL outer page shell sizing.
+   Keeps tab switching smoother by using the same viewport, width, min-height,
+   and scrollbar behavior as the rest of the RF console pages.
+   -------------------------------------------------------------------------- */
+html {
+  scrollbar-gutter: stable;
+}
+
+body.rf-console {
+  overflow-y: auto;
+}
+
+body.rf-console-home-svg.rf-dashboard-2x8.rf-dashboard-stable-fit #header,
+body.rf-console-cal #header {
+  width: min(96vw, 2800px) !important;
+  max-width: 2800px !important;
+  margin-left: auto !important;
+  margin-right: auto !important;
+}
+
+body.rf-console-home-svg.rf-dashboard-2x8.rf-dashboard-stable-fit #site_content,
+body.rf-console-cal #site_content {
+  width: min(96vw, 2800px) !important;
+  max-width: 2800px !important;
+  min-height: calc(100vh - 160px) !important;
+  margin-left: auto !important;
+  margin-right: auto !important;
+  padding-top: 16px !important;
+  padding-bottom: 32px !important;
+  overflow: visible !important;
+}
+
+body.rf-console-cal .cal-profile-wrapper {
+  min-height: calc(100vh - 224px);
+  padding: clamp(16px, 1.4vw, 24px) !important;
+  border: 1px solid var(--rf-border);
+  border-radius: var(--rf-radius-lg);
+  background: linear-gradient(180deg, rgba(19, 33, 54, .96), rgba(13, 24, 38, .98));
+  box-shadow: var(--rf-shadow-panel);
+}
+
+body.rf-console-cal .device-card-grid {
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)) !important;
+  align-items: stretch;
+}
+
+@media (max-width: 900px) {
+  body.rf-console-home-svg.rf-dashboard-2x8.rf-dashboard-stable-fit #site_content,
+  body.rf-console-cal #site_content {
+    width: min(94vw, 2800px) !important;
+    padding-top: 12px !important;
+    padding-bottom: 24px !important;
+  }
+
+  body.rf-console-cal .device-card-grid {
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)) !important;
+  }
+}
+
