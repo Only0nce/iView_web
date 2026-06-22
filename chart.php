@@ -23,12 +23,14 @@ include('ListAudioGain.php')
   <meta name="keywords" content="ED137, SIP" />
   <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
   <link rel="stylesheet" type="text/css" href="style.css" title="style" />
+  <link rel="stylesheet" type="text/css" href="rf-console.css?v=<?php echo time(); ?>" />
   <link rel="icon" type="image/png" href="favicon.ico" sizes="16x16" />
   <script src="jquery.min.js"></script>
   <script type="text/javascript" src="jquery-latest.min.js"></script>
   <script type="text/javascript" src="jquery-ui.js"></script>
   <script type="text/javascript" src="myfunctionChart.js"></script>
   <script type="text/javascript" src="canvasjs.min.js"></script>
+  <script type="text/javascript" src="rf-theme.js?v=<?php echo time(); ?>"></script>
 <!--  <script type="text/javascript" src="countUp.js"></script>-->
   
   <script type = "text/javascript">
@@ -134,22 +136,58 @@ catch(\PDOException $ex){
 	
 ?>
 
+function rfCssVar(name, fallback) {
+  var source = document.body || document.documentElement;
+  var value = window.getComputedStyle ? window.getComputedStyle(source).getPropertyValue(name).trim() : "";
+  return value || fallback;
+}
+
+var rfTheme = document.documentElement.getAttribute("data-rf-theme") === "light" ? "light" : "dark";
+var rfChart = {
+  background: rfCssVar("--rf-input-bg", rfTheme === "light" ? "#ffffff" : "#0b1626"),
+  text: rfCssVar("--rf-text", rfTheme === "light" ? "#17243a" : "#eaf2ff"),
+  muted: rfCssVar("--rf-text-muted", rfTheme === "light" ? "#586b84" : "#94a7bf"),
+  grid: rfCssVar("--rf-border", rfTheme === "light" ? "#c8d8e8" : "#29435e"),
+  primary: rfCssVar("--rf-chart-primary", rfTheme === "light" ? "#0369a1" : "#38bdf8"),
+  secondary: rfCssVar("--rf-chart-secondary", rfTheme === "light" ? "#047857" : "#22c55e"),
+  tooltip: rfCssVar("--rf-modal-bg", rfTheme === "light" ? "#ffffff" : "#101d30")
+};
+
 var chart = new CanvasJS.Chart("chartContainer",
 {
-  theme: "dark1",
-  backgroundColor: "#00000000",
+  theme: rfTheme === "light" ? "light2" : "dark1",
+  backgroundColor: rfChart.background,
   animationEnabled: true, 
   animationDuration: 500,
   title:{
-  text: chartText
+  text: chartText,
+  fontColor: rfChart.text
+  },
+  axisX:{
+      labelFontColor: rfChart.muted,
+      lineColor: rfChart.grid,
+      tickColor: rfChart.grid
   },
   axisY:{
       title:axisYTitle,
+      titleFontColor: rfChart.text,
+      labelFontColor: rfChart.muted,
+      gridColor: rfChart.grid,
+      lineColor: rfChart.grid,
+      tickColor: rfChart.grid
+  },
+  legend:{
+      fontColor: rfChart.text
+  },
+  toolTip:{
+      backgroundColor: rfChart.tooltip,
+      fontColor: rfChart.text,
+      borderColor: rfChart.grid
   },
   data: [
   {
 	  type: "line", //change type to bar, line, area, pie, etc  
-	  color: "#FA057E",
+	  color: rfChart.primary,
 	  name: y1Name,
 	  showInLegend: true,
 	  xValueFormatString: "HH:mm DD-MMM",
@@ -158,7 +196,7 @@ var chart = new CanvasJS.Chart("chartContainer",
   },
   {
 	  type: "line", //change type to bar, line, area, pie, etc  
-	  color: "#fcff4d",
+	  color: rfChart.secondary,
 	  name: y2Name,
 	  showInLegend: true,
 	  xValueFormatString: "HH:mm DD-MMM",
@@ -169,8 +207,14 @@ var chart = new CanvasJS.Chart("chartContainer",
 });
 chart.render();
 }
+
+if (window.addEventListener) {
+  window.addEventListener("rf-theme-change", function () {
+    plotChart();
+  });
+}
 </script>
-<body>
+<body class="rf-console rf-console-chart">
 <div id="header">
   <div id="logo">
 	<div id="logo_text">

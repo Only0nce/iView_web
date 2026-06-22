@@ -30,9 +30,10 @@
 	      	<input class="form-control" type="password" placeholder="" name="renewpass" id="renewpass" required/>
 			<label for="renewpass">Retype new password</label>
 		</div>
-      
-	
-		  <button class="button button2" type="submit" name="Submit" value="Change Password">Change Password</button>
+      <div class="rf-auth-actions">
+		    <button class="button button2" type="submit" name="Submit" value="Change Password">Change Password</button>
+        <a href="index.php" class="rf-btn rf-btn-secondary">Back to Dashboard</a>
+      </div>
 	    </form>
 	  </div>
 </div>

@@ -108,7 +108,7 @@ include('ListAudioGain.php')
 <h3 class="truelanLabel" id="newtruelan" name="newtruelan" >New Site</h3>
 </div>
 <div class="container6">
-		<div class="card" id="card0" name="card0" style="display: block; background-color: rgba(0, 0, 0, 0.0)">
+		<div class="card role-device-panel" id="card0" name="card0" style="display: block; background-color: rgba(0, 0, 0, 0.0)">
 			<?php	
 				
 				echo '<div class="cardTxTab cardTxTabAdd" id="cardTxId0" name="cardTxId0" onclick="setCurrentID(0)" style="display: block;">';
@@ -170,11 +170,11 @@ include('ListAudioGain.php')
 					<div class="cardRoleTextID"> <span>15</span></div>
 			  <select id="chId15" name="chId15" class="selectedTrueLan" ><option selected value='0'>Disable</option></select>
 				<img class="cardRoleTabImage" src="img/Thrulan.png" alt="Flowers in Chania"></div>
-			<div class="cardRole" id="cardButton" style="display: block; background-color: rgba(0, 0, 0, 0.0)">
+			<div class="cardRole role-action-panel" id="cardButton" style="display: block; background-color: rgba(0, 0, 0, 0.0)">
 						<button class="button button2" type="button" id="removerolebutton" style="margin-top: 10px; display: none;" onClick="removeRole();">REMOVE</button>
 			</div>
 			</div>
-		<div class="card" id="card0" name="card0" style="display: block; background-color: rgba(0, 0, 0, 0.0)">
+		<div class="card role-device-panel" id="card0" name="card0" style="display: block; background-color: rgba(0, 0, 0, 0.0)">
 			<div class="cardRole" id="cardRoleId2" name="cardRoleId2" style="display: block; background-color: rgba(0, 0, 0, 0.1)">
 					<div class="cardRoleTextID"> <span>2</span></div>
 			  <select id="chId2" name="chId2" class="selectedTrueLan" ><option selected value='0'>Disable</option></select>
@@ -215,7 +215,7 @@ include('ListAudioGain.php')
 					<div class="cardRoleTextID"> <span>16</span></div>
 			  <select id="chId16" name="chId16" class="selectedTrueLan" ><option selected value='0'>Disable</option></select>
 				<img class="cardRoleTabImage" src="img/Thrulan.png" alt="Flowers in Chania"></div>
-			<div class="cardRole" id="cardButton" style="display: block; background-color: rgba(0, 0, 0, 0.0)">
+			<div class="cardRole role-action-panel" id="cardButton" style="display: block; background-color: rgba(0, 0, 0, 0.0)">
 						<button class="button button2" type="button" id="saverolebutton" style="margin-top: 10px;" onClick="newRole();">NEW</button>
 						<button class="button button2" type="button" id="selectrolebutton" style="margin-top: 10px; display: none;" onClick="selectedRole();">SELECT</button>
 			</div>
