@@ -52,7 +52,7 @@ include('ListAudioGain.php')
 		<li><a href="datalogger.php">LOG</a></li>
 		<li><a href="cal.php?id=1">CAL</a></li>
     <li><a href="thrulan.php?id=0">THRULAN</a></li>
-    <li><a href="role.php?id=0">ROLE</a></li>
+    <li><a href="role.php?id=0">SITE</a></li>
 		<li><a href="network.php">NETWORK</a></li>
 		<li><a href="update.php">system</a></li>
 		<li><a href="logout.php">LOGOUT</a></li>

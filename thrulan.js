@@ -509,7 +509,7 @@ function processMsg(message) {
                     document.createElement('img'),
                     {
                         classList: 'cardTxTabImage',
-                        src: "img/radioIcon.png",
+                        src: "/img/Thrulan.png",
                         alt: "Flowers in Chania"
                     }
                 )

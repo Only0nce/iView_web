@@ -58,7 +58,7 @@ header("Pragma: no-cache");
                 <li><a href="cal.php?id=1">CAL</a></li>
                 <li><a href="thrulan.php?id=0">Power Sensor</a></li>
                 <li><a href="snmp_update.php">Rx SNMP Info</a></li>
-                <li><a href="role.php?id=0">ROLE</a></li>
+                <li><a href="role.php?id=0">SITE</a></li>
                 <li><a href="network.php">NETWORK</a></li>
                 <li><a href="wifi.php">WiFi</a></li>
                 <li><a href="update.php">system</a></li>
@@ -101,7 +101,7 @@ header("Pragma: no-cache");
             </div>
             <div class="rf-toolbar-actions">
                 <div class="rf-role-summary" aria-label="Current role summary">
-                    <span>Role</span>
+                    <span>Site</span>
                     <strong id="roleNameDisplay">--</strong>
                     <small id="roleDeviceSummary">All: -- | Connect: -- | Disconnect: --</small>
                 </div>
