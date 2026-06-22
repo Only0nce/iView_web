@@ -1794,107 +1794,83 @@ function makeDurationBarTrendSvg(points) {
 }
 
 
-function plotlyAvailable() {
-  return typeof window.Plotly !== "undefined" && window.Plotly && typeof window.Plotly.react === "function";
+function canvasjsAvailable() {
+  return typeof window.CanvasJS !== "undefined" && window.CanvasJS && typeof window.CanvasJS.Chart === "function";
 }
 
-function plotlyConfig() {
-  // Graphs are display-only. Disable all direct Plotly interactions:
-  // no wheel zoom, drag zoom, pan, double-click reset, hover action, or modebar.
-  return {
-    responsive: true,
-    staticPlot: true,
-    displayModeBar: false,
-    scrollZoom: false,
-    doubleClick: false,
-    showTips: false,
-    displaylogo: false,
-    editable: false
-  };
-}
-
-function plotlyCommonLayout(height) {
+function logxCanvasCommonOptions(height) {
   const theme = getLogxThemePalette();
   return {
+    animationEnabled: false,
+    zoomEnabled: false,
     height,
-    paper_bgcolor: theme.paper,
-    plot_bgcolor: theme.plot,
-    font: { color: theme.font, family: "Arial, Helvetica, sans-serif", size: 12 },
-    margin: { l: 58, r: 58, t: 16, b: 42 },
-    dragmode: false,
-    hovermode: false,
-    hoverlabel: {
-      bgcolor: theme.hoverBg,
-      bordercolor: theme.hoverBorder,
-      font: { color: theme.font, size: 12 }
-    },
-    xaxis: {
-      showgrid: true,
-      gridcolor: theme.grid,
-      zeroline: false,
-      fixedrange: true,
-      color: theme.muted,
-      tickformat: "%d/%m %H:%M",
-      rangeslider: { visible: false }
-    },
-    yaxis: {
-      showgrid: true,
-      gridcolor: theme.grid,
-      zeroline: false,
-      fixedrange: true,
-      color: theme.muted
-    },
+    backgroundColor: theme.plot,
     legend: {
-      orientation: "h",
-      x: 1,
-      xanchor: "right",
-      y: 1.18,
-      bgcolor: "rgba(0,0,0,0)"
+      horizontalAlign: "right",
+      verticalAlign: "top",
+      fontColor: theme.font,
+      fontSize: 12
+    },
+    toolTip: {
+      shared: true,
+      backgroundColor: theme.hoverBg,
+      borderColor: theme.hoverBorder,
+      fontColor: theme.font
+    },
+    axisX: {
+      valueFormatString: "DD/MM HH:mm",
+      labelFontColor: theme.muted,
+      labelFontSize: 11,
+      lineColor: theme.axis,
+      tickColor: theme.axis,
+      gridColor: theme.grid,
+      gridThickness: 1
+    },
+    axisY: {
+      labelFontColor: theme.muted,
+      titleFontColor: theme.muted,
+      labelFontSize: 11,
+      lineColor: theme.axis,
+      tickColor: theme.axis,
+      gridColor: theme.grid,
+      gridThickness: 1,
+      includeZero: false
     }
   };
 }
 
-function pointCustomData(points) {
-  return points.map(p => [
-    p.startText || p.label || "",
-    p.endText || "",
-    p.site || "",
-    p.station || "",
-    Number.isFinite(p.reflected) ? p.reflected : null,
-    Number.isFinite(p.forward) ? p.forward : null,
-    Number.isFinite(p.vswr) ? p.vswr : null,
-    Number.isFinite(p.rssi) ? p.rssi : null,
-    Number.isFinite(p.duration) ? p.duration : null,
-    Number.isFinite(p.threshold) ? p.threshold : null,
-    p.connection || "",
-    p.samples || 1
-  ]);
+function logxCanvasPoint(p, key) {
+  const d = new Date(p.ts);
+  const y = Number(p[key]);
+  return {
+    x: Number.isNaN(d.getTime()) ? new Date() : d,
+    y: Number.isFinite(y) ? y : null,
+    meta: p
+  };
 }
 
-function hoverTemplateFor(label, unit, valueName) {
-  return `<b>%{customdata[0]}</b><br>` +
-    `End: %{customdata[1]}<br>` +
-    `Site: %{customdata[2]}<br>` +
-    `Station: %{customdata[3]}<br>` +
-    `${label}: %{y:.3f} ${unit}<br>` +
-    `Forward: %{customdata[5]:.3f} ${unit}<br>` +
-    `Reflected: %{customdata[4]:.3f} ${unit}<br>` +
-    `VSWR: %{customdata[6]:.3f}<br>` +
-    `RSSI: %{customdata[7]:.1f} dBm<br>` +
-    `Threshold: %{customdata[9]:.3f} W<br>` +
-    `Duration: %{customdata[8]} sec<br>` +
-    `Connection: %{customdata[10]}<br>` +
-    `Samples: %{customdata[11]}` +
-    `<extra>${valueName}</extra>`;
+function logxCanvasTooltip(unit, valueLabel) {
+  return function (e) {
+    if (!e.entries || !e.entries.length) return "";
+    const p = e.entries[0].dataPoint.meta || {};
+    let html = "<strong>" + escapeHtml(p.startText || p.label || "") + "</strong><br/>";
+    if (p.endText) html += "End: " + escapeHtml(p.endText) + "<br/>";
+    if (p.site) html += "Site: " + escapeHtml(p.site) + "<br/>";
+    if (p.station) html += "Station: " + escapeHtml(p.station) + "<br/>";
+    e.entries.forEach(function (entry) {
+      const name = entry.dataSeries.name || valueLabel || "Value";
+      const axisUnit = name === "VSWR" ? "" : (name === "RSSI" ? " dBm" : (unit ? " " + unit : ""));
+      html += escapeHtml(name) + ": " + formatNumber(entry.dataPoint.y, name === "VSWR" ? 3 : 2, axisUnit) + "<br/>";
+    });
+    if (Number.isFinite(p.duration)) html += "Duration: " + escapeHtml(String(p.duration)) + " sec<br/>";
+    if (Number.isFinite(p.samples)) html += "Samples: " + escapeHtml(String(p.samples));
+    return html;
+  };
 }
 
 function renderMainTrendPlotly(points) {
   const el = document.getElementById("logxMainTrend");
   if (!el) return;
-  if (!plotlyAvailable()) {
-    el.innerHTML = makeMainTrendSvg(points);
-    return;
-  }
 
   const data = sampleObjects(points, 900);
   if (!data.length) {
@@ -1902,141 +1878,128 @@ function renderMainTrendPlotly(points) {
     return;
   }
 
-  const x = data.map(p => new Date(p.ts));
-  const customdata = pointCustomData(data);
+  if (!canvasjsAvailable()) {
+    el.innerHTML = makeMainTrendSvg(points);
+    return;
+  }
+
   const unit = window.logTrendPowerUnit === "dbm" ? "dBm" : "W";
   const modeText = window.logTrendPowerValue === "rms" ? "RMS" : "MAX-HOLD";
-
-  const traces = [
-    {
-      name: "Forward",
-      type: "scattergl",
-      mode: "lines+markers",
-      x,
-      y: data.map(p => p.forward),
-      customdata,
-      line: { color: "#2bb7f6", width: 2.5 },
-      marker: { color: "#2bb7f6", size: 5 },
-      hovertemplate: hoverTemplateFor("Forward", unit, "Forward")
+  const theme = getLogxThemePalette();
+  const chart = new CanvasJS.Chart("logxMainTrend", {
+    ...logxCanvasCommonOptions(330),
+    axisY: {
+      ...logxCanvasCommonOptions(330).axisY,
+      title: `${modeText} ${unit}`
     },
-    {
-      name: "Reflected",
-      type: "scattergl",
-      mode: "lines+markers",
-      x,
-      y: data.map(p => p.reflected),
-      customdata,
-      line: { color: "#43d39e", width: 2 },
-      marker: { color: "#43d39e", size: 5 },
-      hovertemplate: hoverTemplateFor("Reflected", unit, "Reflected")
+    axisY2: {
+      title: "VSWR",
+      titleFontColor: theme.muted,
+      labelFontColor: theme.muted,
+      labelFontSize: 11,
+      lineColor: theme.axis,
+      tickColor: theme.axis,
+      gridThickness: 0,
+      includeZero: false
     },
-    {
-      name: "VSWR",
-      type: "scattergl",
-      mode: "lines+markers",
-      x,
-      y: data.map(p => p.vswr),
-      customdata,
-      yaxis: "y2",
-      line: { color: "#f59e0b", width: 2 },
-      marker: { color: "#f59e0b", size: 5 },
-      hovertemplate: `<b>%{customdata[0]}</b><br>` +
-        `End: %{customdata[1]}<br>` +
-        `Site: %{customdata[2]}<br>` +
-        `Station: %{customdata[3]}<br>` +
-        `VSWR: %{y:.3f}<br>` +
-        `Forward: %{customdata[5]:.3f} ${unit}<br>` +
-        `Reflected: %{customdata[4]:.3f} ${unit}<br>` +
-        `RSSI: %{customdata[7]:.1f} dBm<br>` +
-        `Duration: %{customdata[8]} sec<br>` +
-        `Samples: %{customdata[11]}<extra>VSWR</extra>`
-    }
-  ];
+    toolTip: {
+      ...logxCanvasCommonOptions(330).toolTip,
+      contentFormatter: logxCanvasTooltip(unit, "Trend")
+    },
+    data: [
+      {
+        type: "line",
+        name: "Forward",
+        showInLegend: true,
+        color: "#2bb7f6",
+        lineThickness: 3,
+        markerSize: 4,
+        dataPoints: data.filter(p => Number.isFinite(p.forward)).map(p => logxCanvasPoint(p, "forward"))
+      },
+      {
+        type: "line",
+        name: "Reflected",
+        showInLegend: true,
+        color: "#43d39e",
+        lineThickness: 2,
+        markerSize: 4,
+        dataPoints: data.filter(p => Number.isFinite(p.reflected)).map(p => logxCanvasPoint(p, "reflected"))
+      },
+      {
+        type: "line",
+        name: "VSWR",
+        axisYType: "secondary",
+        showInLegend: true,
+        color: "#f59e0b",
+        lineThickness: 2,
+        markerSize: 4,
+        dataPoints: data.filter(p => Number.isFinite(p.vswr)).map(p => logxCanvasPoint(p, "vswr"))
+      }
+    ]
+  });
 
-  const layout = plotlyCommonLayout(330);
-  layout.yaxis.title = `${modeText} ${unit}`;
-  layout.yaxis2 = {
-    title: "VSWR",
-    overlaying: "y",
-    side: "right",
-    showgrid: false,
-    zeroline: false,
-    color: "#8fa2b8",
-    fixedrange: true
-  };
-
-  window.Plotly.react(el, traces, layout, plotlyConfig());
+  el.classList.add("logx-canvasjs-plot");
+  chart.render();
 }
 
 function renderRssiTrendPlotly(points) {
   const el = document.getElementById("logxRssiTrend");
   if (!el) return;
-  if (!plotlyAvailable()) {
-    el.innerHTML = makeSingleLineTrendSvg(points, "rssi", "#9b5cff", "RSSI", 0);
-    return;
-  }
-
   const data = sampleObjects(points.filter(p => Number.isFinite(p.rssi)), 900);
   if (!data.length) {
     el.innerHTML = `<div class="logx-chart-empty">No RSSI data</div>`;
     return;
   }
 
-  const customdata = pointCustomData(data);
-  const layout = plotlyCommonLayout(205);
-  layout.margin = { l: 58, r: 20, t: 12, b: 42 };
-  layout.yaxis.title = "RSSI dBm";
+  if (!canvasjsAvailable()) {
+    el.innerHTML = makeSingleLineTrendSvg(points, "rssi", "#9b5cff", "RSSI", 0);
+    return;
+  }
 
-  window.Plotly.react(el, [{
+  const opts = logxCanvasCommonOptions(205);
+  opts.axisY.title = "RSSI dBm";
+  opts.toolTip.contentFormatter = logxCanvasTooltip("dBm", "RSSI");
+  opts.data = [{
+    type: "line",
     name: "RSSI",
-    type: "scattergl",
-    mode: "lines+markers",
-    x: data.map(p => new Date(p.ts)),
-    y: data.map(p => p.rssi),
-    customdata,
-    line: { color: "#9b5cff", width: 2.5 },
-    marker: { color: "#9b5cff", size: 5 },
-    hovertemplate: `<b>%{customdata[0]}</b><br>` +
-      `Site: %{customdata[2]}<br>` +
-      `Station: %{customdata[3]}<br>` +
-      `RSSI: %{y:.1f} dBm<br>` +
-      `Duration: %{customdata[8]} sec<br>` +
-      `Samples: %{customdata[11]}<extra>RSSI</extra>`
-  }], layout, plotlyConfig());
+    showInLegend: false,
+    color: "#9b5cff",
+    lineThickness: 3,
+    markerSize: 4,
+    dataPoints: data.map(p => logxCanvasPoint(p, "rssi"))
+  }];
+
+  el.classList.add("logx-canvasjs-plot");
+  new CanvasJS.Chart("logxRssiTrend", opts).render();
 }
 
 function renderDurationTrendPlotly(points) {
   const el = document.getElementById("logxDurationTrend");
   if (!el) return;
-  if (!plotlyAvailable()) {
-    el.innerHTML = makeDurationBarTrendSvg(points);
-    return;
-  }
-
   const data = sampleObjects(points.filter(p => Number.isFinite(p.duration)), 900);
   if (!data.length) {
     el.innerHTML = `<div class="logx-chart-empty">No duration data</div>`;
     return;
   }
 
-  const customdata = pointCustomData(data);
-  const layout = plotlyCommonLayout(205);
-  layout.margin = { l: 58, r: 20, t: 12, b: 42 };
-  layout.yaxis.title = "Duration sec";
+  if (!canvasjsAvailable()) {
+    el.innerHTML = makeDurationBarTrendSvg(points);
+    return;
+  }
 
-  window.Plotly.react(el, [{
+  const opts = logxCanvasCommonOptions(205);
+  opts.axisY.title = "Duration sec";
+  opts.toolTip.contentFormatter = logxCanvasTooltip("sec", "Duration");
+  opts.data = [{
+    type: "column",
     name: "Duration",
-    type: "bar",
-    x: data.map(p => new Date(p.ts)),
-    y: data.map(p => p.duration),
-    customdata,
-    marker: { color: "#6d74b9", opacity: 0.9 },
-    hovertemplate: `<b>%{customdata[0]}</b><br>` +
-      `Site: %{customdata[2]}<br>` +
-      `Station: %{customdata[3]}<br>` +
-      `Duration: %{y} sec<br>` +
-      `Samples: %{customdata[11]}<extra>Duration</extra>`
-  }], layout, plotlyConfig());
+    showInLegend: false,
+    color: "#6d74b9",
+    dataPoints: data.map(p => logxCanvasPoint(p, "duration"))
+  }];
+
+  el.classList.add("logx-canvasjs-plot");
+  new CanvasJS.Chart("logxDurationTrend", opts).render();
 }
 
 function renderOverview(rows) {

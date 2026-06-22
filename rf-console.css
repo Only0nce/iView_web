@@ -6689,3 +6689,485 @@ body.rf-console-role .role-action-panel #removerolebutton[style*="display: none"
     grid-template-columns: 1fr !important;
   }
 }
+
+/* --------------------------------------------------------------------------
+   Index Live Trend light-mode plot readability fix.
+   Fixes invisible title/axes caused by legacy header CSS and dark Plotly colors.
+   -------------------------------------------------------------------------- */
+body.rf-console-home-svg .rf-trend-head,
+body.rf-console-home-svg.rf-dashboard-2x8 .rf-trend-head,
+body.rf-console-home-svg.rf-dashboard-2x8.rf-dashboard-stable-fit .rf-trend-head,
+body.rf-console .rf-trend-head {
+  float: none !important;
+  width: auto !important;
+  position: relative !important;
+  background: transparent !important;
+  background-color: transparent !important;
+  background-image: none !important;
+  border: 0 !important;
+  box-shadow: none !important;
+}
+
+body.rf-console-home-svg .rf-trend-head h3,
+body.rf-console-home-svg.rf-dashboard-2x8 .rf-trend-head h3,
+body.rf-console-home-svg.rf-dashboard-2x8.rf-dashboard-stable-fit .rf-trend-head h3 {
+  color: var(--rf-ink-strong) !important;
+  background: transparent !important;
+}
+
+html[data-rf-theme="light"] body.rf-console-home-svg .rf-trend-card,
+html[data-rf-theme="light"] body.rf-console-home-svg.rf-dashboard-2x8 .rf-trend-card,
+html[data-rf-theme="light"] body.rf-console-home-svg.rf-dashboard-2x8.rf-dashboard-stable-fit .rf-trend-card {
+  background: #ffffff !important;
+  border-color: var(--rf-border) !important;
+  color: var(--rf-ink) !important;
+}
+
+html[data-rf-theme="light"] body.rf-console-home-svg .rf-trend-head h3,
+html[data-rf-theme="light"] body.rf-console-home-svg.rf-dashboard-2x8 .rf-trend-head h3,
+html[data-rf-theme="light"] body.rf-console-home-svg.rf-dashboard-2x8.rf-dashboard-stable-fit .rf-trend-head h3 {
+  color: #102844 !important;
+}
+
+html[data-rf-theme="light"] body.rf-console-home-svg .rf-trend-plot,
+html[data-rf-theme="light"] body.rf-console-home-svg [id^="myPlot"],
+html[data-rf-theme="light"] body.rf-console-home-svg .js-plotly-plot,
+html[data-rf-theme="light"] body.rf-console-home-svg .js-plotly-plot .plot-container,
+html[data-rf-theme="light"] body.rf-console-home-svg .js-plotly-plot .svg-container,
+html[data-rf-theme="light"] body.rf-console-home-svg .js-plotly-plot .main-svg {
+  background: #ffffff !important;
+  color: #17243a !important;
+}
+
+html[data-rf-theme="light"] body.rf-console-home-svg .js-plotly-plot .bg,
+html[data-rf-theme="light"] body.rf-console-home-svg .js-plotly-plot rect.bg {
+  fill: #ffffff !important;
+}
+
+html[data-rf-theme="light"] body.rf-console-home-svg .js-plotly-plot .xtick text,
+html[data-rf-theme="light"] body.rf-console-home-svg .js-plotly-plot .ytick text,
+html[data-rf-theme="light"] body.rf-console-home-svg .js-plotly-plot .gtitle,
+html[data-rf-theme="light"] body.rf-console-home-svg .js-plotly-plot .xtitle,
+html[data-rf-theme="light"] body.rf-console-home-svg .js-plotly-plot .ytitle,
+html[data-rf-theme="light"] body.rf-console-home-svg .js-plotly-plot .legendtext {
+  fill: #17243a !important;
+  color: #17243a !important;
+}
+
+/* --------------------------------------------------------------------------
+   Index Live Trend: visible empty/offline states in light mode.
+   Ensures the graph area and text remain readable even with no samples/offline.
+   -------------------------------------------------------------------------- */
+body.rf-console-home-svg .rf-trend-empty-state {
+  width: 100%;
+  height: 100%;
+  min-height: 220px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  border: 1px dashed var(--rf-border);
+  border-radius: 10px;
+  background: #0b1420;
+  color: var(--rf-muted);
+  text-align: center;
+}
+
+body.rf-console-home-svg .rf-trend-empty-title {
+  color: var(--rf-ink-strong);
+  font-size: 15px;
+  font-weight: 900;
+  letter-spacing: .04em;
+}
+
+body.rf-console-home-svg .rf-trend-empty-state small {
+  color: var(--rf-muted);
+  font-size: 12px;
+  font-weight: 700;
+}
+
+html[data-rf-theme="light"] body.rf-console-home-svg .rf-trend-empty-state {
+  background: #ffffff !important;
+  border-color: #c8d8e8 !important;
+  color: #53657c !important;
+}
+
+html[data-rf-theme="light"] body.rf-console-home-svg .rf-trend-empty-title {
+  color: #102844 !important;
+}
+
+html[data-rf-theme="light"] body.rf-console-home-svg .rf-trend-empty-state small {
+  color: #53657c !important;
+}
+
+html[data-rf-theme="light"] body.rf-console-home-svg.rf-dashboard-2x8.rf-dashboard-stable-fit .rf-trend-offline-overlay {
+  background: rgba(255, 255, 255, .56) !important;
+  backdrop-filter: none !important;
+}
+
+html[data-rf-theme="light"] body.rf-console-home-svg.rf-dashboard-2x8.rf-dashboard-stable-fit .rf-trend-offline-overlay span {
+  background: rgba(254, 226, 226, .88) !important;
+  border-color: rgba(220, 38, 38, .72) !important;
+  color: #991b1b !important;
+  text-shadow: none !important;
+}
+
+html[data-rf-theme="light"] body.rf-console-home-svg.rf-dashboard-2x8.rf-dashboard-stable-fit .rf-trend-card.is-offline .rf-trend-plot,
+html[data-rf-theme="light"] body.rf-console-home-svg.rf-dashboard-2x8.rf-dashboard-stable-fit .rf-trend-card.is-offline [id^="myPlot"] {
+  opacity: .88 !important;
+}
+
+/* --------------------------------------------------------------------------
+   Index Live Trend light chart final pass.
+   Use a light-blue chart surface and force Plotly SVG contrast in day mode.
+   -------------------------------------------------------------------------- */
+html[data-rf-theme="light"] body.rf-console-home-svg .rf-trend-card,
+html[data-rf-theme="light"] body.rf-console-home-svg.rf-dashboard-2x8 .rf-trend-card,
+html[data-rf-theme="light"] body.rf-console-home-svg.rf-dashboard-2x8.rf-dashboard-stable-fit .rf-trend-card {
+  background: #ffffff !important;
+}
+
+html[data-rf-theme="light"] body.rf-console-home-svg .rf-trend-plot,
+html[data-rf-theme="light"] body.rf-console-home-svg [id^="myPlot"] {
+  background: #f3f8fd !important;
+  border: 1px solid #c8d8e8 !important;
+  border-radius: 10px !important;
+  color: #0f172a !important;
+}
+
+html[data-rf-theme="light"] body.rf-console-home-svg .js-plotly-plot,
+html[data-rf-theme="light"] body.rf-console-home-svg .js-plotly-plot .plot-container,
+html[data-rf-theme="light"] body.rf-console-home-svg .js-plotly-plot .svg-container,
+html[data-rf-theme="light"] body.rf-console-home-svg .js-plotly-plot .main-svg {
+  background: #f3f8fd !important;
+}
+
+html[data-rf-theme="light"] body.rf-console-home-svg .js-plotly-plot .bg,
+html[data-rf-theme="light"] body.rf-console-home-svg .js-plotly-plot rect.bg {
+  fill: #f3f8fd !important;
+}
+
+html[data-rf-theme="light"] body.rf-console-home-svg .js-plotly-plot text,
+html[data-rf-theme="light"] body.rf-console-home-svg .js-plotly-plot .xtick text,
+html[data-rf-theme="light"] body.rf-console-home-svg .js-plotly-plot .ytick text,
+html[data-rf-theme="light"] body.rf-console-home-svg .js-plotly-plot .gtitle,
+html[data-rf-theme="light"] body.rf-console-home-svg .js-plotly-plot .xtitle,
+html[data-rf-theme="light"] body.rf-console-home-svg .js-plotly-plot .ytitle,
+html[data-rf-theme="light"] body.rf-console-home-svg .js-plotly-plot .legendtext {
+  fill: #0f172a !important;
+  color: #0f172a !important;
+}
+
+html[data-rf-theme="light"] body.rf-console-home-svg .js-plotly-plot .gridlayer path {
+  stroke: #d4e3f0 !important;
+  stroke-opacity: 1 !important;
+}
+
+html[data-rf-theme="light"] body.rf-console-home-svg .js-plotly-plot .zerolinelayer path,
+html[data-rf-theme="light"] body.rf-console-home-svg .js-plotly-plot .xlines-above path,
+html[data-rf-theme="light"] body.rf-console-home-svg .js-plotly-plot .ylines-above path {
+  stroke: #385b78 !important;
+  stroke-opacity: 1 !important;
+}html[data-rf-theme="light"] body.rf-console-home-svg .js-plotly-plot .xlines-above path,
+html[data-rf-theme="light"] body.rf-console-home-svg .js-plotly-plot .ylines-above path,
+html[data-rf-theme="light"] body.rf-console-home-svg .js-plotly-plot .zerolinelayer path {
+  stroke: #111827 !important;
+  stroke-opacity: 1 !important;
+}
+
+/* --------------------------------------------------------------------------
+   Index Live Trend title color override.
+   Keeps the section label readable and consistent in both light and dark modes.
+   -------------------------------------------------------------------------- */
+body.rf-console-home-svg .rf-trend-head h3,
+body.rf-console-home-svg.rf-dashboard-2x8 .rf-trend-head h3,
+body.rf-console-home-svg.rf-dashboard-2x8.rf-dashboard-stable-fit .rf-trend-head h3 {
+  color: #eaf2ff !important;
+  font-weight: 950 !important;
+}
+
+html[data-rf-theme="light"] body.rf-console-home-svg .rf-trend-head h3,
+html[data-rf-theme="light"] body.rf-console-home-svg.rf-dashboard-2x8 .rf-trend-head h3,
+html[data-rf-theme="light"] body.rf-console-home-svg.rf-dashboard-2x8.rf-dashboard-stable-fit .rf-trend-head h3 {
+  color: #0f172a !important;
+}
+
+html[data-rf-theme="dark"] body.rf-console-home-svg .rf-trend-head h3,
+html[data-rf-theme="dark"] body.rf-console-home-svg.rf-dashboard-2x8 .rf-trend-head h3,
+html[data-rf-theme="dark"] body.rf-console-home-svg.rf-dashboard-2x8.rf-dashboard-stable-fit .rf-trend-head h3 {
+  color: #f8fbff !important;
+}
+
+/* --------------------------------------------------------------------------
+   Index Live Trend: light mode chart surface styled like the dark chart,
+   but with a day-mode compatible blue/gray background.
+   -------------------------------------------------------------------------- */
+html[data-rf-theme="light"] body.rf-console-home-svg .rf-trend-card,
+html[data-rf-theme="light"] body.rf-console-home-svg.rf-dashboard-2x8 .rf-trend-card,
+html[data-rf-theme="light"] body.rf-console-home-svg.rf-dashboard-2x8.rf-dashboard-stable-fit .rf-trend-card {
+  background: #ffffff !important;
+  border-color: #b9cde1 !important;
+}
+
+html[data-rf-theme="light"] body.rf-console-home-svg .rf-trend-plot,
+html[data-rf-theme="light"] body.rf-console-home-svg [id^="myPlot"] {
+  background: #eaf2fa !important;
+  border: 1px solid #b9cde1 !important;
+  border-radius: 10px !important;
+  color: #102844 !important;
+}
+
+html[data-rf-theme="light"] body.rf-console-home-svg .js-plotly-plot,
+html[data-rf-theme="light"] body.rf-console-home-svg .js-plotly-plot .plot-container,
+html[data-rf-theme="light"] body.rf-console-home-svg .js-plotly-plot .svg-container,
+html[data-rf-theme="light"] body.rf-console-home-svg .js-plotly-plot .main-svg {
+  background: #eaf2fa !important;
+}
+
+html[data-rf-theme="light"] body.rf-console-home-svg .js-plotly-plot .bg,
+html[data-rf-theme="light"] body.rf-console-home-svg .js-plotly-plot rect.bg {
+  fill: #eaf2fa !important;
+}
+
+html[data-rf-theme="light"] body.rf-console-home-svg .js-plotly-plot text,
+html[data-rf-theme="light"] body.rf-console-home-svg .js-plotly-plot .xtick text,
+html[data-rf-theme="light"] body.rf-console-home-svg .js-plotly-plot .ytick text,
+html[data-rf-theme="light"] body.rf-console-home-svg .js-plotly-plot .gtitle,
+html[data-rf-theme="light"] body.rf-console-home-svg .js-plotly-plot .xtitle,
+html[data-rf-theme="light"] body.rf-console-home-svg .js-plotly-plot .ytitle,
+html[data-rf-theme="light"] body.rf-console-home-svg .js-plotly-plot .legendtext {
+  fill: #102844 !important;
+  color: #102844 !important;
+}
+
+html[data-rf-theme="light"] body.rf-console-home-svg .js-plotly-plot .gridlayer path {
+  stroke: #c4d6e8 !important;
+  stroke-opacity: 1 !important;
+}
+
+html[data-rf-theme="light"] body.rf-console-home-svg .js-plotly-plot .xlines-above path,
+html[data-rf-theme="light"] body.rf-console-home-svg .js-plotly-plot .ylines-above path,
+html[data-rf-theme="light"] body.rf-console-home-svg .js-plotly-plot .zerolinelayer path {
+  stroke: #102844 !important;
+  stroke-opacity: 1 !important;
+}
+
+html[data-rf-theme="light"] body.rf-console-home-svg .rf-trend-card,
+html[data-rf-theme="light"] body.rf-console-home-svg.rf-dashboard-2x8 .rf-trend-card,
+html[data-rf-theme="light"] body.rf-console-home-svg.rf-dashboard-2x8.rf-dashboard-stable-fit .rf-trend-card {
+  background: #ffffff !important;
+  border-color: #b7cadd !important;
+}
+
+html[data-rf-theme="light"] body.rf-console-home-svg .rf-trend-plot,
+html[data-rf-theme="light"] body.rf-console-home-svg [id^="myPlot"] {
+  min-height: 280px !important;
+  background-color: #dfeaf5 !important;
+  background-image:
+    linear-gradient(rgba(17, 24, 39, .08) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(17, 24, 39, .08) 1px, transparent 1px) !important;
+  background-size: 72px 48px !important;
+  border: 1px solid #9fb6cc !important;
+  border-radius: 10px !important;
+  color: #111827 !important;
+}
+
+html[data-rf-theme="light"] body.rf-console-home-svg .js-plotly-plot,
+html[data-rf-theme="light"] body.rf-console-home-svg .js-plotly-plot .plot-container,
+html[data-rf-theme="light"] body.rf-console-home-svg .js-plotly-plot .svg-container,
+html[data-rf-theme="light"] body.rf-console-home-svg .js-plotly-plot .main-svg {
+  background: #dfeaf5 !important;
+}
+
+html[data-rf-theme="light"] body.rf-console-home-svg .js-plotly-plot .bg,
+html[data-rf-theme="light"] body.rf-console-home-svg .js-plotly-plot rect.bg {
+  fill: #dfeaf5 !important;
+}
+
+html[data-rf-theme="light"] body.rf-console-home-svg .js-plotly-plot text,
+html[data-rf-theme="light"] body.rf-console-home-svg .js-plotly-plot .xtick text,
+html[data-rf-theme="light"] body.rf-console-home-svg .js-plotly-plot .ytick text,
+html[data-rf-theme="light"] body.rf-console-home-svg .js-plotly-plot .gtitle,
+html[data-rf-theme="light"] body.rf-console-home-svg .js-plotly-plot .xtitle,
+html[data-rf-theme="light"] body.rf-console-home-svg .js-plotly-plot .ytitle,
+html[data-rf-theme="light"] body.rf-console-home-svg .js-plotly-plot .legendtext {
+  fill: #111827 !important;
+  color: #111827 !important;
+  opacity: 1 !important;
+}
+
+html[data-rf-theme="light"] body.rf-console-home-svg .js-plotly-plot .gridlayer path {
+  stroke: #9fb6cc !important;
+  stroke-opacity: 1 !important;
+}
+
+/* --------------------------------------------------------------------------
+   Index Live Trend final Plotly fix
+   Keep Plotly trace colors in JavaScript. CSS only fixes panel, sizing,
+   surface, text/grid contrast, and visibility. Do not force scatter line colors.
+   -------------------------------------------------------------------------- */
+body.rf-console-home-svg .rf-trend-card {
+  overflow: hidden !important;
+}
+
+body.rf-console-home-svg .rf-trend-plot,
+body.rf-console-home-svg [id^="myPlot"] {
+  display: block !important;
+  width: 100% !important;
+  min-width: 0 !important;
+  min-height: 240px !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+}
+
+html[data-rf-theme="light"] body.rf-console-home-svg .rf-trend-card {
+  background: #f8fbff !important;
+  border-color: #b9cde1 !important;
+}
+
+html[data-rf-theme="light"] body.rf-console-home-svg .rf-trend-head,
+html[data-rf-theme="light"] body.rf-console-home-svg .rf-trend-head h3 {
+  background: transparent !important;
+  color: #0f172a !important;
+}
+
+html[data-rf-theme="light"] body.rf-console-home-svg .rf-trend-plot,
+html[data-rf-theme="light"] body.rf-console-home-svg [id^="myPlot"] {
+  background: #dfeaf5 !important;
+  background-image: none !important;
+  border: 1px solid #9fb6cc !important;
+  border-radius: 10px !important;
+  color: #111827 !important;
+}
+
+html[data-rf-theme="light"] body.rf-console-home-svg .js-plotly-plot,
+html[data-rf-theme="light"] body.rf-console-home-svg .js-plotly-plot .plot-container,
+html[data-rf-theme="light"] body.rf-console-home-svg .js-plotly-plot .svg-container,
+html[data-rf-theme="light"] body.rf-console-home-svg .js-plotly-plot .main-svg,
+html[data-rf-theme="light"] body.rf-console-home-svg .js-plotly-plot svg {
+  visibility: visible !important;
+  opacity: 1 !important;
+  background: #dfeaf5 !important;
+}
+
+html[data-rf-theme="light"] body.rf-console-home-svg .js-plotly-plot .bg,
+html[data-rf-theme="light"] body.rf-console-home-svg .js-plotly-plot rect.bg {
+  fill: #dfeaf5 !important;
+  opacity: 1 !important;
+}
+
+html[data-rf-theme="light"] body.rf-console-home-svg .js-plotly-plot text,
+html[data-rf-theme="light"] body.rf-console-home-svg .js-plotly-plot .xtick text,
+html[data-rf-theme="light"] body.rf-console-home-svg .js-plotly-plot .ytick text,
+html[data-rf-theme="light"] body.rf-console-home-svg .js-plotly-plot .legendtext,
+html[data-rf-theme="light"] body.rf-console-home-svg .js-plotly-plot .xtitle,
+html[data-rf-theme="light"] body.rf-console-home-svg .js-plotly-plot .ytitle {
+  fill: #111827 !important;
+  color: #111827 !important;
+  opacity: 1 !important;
+}
+
+html[data-rf-theme="light"] body.rf-console-home-svg .js-plotly-plot .gridlayer path {
+  stroke: #8da7bf !important;
+  stroke-opacity: 1 !important;
+}
+
+html[data-rf-theme="light"] body.rf-console-home-svg .js-plotly-plot .xlines-above path,
+html[data-rf-theme="light"] body.rf-console-home-svg .js-plotly-plot .ylines-above path,
+html[data-rf-theme="light"] body.rf-console-home-svg .js-plotly-plot .zerolinelayer path {
+  stroke: #111827 !important;
+  stroke-opacity: 1 !important;
+  opacity: 1 !important;
+}
+
+html[data-rf-theme="dark"] body.rf-console-home-svg .rf-trend-head,
+html[data-rf-theme="dark"] body.rf-console-home-svg .rf-trend-head h3 {
+  background: transparent !important;
+  color: #f8fbff !important;
+}
+
+/* --------------------------------------------------------------------------
+   CanvasJS migration for index Live Trend
+   Local/offline canvas chart surface. Plot colors are controlled in JS.
+   -------------------------------------------------------------------------- */
+body.rf-console-home-svg .rf-canvasjs-plot,
+body.rf-console-home-svg .rf-canvasjs-plot .canvasjs-chart-container,
+body.rf-console-home-svg .rf-canvasjs-plot canvas {
+  width: 100% !important;
+  min-height: 240px !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+}
+
+html[data-rf-theme="light"] body.rf-console-home-svg .rf-canvasjs-plot,
+html[data-rf-theme="light"] body.rf-console-home-svg .rf-canvasjs-plot .canvasjs-chart-container {
+  background: #dfeaf5 !important;
+}
+
+html[data-rf-theme="dark"] body.rf-console-home-svg .rf-canvasjs-plot,
+html[data-rf-theme="dark"] body.rf-console-home-svg .rf-canvasjs-plot .canvasjs-chart-container {
+  background: #0b1420 !important;
+}
+
+/* --------------------------------------------------------------------------
+   CanvasJS tooltip visibility fix
+   Keep hover tooltip near the top of the Live Trend plot and prevent clipping.
+   -------------------------------------------------------------------------- */
+body.rf-console-home-svg .rf-trend-card,
+body.rf-console-home-svg .rf-trend-plot,
+body.rf-console-home-svg [id^="myPlot"],
+body.rf-console-home-svg .rf-canvasjs-plot,
+body.rf-console-home-svg .rf-canvasjs-plot .canvasjs-chart-container {
+  overflow: visible !important;
+}
+
+body.rf-console-home-svg .rf-canvasjs-plot .canvasjs-chart-tooltip,
+body.rf-console-home-svg [id^="myPlot"] .canvasjs-chart-tooltip {
+  top: 8px !important;
+  z-index: 99999 !important;
+  max-width: 230px !important;
+  pointer-events: none !important;
+  white-space: nowrap !important;
+}
+
+html[data-rf-theme="light"] body.rf-console-home-svg .rf-canvasjs-plot .canvasjs-chart-tooltip,
+html[data-rf-theme="light"] body.rf-console-home-svg [id^="myPlot"] .canvasjs-chart-tooltip {
+  color: #111827 !important;
+}
+
+html[data-rf-theme="dark"] body.rf-console-home-svg .rf-canvasjs-plot .canvasjs-chart-tooltip,
+html[data-rf-theme="dark"] body.rf-console-home-svg [id^="myPlot"] .canvasjs-chart-tooltip {
+  color: #eaf2ff !important;
+}
+
+/* --------------------------------------------------------------------------
+   Datalogger CanvasJS chart migration
+   Offline CanvasJS rendering for main, RSSI, and duration trend panels.
+   -------------------------------------------------------------------------- */
+body.rf-console-log .logx-canvasjs-plot,
+body.rf-console-log .logx-canvasjs-plot .canvasjs-chart-container,
+body.rf-console-log .logx-canvasjs-plot canvas {
+  width: 100% !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+}
+
+body.rf-console-log #logxMainTrend.logx-canvasjs-plot {
+  min-height: 330px !important;
+}
+
+body.rf-console-log #logxRssiTrend.logx-canvasjs-plot,
+body.rf-console-log #logxDurationTrend.logx-canvasjs-plot {
+  min-height: 205px !important;
+}
+
+html[data-rf-theme="light"] body.rf-console-log .logx-canvasjs-plot,
+html[data-rf-theme="light"] body.rf-console-log .logx-canvasjs-plot .canvasjs-chart-container {
+  background: #ffffff !important;
+}
+
+html[data-rf-theme="dark"] body.rf-console-log .logx-canvasjs-plot,
+html[data-rf-theme="dark"] body.rf-console-log .logx-canvasjs-plot .canvasjs-chart-container {
+  background: #0b1420 !important;
+}

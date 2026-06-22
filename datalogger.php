@@ -27,7 +27,7 @@ include('ListAudioGain.php')
   <script src="jquery.min.js"></script>
   <script type="text/javascript" src="jquery-latest.min.js"></script>
   <script type="text/javascript" src="jquery-ui.js"></script>
-  <script type="text/javascript" src="plotly-latest.min.js"></script>
+  <script type="text/javascript" src="canvasjs.min.js?v=<?php echo time(); ?>"></script>
   <script type="text/javascript" src="myfunctionDatalogger.js?v=<?php echo time(); ?>"></script>
 <!--  <script type="text/javascript" src="countUp.js"></script>-->
   
