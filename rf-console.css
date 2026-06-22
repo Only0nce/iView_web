@@ -862,7 +862,7 @@ body.rf-console-editor .cardTxTab {
   align-items: center;
   gap: var(--rf-space-3);
   width: 100%;
-  min-height: 58px;
+  min-height: 88px;
   margin: 0 0 var(--rf-space-2);
   padding: var(--rf-space-2) var(--rf-space-3);
   border: 1px solid var(--rf-border);
@@ -881,8 +881,9 @@ body.rf-console-editor .cardTxTabImage,
 body.rf-console-editor .cardRoleTabImage {
   position: static;
   flex: 0 0 auto;
-  width: 34px;
-  height: 34px;
+  width: 76px;
+  height: 76px;
+  max-width: none;
   object-fit: contain;
 }
 
@@ -895,6 +896,56 @@ body.rf-console-editor .cardTxTabText3 {
   line-height: 1.25;
   overflow: hidden;
   text-overflow: ellipsis;
+}
+
+
+body.rf-console-editor .cardTxTabAdd {
+  border-style: dashed;
+  border-color: rgba(43, 183, 246, 0.55);
+}
+
+body.rf-console-editor .cardTxTabAdd:hover {
+  border-color: rgba(125, 211, 252, 0.95);
+  background: #10233a !important;
+}
+
+body.rf-console-editor .cardTxTabIcon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+  width: 48px;
+  height: 48px;
+  overflow: visible;
+}
+
+body.rf-console-editor .cardTxTabIconAdd {
+  border-radius: 999px;
+  color: #072036;
+  background: #5ecbff;
+  font-size: 34px;
+  font-weight: 900;
+  line-height: 1;
+  filter: drop-shadow(0 8px 18px rgba(43, 183, 246, 0.26));
+}
+
+body.rf-console-editor .cardTxTabIconAdd svg {
+  display: block;
+  width: 48px;
+  height: 48px;
+}
+
+body.rf-console-editor .cardTxTabIconAdd svg circle {
+  fill: #5ecbff;
+  stroke: rgba(173, 232, 255, 0.9);
+  stroke-width: 1.2;
+}
+
+body.rf-console-editor .cardTxTabIconAdd svg path {
+  fill: none;
+  stroke: #072036;
+  stroke-width: 5;
+  stroke-linecap: round;
 }
 
 body.rf-console-editor .selected_list {
@@ -1298,7 +1349,7 @@ body.rf-console-auth .form {
 }
 
 body.rf-console-auth .form::before {
-  content: "RF Console";
+  content: "iView RF Power Monitor";
   display: block;
   margin-bottom: var(--rf-space-5);
   color: var(--rf-ink-strong);
@@ -1381,4 +1432,5742 @@ body.rf-console-auth #footer {
   body.rf-console-auth .login-page {
     margin-top: var(--rf-space-6);
   }
+}
+
+/* --------------------------------------------------------------------------
+   Index SVG-style dashboard layout
+   Source target: uploaded SVG mockup 1920x520. Frontend only: no backend,
+   WebSocket payload, SQL, API, or data-flow contract changes.
+   -------------------------------------------------------------------------- */
+body.rf-console-home-svg {
+  --rf-svg-page: #050d18;
+  --rf-svg-panel: #0d1a2c;
+  --rf-svg-panel-2: #091524;
+  --rf-svg-chart: #18303d;
+  --rf-svg-border: #284563;
+  --rf-svg-text: #eaf2ff;
+  --rf-svg-muted: #8ea6c2;
+  --rf-svg-blue: #38bdf8;
+  --rf-svg-green: #22c55e;
+  --rf-svg-orange: #f59e0b;
+  --rf-svg-pink: #ff3ea5;
+  --rf-svg-radius: 16px;
+  background: var(--rf-svg-page) !important;
+}
+
+body.rf-console-home-svg #site_content {
+  display: block;
+  padding-top: 14px;
+}
+
+body.rf-console-home-svg .rf-home-toolbar {
+  min-height: 88px;
+  padding: 10px 14px;
+  border-color: rgba(40, 69, 99, .78);
+  border-radius: 12px;
+  background: rgba(13, 26, 44, .78);
+}
+
+body.rf-console-home-svg .rf-home-title-block {
+  display: flex;
+  min-width: 0;
+  flex: 1 1 auto;
+  flex-direction: column;
+  gap: 3px;
+}
+
+body.rf-console-home-svg .rf-home-subtitle {
+  color: var(--rf-svg-muted);
+  font-size: 12px;
+  font-weight: 700;
+}
+
+body.rf-console-home-svg .rf-unit-switch {
+  display: inline-flex;
+  flex: 0 0 auto;
+  gap: 8px;
+  align-items: center;
+}
+
+body.rf-console-home-svg #unitWattActive,
+body.rf-console-home-svg #unitDBActive {
+  position: relative !important;
+  top: auto !important;
+  left: auto !important;
+  min-width: 64px;
+  height: 34px;
+  border-radius: 10px;
+  box-shadow: none;
+}
+
+body.rf-console-home-svg .rf-dashboard-stack {
+  position: relative !important;
+  top: auto !important;
+  left: auto !important;
+  width: 100% !important;
+  height: auto !important;
+  min-height: 0;
+  display: grid !important;
+  grid-template-columns: 1fr;
+  gap: 18px;
+  margin: 0;
+}
+
+body.rf-console-home-svg .rf-device-row {
+  display: none;
+}
+
+@supports selector(:has(*)) {
+  body.rf-console-home-svg .rf-device-row:has(.rf-device-overview[style*="block"]),
+  body.rf-console-home-svg .rf-device-row:has(.rf-trend-card[style*="block"]),
+  body.rf-console-home-svg .rf-device-row:has(.rf-radio-control[style*="block"]) {
+    display: block;
+  }
+}
+
+body.rf-console-home-svg .rf-device-layout {
+  display: grid;
+  grid-template-columns: minmax(420px, 740px) minmax(0, 1fr);
+  gap: 18px;
+  align-items: stretch;
+}
+
+body.rf-console-home-svg .rf-device-overview,
+body.rf-console-home-svg .rf-trend-card,
+body.rf-console-home-svg .rf-radio-control {
+  position: relative;
+  width: auto !important;
+  min-width: 0;
+  margin: 0 !important;
+  border: 1.3px solid var(--rf-svg-border);
+  border-radius: var(--rf-svg-radius);
+  background: var(--rf-svg-panel);
+  color: var(--rf-svg-text);
+  box-shadow: none;
+  overflow: hidden;
+}
+
+body.rf-console-home-svg .rf-device-overview {
+  min-height: 392px;
+  height: 392px;
+  padding: 18px 22px;
+}
+
+body.rf-console-home-svg .rf-overview-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 18px;
+  min-height: 42px;
+}
+
+body.rf-console-home-svg .rf-overview-head .title {
+  position: static !important;
+  width: auto !important;
+  max-width: calc(100% - 150px);
+  margin: 0;
+  overflow: hidden;
+  color: var(--rf-svg-text);
+  font-size: clamp(18px, 1.12vw, 23px);
+  font-weight: 900;
+  line-height: 1.2;
+  letter-spacing: .045em;
+  text-align: left !important;
+  text-overflow: ellipsis;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+body.rf-console-home-svg .rf-alert-pill,
+body.rf-console-home-svg .rf-mini-pill {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 29px;
+  padding: 0 28px;
+  border: 1px solid var(--rf-svg-orange);
+  border-radius: 999px;
+  color: var(--rf-svg-orange);
+  background: rgba(51, 34, 7, .72);
+  font-size: 12px;
+  font-weight: 900;
+  letter-spacing: .055em;
+  text-transform: uppercase;
+}
+
+body.rf-console-home-svg .rf-mini-pill {
+  min-height: 22px;
+  padding: 0 18px;
+  font-size: 10px;
+}
+
+body.rf-console-home-svg [data-state="ok"].rf-alert-pill,
+body.rf-console-home-svg [data-state="ok"].rf-mini-pill,
+body.rf-console-home-svg .rf-mini-pill[data-state="ok"] {
+  border-color: var(--rf-svg-green);
+  color: var(--rf-svg-green);
+  background: rgba(14, 53, 42, .72);
+}
+
+body.rf-console-home-svg [data-state="alert"].rf-alert-pill,
+body.rf-console-home-svg [data-state="alert"].rf-mini-pill,
+body.rf-console-home-svg .rf-mini-pill[data-state="alert"] {
+  border-color: var(--rf-red);
+  color: var(--rf-red);
+  background: rgba(80, 18, 28, .72);
+}
+
+body.rf-console-home-svg [data-state="offline"].rf-alert-pill,
+body.rf-console-home-svg [data-state="offline"].rf-mini-pill,
+body.rf-console-home-svg .rf-mini-pill[data-state="offline"] {
+  border-color: rgba(142, 166, 194, .55);
+  color: var(--rf-svg-muted);
+  background: rgba(29, 45, 64, .72);
+}
+
+body.rf-console-home-svg .rf-forward-block {
+  margin-top: 20px;
+}
+
+body.rf-console-home-svg .rf-forward-block .fwdLabel {
+  position: static !important;
+  display: block;
+  width: auto !important;
+  margin: 0;
+  color: var(--rf-svg-blue);
+  font-size: clamp(44px, 3.6vw, 72px);
+  font-weight: 950;
+  line-height: .95;
+  letter-spacing: -.035em;
+  text-align: left !important;
+  font-variant-numeric: tabular-nums;
+}
+
+body.rf-console-home-svg .rf-forward-block .fwdpowerw {
+  position: static !important;
+  display: block;
+  width: auto !important;
+  margin-top: 8px;
+  color: var(--rf-svg-muted);
+  font-size: 14px;
+  font-weight: 800;
+  text-align: left !important;
+}
+
+body.rf-console-home-svg .rf-overview-metrics {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+  margin-top: 18px;
+}
+
+body.rf-console-home-svg .rf-metric-card {
+  position: relative;
+  min-height: 76px;
+  padding: 14px 14px 10px;
+  border: 1px solid var(--rf-svg-border);
+  border-radius: 10px;
+  background: var(--rf-svg-panel-2);
+  overflow: hidden;
+}
+
+body.rf-console-home-svg .rf-metric-reflected,
+body.rf-console-home-svg .rf-metric-status,
+body.rf-console-home-svg .rf-metric-sql {
+  min-height: 70px;
+}
+
+body.rf-console-home-svg .rf-metric-card > span:not(.rf-mini-pill),
+body.rf-console-home-svg .rf-metric-card .rwdpowerlabel,
+body.rf-console-home-svg .rf-metric-card .vswrlabel {
+  position: static !important;
+  display: block;
+  width: auto !important;
+  margin: 7px 0 0;
+  color: var(--rf-svg-muted);
+  font-size: 11px;
+  font-weight: 850;
+  letter-spacing: .045em;
+  text-align: left !important;
+  text-transform: uppercase;
+}
+
+body.rf-console-home-svg .rf-metric-top {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+body.rf-console-home-svg .rf-metric-top strong,
+body.rf-console-home-svg .rf-metric-top .rssiValue,
+body.rf-console-home-svg .rf-metric-top .vswrLabel,
+body.rf-console-home-svg .rf-metric-top .rwdLabel {
+  position: static !important;
+  display: block;
+  width: auto !important;
+  margin: 0;
+  color: var(--rf-svg-text);
+  font-size: clamp(25px, 1.65vw, 35px);
+  font-weight: 950;
+  line-height: 1;
+  letter-spacing: -.02em;
+  text-align: left !important;
+  font-variant-numeric: tabular-nums;
+}
+
+body.rf-console-home-svg .rf-metric-top span {
+  color: var(--rf-svg-muted);
+  font-size: 12px;
+  font-weight: 800;
+}
+
+body.rf-console-home-svg .rf-metric-rssi .rf-metric-top strong,
+body.rf-console-home-svg .rf-metric-status .rf-metric-top strong {
+  color: var(--rf-svg-orange);
+}
+
+body.rf-console-home-svg .rf-metric-vswr .rf-metric-top strong {
+  color: var(--rf-svg-text);
+}
+
+body.rf-console-home-svg .rf-metric-reflected .rf-metric-top strong {
+  color: var(--rf-svg-green);
+}
+
+body.rf-console-home-svg .rf-metric-card .rf-mini-pill {
+  position: absolute;
+  right: 12px;
+  bottom: 10px;
+}
+
+body.rf-console-home-svg .rf-metric-rssi,
+body.rf-console-home-svg .rf-metric-vswr {
+  grid-column: span 1;
+}
+
+body.rf-console-home-svg .rf-metric-reflected,
+body.rf-console-home-svg .rf-metric-status,
+body.rf-console-home-svg .rf-metric-sql {
+  grid-column: span 1;
+}
+
+body.rf-console-home-svg .rf-progress-line,
+body.rf-console-home-svg .barfwd,
+body.rf-console-home-svg .barrwd,
+body.rf-console-home-svg .barrssi,
+body.rf-console-home-svg .barvswr {
+  position: relative !important;
+  top: auto !important;
+  left: auto !important;
+  right: auto !important;
+  width: 100% !important;
+  height: 6px;
+  margin: 10px 0 0 !important;
+  padding: 0 !important;
+  overflow: hidden;
+  border-radius: 999px;
+  background: rgba(40, 69, 99, .62);
+}
+
+body.rf-console-home-svg .emptybar {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  border-radius: inherit;
+  background: rgba(40, 69, 99, .62);
+}
+
+body.rf-console-home-svg .filledbar {
+  position: absolute;
+  inset: 0 auto 0 0;
+  height: 100%;
+  min-width: 2px;
+  border-radius: inherit;
+  background: var(--rf-svg-green);
+  transition: width var(--rf-duration) var(--rf-ease), background var(--rf-duration) var(--rf-ease);
+}
+
+body.rf-console-home-svg .rf-overview-footer {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1.2fr auto;
+  gap: 14px;
+  align-items: center;
+  min-height: 48px;
+  margin-top: 18px;
+  padding: 0 16px;
+  border: 1px solid var(--rf-svg-border);
+  border-radius: 10px;
+  background: var(--rf-svg-panel-2);
+  color: var(--rf-svg-muted);
+  font-size: 13px;
+  font-weight: 850;
+}
+
+body.rf-console-home-svg .rf-live-dot {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  margin-right: 8px;
+  border-radius: 50%;
+  background: var(--rf-svg-green);
+}
+
+body.rf-console-home-svg .rf-overview-footer b {
+  color: var(--rf-svg-text);
+}
+
+body.rf-console-home-svg .rf-maxhold-label {
+  color: var(--rf-svg-pink);
+  letter-spacing: .06em;
+  text-transform: uppercase;
+}
+
+body.rf-console-home-svg .rf-trend-card {
+  min-height: 392px;
+  height: 392px;
+  padding: 16px;
+}
+
+body.rf-console-home-svg .rf-trend-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  min-height: 30px;
+  margin-bottom: 8px;
+}
+
+body.rf-console-home-svg .rf-trend-head h3 {
+  margin: 0;
+  color: var(--rf-svg-text);
+  font-size: 19px;
+  font-weight: 950;
+  line-height: 1.2;
+}
+
+body.rf-console-home-svg .rf-trend-head span {
+  color: var(--rf-svg-text);
+  font-size: 13px;
+  font-weight: 900;
+  letter-spacing: .04em;
+}
+
+body.rf-console-home-svg .rf-trend-plot,
+body.rf-console-home-svg [id^="myPlot"] {
+  width: 100% !important;
+  height: calc(100% - 44px) !important;
+  min-height: 300px;
+  margin: 0 !important;
+  padding: 0 !important;
+  border: 0;
+  border-radius: 8px;
+  background: var(--rf-svg-chart);
+  overflow: hidden;
+}
+
+body.rf-console-home-svg .cardDisconnect {
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  border-radius: inherit;
+  background: rgba(5, 13, 24, .78);
+  opacity: 1;
+}
+
+body.rf-console-home-svg .cardDisconnect[style*="block"] {
+  display: flex !important;
+}
+
+body.rf-console-home-svg .cardDisconnect .imgCenter {
+  position: static !important;
+  width: 18px;
+  height: 18px;
+}
+
+body.rf-console-home-svg .cardDisconnect .cardDisconnectLabel {
+  position: static !important;
+  color: var(--rf-svg-text);
+  font-size: 14px;
+  font-weight: 900;
+}
+
+body.rf-console-home-svg .rf-radio-control {
+  display: block;
+  min-height: 130px;
+  height: auto;
+  margin-top: 12px !important;
+  padding: 14px;
+}
+
+body.rf-console-home-svg .rf-radio-control .title,
+body.rf-console-home-svg .rf-radio-control .fwdLabel {
+  position: static !important;
+  width: auto !important;
+  margin: 0;
+  text-align: left !important;
+}
+
+body.rf-console-home-svg .rf-radio-control .title {
+  color: var(--rf-svg-text);
+  font-size: 14px;
+  font-weight: 900;
+}
+
+body.rf-console-home-svg .rf-radio-control .fwdLabel {
+  color: var(--rf-svg-blue);
+  font-size: 28px;
+  font-weight: 950;
+}
+
+body.rf-console-home-svg .rf-radio-rssi,
+body.rf-console-home-svg .rf-radio-row,
+body.rf-console-home-svg .rf-radio-footer {
+  position: static !important;
+  display: inline-flex;
+  gap: 8px;
+  align-items: center;
+  margin: 8px 12px 0 0;
+}
+
+body.rf-console-home-svg .rf-radio-rssi {
+  display: grid;
+  min-width: 220px;
+  grid-template-columns: 1fr;
+  gap: 5px;
+}
+
+body.rf-console-home-svg .rf-radio-rssi span,
+body.rf-console-home-svg .rf-radio-footer {
+  color: var(--rf-svg-muted);
+  font-size: 12px;
+  font-weight: 800;
+}
+
+body.rf-console-home-svg .powerButton,
+body.rf-console-home-svg .upDownButton,
+body.rf-console-home-svg .contentButton {
+  min-width: 42px;
+  min-height: 32px;
+  border: 1px solid var(--rf-svg-border);
+  border-radius: 8px;
+  background: var(--rf-svg-panel-2);
+  color: var(--rf-svg-text);
+  font-size: 12px;
+  font-weight: 900;
+}
+
+body.rf-console-home-svg .contentButton {
+  min-width: 72px;
+}
+
+@media (max-width: 1260px) {
+  body.rf-console-home-svg .rf-device-layout {
+    grid-template-columns: 1fr;
+  }
+
+  body.rf-console-home-svg .rf-device-overview,
+  body.rf-console-home-svg .rf-trend-card {
+    height: auto;
+    min-height: 360px;
+  }
+}
+
+@media (max-width: 760px) {
+  body.rf-console-home-svg .rf-home-toolbar {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  body.rf-console-home-svg .rf-unit-switch {
+    justify-content: flex-start;
+  }
+
+  body.rf-console-home-svg .rf-device-overview {
+    padding: 14px;
+  }
+
+  body.rf-console-home-svg .rf-overview-head,
+  body.rf-console-home-svg .rf-trend-head {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  body.rf-console-home-svg .rf-overview-head .title {
+    max-width: 100%;
+    white-space: normal;
+  }
+
+  body.rf-console-home-svg .rf-overview-metrics,
+  body.rf-console-home-svg .rf-overview-footer {
+    grid-template-columns: 1fr;
+  }
+
+  body.rf-console-home-svg .rf-trend-card {
+    height: 360px;
+  }
+
+  body.rf-console-home-svg .rf-trend-plot,
+  body.rf-console-home-svg [id^="myPlot"] {
+    height: calc(100% - 72px) !important;
+  }
+}
+
+/* --------------------------------------------------------------------------
+   Index SVG-style dashboard readability fix
+   Fixes floating labels/badges, Plotly toolbar overlay, and fixed-height
+   clipping in the left overview panel. UI-only; no behavior contracts changed.
+   -------------------------------------------------------------------------- */
+body.rf-console-home-svg .rf-device-layout {
+  align-items: start;
+}
+
+body.rf-console-home-svg .rf-device-overview {
+  height: auto;
+  min-height: 392px;
+  overflow: visible;
+}
+
+body.rf-console-home-svg .rf-overview-metrics {
+  align-items: stretch;
+}
+
+body.rf-console-home-svg .rf-metric-card {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  gap: 6px;
+  overflow: hidden;
+}
+
+body.rf-console-home-svg .rf-metric-card .rf-metric-top {
+  min-height: 30px;
+}
+
+body.rf-console-home-svg .rf-metric-card > span:not(.rf-mini-pill),
+body.rf-console-home-svg .rf-metric-card .rwdpowerlabel,
+body.rf-console-home-svg .rf-metric-card .vswrlabel {
+  margin-top: 0;
+}
+
+body.rf-console-home-svg .rf-metric-card .rf-mini-pill {
+  position: static !important;
+  right: auto !important;
+  bottom: auto !important;
+  align-self: flex-end;
+  margin-top: auto;
+  white-space: nowrap;
+}
+
+body.rf-console-home-svg .rf-metric-card .rf-progress-line,
+body.rf-console-home-svg .rf-metric-card .barfwd,
+body.rf-console-home-svg .rf-metric-card .barrwd,
+body.rf-console-home-svg .rf-metric-card .barrssi,
+body.rf-console-home-svg .rf-metric-card .barvswr {
+  flex: 0 0 auto;
+  margin-top: 4px !important;
+}
+
+body.rf-console-home-svg .rf-metric-status .rf-metric-top strong,
+body.rf-console-home-svg .rf-metric-sql .rf-metric-top strong {
+  overflow: hidden;
+  max-width: 100%;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+body.rf-console-home-svg .rf-overview-footer {
+  margin-top: 16px;
+}
+
+body.rf-console-home-svg .rf-trend-plot .modebar,
+body.rf-console-home-svg .rf-trend-card .modebar,
+body.rf-console-home-svg [id^="myPlot"] .modebar {
+  display: none !important;
+}
+
+body.rf-console-home-svg .rf-trend-card {
+  overflow: hidden;
+}
+
+body.rf-console-home-svg .rf-trend-plot,
+body.rf-console-home-svg [id^="myPlot"] {
+  overflow: hidden;
+}
+
+@media (max-width: 760px) {
+  body.rf-console-home-svg .rf-metric-card .rf-mini-pill {
+    align-self: flex-start;
+  }
+}
+
+/* --------------------------------------------------------------------------
+   Index role summary from view_update_Page
+   Displays roleName and device counts from the existing WebSocket payload.
+   -------------------------------------------------------------------------- */
+body.rf-console-home-svg .rf-toolbar-actions {
+  display: inline-flex;
+  flex: 0 0 auto;
+  gap: 12px;
+  align-items: center;
+  justify-content: flex-end;
+}
+
+body.rf-console-home-svg .rf-role-summary {
+  display: grid;
+  min-width: 190px;
+  min-height: 42px;
+  padding: 7px 12px;
+  border: 1px solid rgba(40, 69, 99, .85);
+  border-radius: 12px;
+  background: rgba(9, 21, 36, .78);
+  color: var(--rf-svg-text);
+}
+
+body.rf-console-home-svg .rf-role-summary span {
+  color: var(--rf-svg-muted);
+  font-size: 10px;
+  font-weight: 900;
+  letter-spacing: .06em;
+  line-height: 1.1;
+  text-transform: uppercase;
+}
+
+body.rf-console-home-svg .rf-role-summary strong {
+  overflow: hidden;
+  color: var(--rf-svg-text);
+  font-size: 15px;
+  font-weight: 950;
+  line-height: 1.2;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+body.rf-console-home-svg .rf-role-summary small {
+  color: var(--rf-svg-muted);
+  font-size: 10px;
+  font-weight: 750;
+  line-height: 1.1;
+}
+
+@media (max-width: 820px) {
+  body.rf-console-home-svg .rf-toolbar-actions {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  body.rf-console-home-svg .rf-role-summary {
+    width: 100%;
+  }
+}
+
+/* --------------------------------------------------------------------------
+   16-device no-scroll wall mode
+   Triggered by JS when visible/all_device count is 5 or more. This keeps the
+   page inside the viewport by changing the same design into compact tiles.
+   -------------------------------------------------------------------------- */
+body.rf-console-home-svg.rf-dashboard-wall {
+  overflow: hidden;
+}
+
+body.rf-console-home-svg.rf-dashboard-wall #header {
+  max-height: 96px;
+  overflow: hidden;
+}
+
+body.rf-console-home-svg.rf-dashboard-wall #logo {
+  height: 44px;
+}
+
+body.rf-console-home-svg.rf-dashboard-wall #logo_text h1,
+body.rf-console-home-svg.rf-dashboard-wall #logo_text h1 a {
+  padding-top: 8px;
+  font-size: 18px;
+}
+
+body.rf-console-home-svg.rf-dashboard-wall ul#menu {
+  padding-bottom: 3px;
+}
+
+body.rf-console-home-svg.rf-dashboard-wall ul#menu li a {
+  min-height: 24px;
+  padding: 0 10px;
+  font-size: 10px;
+}
+
+body.rf-console-home-svg.rf-dashboard-wall #site_content {
+  height: calc(100vh - 100px);
+  padding-top: 8px;
+  overflow: hidden;
+}
+
+body.rf-console-home-svg.rf-dashboard-wall .rf-home-toolbar {
+  min-height: 42px;
+  margin-bottom: 8px;
+  padding: 6px 10px;
+}
+
+body.rf-console-home-svg.rf-dashboard-wall .truelanLabel {
+  font-size: 12px;
+}
+
+body.rf-console-home-svg.rf-dashboard-wall .rf-home-subtitle {
+  display: none;
+}
+
+body.rf-console-home-svg.rf-dashboard-wall .rf-role-summary {
+  min-width: 132px;
+  min-height: 32px;
+  padding: 4px 8px;
+}
+
+body.rf-console-home-svg.rf-dashboard-wall .rf-role-summary span,
+body.rf-console-home-svg.rf-dashboard-wall .rf-role-summary small {
+  font-size: 8px;
+}
+
+body.rf-console-home-svg.rf-dashboard-wall .rf-role-summary strong {
+  font-size: 11px;
+}
+
+body.rf-console-home-svg.rf-dashboard-wall #unitWattActive,
+body.rf-console-home-svg.rf-dashboard-wall #unitDBActive {
+  min-width: 48px;
+  height: 30px;
+  padding: 0 8px !important;
+  font-size: 11px;
+}
+
+body.rf-console-home-svg.rf-dashboard-wall .rf-dashboard-stack {
+  height: calc(100vh - 158px) !important;
+  min-height: 0;
+  display: grid !important;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  grid-template-rows: repeat(4, minmax(0, 1fr));
+  grid-auto-flow: row;
+  gap: 8px;
+  overflow: hidden;
+}
+
+body.rf-console-home-svg.rf-dashboard-wall .rf-device-row {
+  min-width: 0;
+  min-height: 0;
+  overflow: hidden;
+}
+
+body.rf-console-home-svg.rf-dashboard-wall .rf-device-layout {
+  height: 100%;
+  min-height: 0;
+  display: grid;
+  grid-template-columns: 40% minmax(0, 1fr);
+  gap: 8px;
+  align-items: stretch;
+}
+
+body.rf-console-home-svg.rf-dashboard-wall .rf-device-overview,
+body.rf-console-home-svg.rf-dashboard-wall .rf-trend-card {
+  height: 100% !important;
+  min-height: 0 !important;
+  padding: 7px 8px;
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+body.rf-console-home-svg.rf-dashboard-wall .rf-overview-head {
+  min-height: 22px;
+  gap: 6px;
+}
+
+body.rf-console-home-svg.rf-dashboard-wall .rf-overview-head .title {
+  max-width: calc(100% - 58px);
+  font-size: clamp(9px, .58vw, 12px);
+  letter-spacing: .035em;
+}
+
+body.rf-console-home-svg.rf-dashboard-wall .rf-alert-pill {
+  min-height: 17px;
+  padding: 0 8px;
+  font-size: 7px;
+}
+
+body.rf-console-home-svg.rf-dashboard-wall .rf-forward-block {
+  margin-top: 6px;
+}
+
+body.rf-console-home-svg.rf-dashboard-wall .rf-forward-block .fwdLabel {
+  font-size: clamp(24px, 1.9vw, 34px);
+}
+
+body.rf-console-home-svg.rf-dashboard-wall .rf-forward-block .fwdpowerw {
+  margin-top: 3px;
+  font-size: 8px;
+}
+
+body.rf-console-home-svg.rf-dashboard-wall .rf-overview-metrics {
+  grid-template-columns: 1fr 1fr;
+  gap: 5px;
+  margin-top: 7px;
+}
+
+body.rf-console-home-svg.rf-dashboard-wall .rf-metric-card {
+  min-height: 34px;
+  padding: 5px 6px;
+  gap: 2px;
+  border-radius: 7px;
+}
+
+body.rf-console-home-svg.rf-dashboard-wall .rf-metric-top {
+  min-height: 16px;
+}
+
+body.rf-console-home-svg.rf-dashboard-wall .rf-metric-top strong,
+body.rf-console-home-svg.rf-dashboard-wall .rf-metric-top .rssiValue,
+body.rf-console-home-svg.rf-dashboard-wall .rf-metric-top .vswrLabel,
+body.rf-console-home-svg.rf-dashboard-wall .rf-metric-top .rwdLabel {
+  font-size: clamp(13px, .92vw, 18px);
+}
+
+body.rf-console-home-svg.rf-dashboard-wall .rf-metric-top span {
+  font-size: 7px;
+}
+
+body.rf-console-home-svg.rf-dashboard-wall .rf-metric-card > span:not(.rf-mini-pill),
+body.rf-console-home-svg.rf-dashboard-wall .rf-metric-card .rwdpowerlabel,
+body.rf-console-home-svg.rf-dashboard-wall .rf-metric-card .vswrlabel {
+  font-size: 7px;
+  line-height: 1;
+}
+
+body.rf-console-home-svg.rf-dashboard-wall .rf-metric-card .rf-mini-pill {
+  display: none;
+}
+
+body.rf-console-home-svg.rf-dashboard-wall .rf-progress-line,
+body.rf-console-home-svg.rf-dashboard-wall .barfwd,
+body.rf-console-home-svg.rf-dashboard-wall .barrwd,
+body.rf-console-home-svg.rf-dashboard-wall .barrssi,
+body.rf-console-home-svg.rf-dashboard-wall .barvswr {
+  height: 3px;
+  margin-top: 3px !important;
+}
+
+body.rf-console-home-svg.rf-dashboard-wall .rf-metric-sql {
+  display: none;
+}
+
+body.rf-console-home-svg.rf-dashboard-wall .rf-overview-footer {
+  min-height: 20px;
+  grid-template-columns: 1fr 1fr;
+  gap: 4px;
+  margin-top: 6px;
+  padding: 0 6px;
+  font-size: 7px;
+}
+
+body.rf-console-home-svg.rf-dashboard-wall .rf-overview-footer span:nth-child(3),
+body.rf-console-home-svg.rf-dashboard-wall .rf-overview-footer span:nth-child(4) {
+  display: none;
+}
+
+body.rf-console-home-svg.rf-dashboard-wall .rf-live-dot {
+  width: 6px;
+  height: 6px;
+  margin-right: 4px;
+}
+
+body.rf-console-home-svg.rf-dashboard-wall .rf-trend-head {
+  min-height: 18px;
+  margin-bottom: 4px;
+}
+
+body.rf-console-home-svg.rf-dashboard-wall .rf-trend-head h3 {
+  font-size: 10px;
+}
+
+body.rf-console-home-svg.rf-dashboard-wall .rf-trend-head span {
+  font-size: 8px;
+}
+
+body.rf-console-home-svg.rf-dashboard-wall .rf-trend-plot,
+body.rf-console-home-svg.rf-dashboard-wall [id^="myPlot"] {
+  height: calc(100% - 22px) !important;
+  min-height: 80px;
+  border-radius: 6px;
+}
+
+body.rf-console-home-svg.rf-dashboard-wall .rf-radio-control {
+  display: none !important;
+}
+
+@media (max-width: 1500px) {
+  body.rf-console-home-svg.rf-dashboard-wall .rf-dashboard-stack {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+
+  body.rf-console-home-svg.rf-dashboard-wall .rf-device-layout {
+    grid-template-columns: 42% minmax(0, 1fr);
+  }
+}
+
+@media (max-width: 1180px) {
+  body.rf-console-home-svg.rf-dashboard-wall .rf-dashboard-stack {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-rows: repeat(8, minmax(0, 1fr));
+  }
+}
+
+/* --------------------------------------------------------------------------
+   16-device scroll layout: 2 columns x 8 rows
+   Overrides the compact no-scroll wall mode. The dashboard keeps two columns,
+   creates eight natural rows for 16 devices, and allows vertical scrolling.
+   UI-only; no backend/WebSocket/data behavior changes.
+   -------------------------------------------------------------------------- */
+body.rf-console-home-svg.rf-dashboard-wall {
+  overflow: auto;
+}
+
+body.rf-console-home-svg.rf-dashboard-wall #header {
+  max-height: none;
+  overflow: visible;
+}
+
+body.rf-console-home-svg.rf-dashboard-wall #logo {
+  height: 56px;
+}
+
+body.rf-console-home-svg.rf-dashboard-wall #logo_text h1,
+body.rf-console-home-svg.rf-dashboard-wall #logo_text h1 a {
+  padding-top: 14px;
+  font-size: 20px;
+}
+
+body.rf-console-home-svg.rf-dashboard-wall #site_content {
+  height: auto;
+  min-height: 0;
+  overflow: visible;
+  padding-top: 10px;
+  padding-bottom: 24px;
+}
+
+body.rf-console-home-svg.rf-dashboard-wall .rf-home-toolbar {
+  min-height: 52px;
+  margin-bottom: 10px;
+  padding: 8px 12px;
+}
+
+body.rf-console-home-svg.rf-dashboard-wall .truelanLabel {
+  font-size: 12px;
+}
+
+body.rf-console-home-svg.rf-dashboard-wall .rf-home-subtitle {
+  display: none;
+}
+
+body.rf-console-home-svg.rf-dashboard-wall .rf-role-summary {
+  min-width: 132px;
+  min-height: 32px;
+  padding: 4px 8px;
+}
+
+body.rf-console-home-svg.rf-dashboard-wall .rf-role-summary span,
+body.rf-console-home-svg.rf-dashboard-wall .rf-role-summary small {
+  font-size: 8px;
+}
+
+body.rf-console-home-svg.rf-dashboard-wall .rf-role-summary strong {
+  font-size: 11px;
+}
+
+body.rf-console-home-svg.rf-dashboard-wall #unitWattActive,
+body.rf-console-home-svg.rf-dashboard-wall #unitDBActive {
+  min-width: 48px;
+  height: 30px;
+  padding: 0 8px !important;
+  font-size: 11px;
+}
+
+body.rf-console-home-svg.rf-dashboard-wall .rf-dashboard-stack {
+  height: auto !important;
+  min-height: 0;
+  display: grid !important;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-rows: none;
+  grid-auto-rows: auto;
+  gap: 10px;
+  overflow: visible;
+}
+
+body.rf-console-home-svg.rf-dashboard-wall .rf-device-row {
+  min-width: 0;
+  min-height: 0;
+  overflow: visible;
+}
+
+body.rf-console-home-svg.rf-dashboard-wall .rf-device-layout {
+  display: grid;
+  grid-template-columns: minmax(260px, 38%) minmax(0, 62%);
+  gap: 10px;
+  align-items: stretch;
+  min-height: 280px;
+}
+
+body.rf-console-home-svg.rf-dashboard-wall .rf-device-overview,
+body.rf-console-home-svg.rf-dashboard-wall .rf-trend-card {
+  height: 280px !important;
+  min-height: 280px !important;
+  padding: 10px 12px;
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+body.rf-console-home-svg.rf-dashboard-wall .rf-overview-head {
+  min-height: 26px;
+  gap: 8px;
+}
+
+body.rf-console-home-svg.rf-dashboard-wall .rf-overview-head .title {
+  max-width: calc(100% - 70px);
+  font-size: 13px;
+  letter-spacing: .04em;
+}
+
+body.rf-console-home-svg.rf-dashboard-wall .rf-alert-pill {
+  min-height: 20px;
+  padding: 0 10px;
+  font-size: 8px;
+}
+
+body.rf-console-home-svg.rf-dashboard-wall .rf-forward-block {
+  margin-top: 8px;
+}
+
+body.rf-console-home-svg.rf-dashboard-wall .rf-forward-block .fwdLabel {
+  font-size: 36px;
+}
+
+body.rf-console-home-svg.rf-dashboard-wall .rf-forward-block .fwdpowerw {
+  margin-top: 4px;
+  font-size: 9px;
+}
+
+body.rf-console-home-svg.rf-dashboard-wall .rf-overview-metrics {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 7px;
+  margin-top: 8px;
+}
+
+body.rf-console-home-svg.rf-dashboard-wall .rf-metric-card {
+  min-height: 48px;
+  padding: 7px 8px;
+  gap: 3px;
+  border-radius: 8px;
+}
+
+body.rf-console-home-svg.rf-dashboard-wall .rf-metric-top {
+  min-height: 18px;
+}
+
+body.rf-console-home-svg.rf-dashboard-wall .rf-metric-top strong,
+body.rf-console-home-svg.rf-dashboard-wall .rf-metric-top .rssiValue,
+body.rf-console-home-svg.rf-dashboard-wall .rf-metric-top .vswrLabel,
+body.rf-console-home-svg.rf-dashboard-wall .rf-metric-top .rwdLabel {
+  font-size: 20px;
+}
+
+body.rf-console-home-svg.rf-dashboard-wall .rf-metric-top span {
+  font-size: 8px;
+}
+
+body.rf-console-home-svg.rf-dashboard-wall .rf-metric-card > span:not(.rf-mini-pill),
+body.rf-console-home-svg.rf-dashboard-wall .rf-metric-card .rwdpowerlabel,
+body.rf-console-home-svg.rf-dashboard-wall .rf-metric-card .vswrlabel {
+  font-size: 8px;
+  line-height: 1.1;
+}
+
+body.rf-console-home-svg.rf-dashboard-wall .rf-metric-card .rf-mini-pill {
+  display: inline-flex;
+  min-height: 16px;
+  padding: 0 8px;
+  font-size: 7px;
+}
+
+body.rf-console-home-svg.rf-dashboard-wall .rf-metric-sql {
+  display: flex;
+}
+
+body.rf-console-home-svg.rf-dashboard-wall .rf-progress-line,
+body.rf-console-home-svg.rf-dashboard-wall .barfwd,
+body.rf-console-home-svg.rf-dashboard-wall .barrwd,
+body.rf-console-home-svg.rf-dashboard-wall .barrssi,
+body.rf-console-home-svg.rf-dashboard-wall .barvswr {
+  height: 4px;
+  margin-top: 4px !important;
+}
+
+body.rf-console-home-svg.rf-dashboard-wall .rf-overview-footer {
+  min-height: 26px;
+  grid-template-columns: 1fr 1fr 1.1fr auto;
+  gap: 6px;
+  margin-top: 8px;
+  padding: 0 8px;
+  font-size: 8px;
+}
+
+body.rf-console-home-svg.rf-dashboard-wall .rf-overview-footer span:nth-child(3),
+body.rf-console-home-svg.rf-dashboard-wall .rf-overview-footer span:nth-child(4) {
+  display: inline-flex;
+}
+
+body.rf-console-home-svg.rf-dashboard-wall .rf-live-dot {
+  width: 6px;
+  height: 6px;
+  margin-right: 4px;
+}
+
+body.rf-console-home-svg.rf-dashboard-wall .rf-trend-head {
+  min-height: 22px;
+  margin-bottom: 5px;
+}
+
+body.rf-console-home-svg.rf-dashboard-wall .rf-trend-head h3 {
+  font-size: 12px;
+}
+
+body.rf-console-home-svg.rf-dashboard-wall .rf-trend-head span {
+  font-size: 9px;
+}
+
+body.rf-console-home-svg.rf-dashboard-wall .rf-trend-plot,
+body.rf-console-home-svg.rf-dashboard-wall [id^="myPlot"] {
+  height: calc(100% - 28px) !important;
+  min-height: 220px;
+  border-radius: 7px;
+}
+
+body.rf-console-home-svg.rf-dashboard-wall .rf-radio-control {
+  display: none !important;
+}
+
+@media (max-width: 1280px) {
+  body.rf-console-home-svg.rf-dashboard-wall .rf-dashboard-stack {
+    grid-template-columns: 1fr;
+  }
+
+  body.rf-console-home-svg.rf-dashboard-wall .rf-device-layout {
+    grid-template-columns: minmax(260px, 40%) minmax(0, 60%);
+  }
+}
+
+/* --------------------------------------------------------------------------
+   Remove cardDisconnect overlays from index dashboard display.
+   The elements/IDs remain in DOM for JS compatibility, but are not rendered.
+   -------------------------------------------------------------------------- */
+body.rf-console-home-svg .cardDisconnect,
+body.rf-console-home-svg .cardDisconnect[style*="block"],
+body.rf-console-home-svg #cardDisconnect,
+body.rf-console-home-svg [id^="cardDisconnect"],
+body.rf-console-home-svg [id^="cardplotDisconnect"] {
+  display: none !important;
+  visibility: hidden !important;
+  pointer-events: none !important;
+}
+
+/* --------------------------------------------------------------------------
+   2 columns x 8 rows without compact shrinking
+   This replaces the old rf-dashboard-wall compressed mode. It keeps the normal
+   card proportions and simply arranges device rows into two columns with
+   vertical scrolling.
+   -------------------------------------------------------------------------- */
+body.rf-console-home-svg.rf-dashboard-2x8 {
+  overflow: auto;
+}
+
+body.rf-console-home-svg.rf-dashboard-2x8 #header {
+  max-height: none;
+  overflow: visible;
+}
+
+body.rf-console-home-svg.rf-dashboard-2x8 #site_content {
+  height: auto;
+  min-height: 0;
+  overflow: visible;
+  padding-top: 14px;
+  padding-bottom: 28px;
+}
+
+body.rf-console-home-svg.rf-dashboard-2x8 .rf-home-toolbar {
+  min-height: 88px;
+  margin-bottom: 14px;
+  padding: 10px 14px;
+}
+
+body.rf-console-home-svg.rf-dashboard-2x8 .rf-home-subtitle {
+  display: inline;
+}
+
+body.rf-console-home-svg.rf-dashboard-2x8 .rf-dashboard-stack {
+  height: auto !important;
+  min-height: 0;
+  display: grid !important;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-rows: none;
+  grid-auto-rows: auto;
+  gap: 18px;
+  overflow: visible;
+}
+
+body.rf-console-home-svg.rf-dashboard-2x8 .rf-device-row {
+  min-width: 0;
+  min-height: 0;
+  overflow: visible;
+}
+
+body.rf-console-home-svg.rf-dashboard-2x8 .rf-device-layout {
+  display: grid;
+  grid-template-columns: minmax(300px, 40%) minmax(0, 60%);
+  gap: 14px;
+  align-items: stretch;
+}
+
+body.rf-console-home-svg.rf-dashboard-2x8 .rf-device-overview,
+body.rf-console-home-svg.rf-dashboard-2x8 .rf-trend-card {
+  height: 392px !important;
+  min-height: 392px !important;
+  padding: 18px 22px;
+  border-radius: var(--rf-svg-radius);
+  overflow: hidden;
+}
+
+body.rf-console-home-svg.rf-dashboard-2x8 .rf-trend-card {
+  padding: 16px;
+}
+
+body.rf-console-home-svg.rf-dashboard-2x8 .rf-overview-head .title {
+  font-size: clamp(16px, .92vw, 22px);
+}
+
+body.rf-console-home-svg.rf-dashboard-2x8 .rf-forward-block .fwdLabel {
+  font-size: clamp(42px, 2.8vw, 66px);
+}
+
+body.rf-console-home-svg.rf-dashboard-2x8 .rf-forward-block .fwdpowerw {
+  font-size: 13px;
+}
+
+body.rf-console-home-svg.rf-dashboard-2x8 .rf-overview-metrics {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+  margin-top: 16px;
+}
+
+body.rf-console-home-svg.rf-dashboard-2x8 .rf-metric-card {
+  min-height: 70px;
+  padding: 12px 12px 10px;
+  gap: 5px;
+  border-radius: 10px;
+}
+
+body.rf-console-home-svg.rf-dashboard-2x8 .rf-metric-top strong,
+body.rf-console-home-svg.rf-dashboard-2x8 .rf-metric-top .rssiValue,
+body.rf-console-home-svg.rf-dashboard-2x8 .rf-metric-top .vswrLabel,
+body.rf-console-home-svg.rf-dashboard-2x8 .rf-metric-top .rwdLabel {
+  font-size: clamp(22px, 1.25vw, 32px);
+}
+
+body.rf-console-home-svg.rf-dashboard-2x8 .rf-metric-card .rf-mini-pill {
+  display: inline-flex;
+}
+
+body.rf-console-home-svg.rf-dashboard-2x8 .rf-metric-sql {
+  display: flex;
+}
+
+body.rf-console-home-svg.rf-dashboard-2x8 .rf-overview-footer {
+  display: grid;
+  min-height: 48px;
+  grid-template-columns: 1fr 1fr 1.2fr auto;
+  gap: 14px;
+  margin-top: 16px;
+  padding: 0 16px;
+  font-size: 13px;
+}
+
+body.rf-console-home-svg.rf-dashboard-2x8 .rf-overview-footer span:nth-child(3),
+body.rf-console-home-svg.rf-dashboard-2x8 .rf-overview-footer span:nth-child(4) {
+  display: inline-flex;
+}
+
+body.rf-console-home-svg.rf-dashboard-2x8 .rf-trend-head {
+  min-height: 30px;
+  margin-bottom: 8px;
+}
+
+body.rf-console-home-svg.rf-dashboard-2x8 .rf-trend-head h3 {
+  font-size: 18px;
+}
+
+body.rf-console-home-svg.rf-dashboard-2x8 .rf-trend-head span {
+  font-size: 12px;
+}
+
+body.rf-console-home-svg.rf-dashboard-2x8 .rf-trend-plot,
+body.rf-console-home-svg.rf-dashboard-2x8 [id^="myPlot"] {
+  height: calc(100% - 44px) !important;
+  min-height: 300px;
+  border-radius: 8px;
+}
+
+body.rf-console-home-svg.rf-dashboard-2x8 .rf-radio-control {
+  display: none !important;
+}
+
+@media (max-width: 1500px) {
+  body.rf-console-home-svg.rf-dashboard-2x8 .rf-dashboard-stack {
+    grid-template-columns: 1fr;
+  }
+
+  body.rf-console-home-svg.rf-dashboard-2x8 .rf-device-layout {
+    grid-template-columns: minmax(300px, 40%) minmax(0, 60%);
+  }
+}
+
+/* --------------------------------------------------------------------------
+   2x8 readability/font-fit patch
+   Fixes oversized text inside narrower 2-column cards so all metrics remain
+   visible. UI-only; no backend/WebSocket/data behavior changes.
+   -------------------------------------------------------------------------- */
+body.rf-console-home-svg.rf-dashboard-2x8 .rf-device-overview,
+body.rf-console-home-svg.rf-dashboard-2x8 .rf-trend-card {
+  height: 360px !important;
+  min-height: 360px !important;
+  padding: 14px 16px;
+}
+
+body.rf-console-home-svg.rf-dashboard-2x8 .rf-trend-card {
+  padding: 14px;
+}
+
+body.rf-console-home-svg.rf-dashboard-2x8 .rf-overview-head {
+  min-height: 30px;
+  gap: 10px;
+}
+
+body.rf-console-home-svg.rf-dashboard-2x8 .rf-overview-head .title {
+  max-width: calc(100% - 86px);
+  overflow: hidden;
+  font-size: clamp(14px, .82vw, 18px);
+  line-height: 1.18;
+  letter-spacing: .035em;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+body.rf-console-home-svg.rf-dashboard-2x8 .rf-alert-pill {
+  min-height: 22px;
+  padding: 0 12px;
+  font-size: 9px;
+  line-height: 1;
+  flex-shrink: 0;
+}
+
+body.rf-console-home-svg.rf-dashboard-2x8 .rf-forward-block {
+  margin-top: 10px;
+}
+
+body.rf-console-home-svg.rf-dashboard-2x8 .rf-forward-block .fwdLabel {
+  font-size: clamp(36px, 2.3vw, 52px);
+  line-height: .95;
+}
+
+body.rf-console-home-svg.rf-dashboard-2x8 .rf-forward-block .fwdpowerw {
+  margin-top: 4px;
+  font-size: 10px;
+  line-height: 1.15;
+}
+
+body.rf-console-home-svg.rf-dashboard-2x8 .rf-overview-metrics {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+  margin-top: 10px;
+}
+
+body.rf-console-home-svg.rf-dashboard-2x8 .rf-metric-card {
+  min-height: 88px;
+  padding: 8px 9px;
+  gap: 3px;
+  border-radius: 9px;
+}
+
+body.rf-console-home-svg.rf-dashboard-2x8 .rf-metric-top {
+  min-height: 20px;
+  gap: 6px;
+}
+
+body.rf-console-home-svg.rf-dashboard-2x8 .rf-metric-top strong,
+body.rf-console-home-svg.rf-dashboard-2x8 .rf-metric-top .rssiValue,
+body.rf-console-home-svg.rf-dashboard-2x8 .rf-metric-top .vswrLabel,
+body.rf-console-home-svg.rf-dashboard-2x8 .rf-metric-top .rwdLabel {
+  font-size: clamp(16px, 1.05vw, 22px);
+  line-height: 1;
+}
+
+body.rf-console-home-svg.rf-dashboard-2x8 .rf-metric-top span {
+  font-size: 8px;
+  line-height: 1;
+}
+
+body.rf-console-home-svg.rf-dashboard-2x8 .rf-metric-card > span:not(.rf-mini-pill),
+body.rf-console-home-svg.rf-dashboard-2x8 .rf-metric-card .rwdpowerlabel,
+body.rf-console-home-svg.rf-dashboard-2x8 .rf-metric-card .vswrlabel {
+  font-size: 8px;
+  line-height: 1.1;
+  letter-spacing: .035em;
+}
+
+body.rf-console-home-svg.rf-dashboard-2x8 .rf-metric-card .rf-mini-pill {
+  min-height: 16px;
+  padding: 0 7px;
+  font-size: 7px;
+  line-height: 1;
+  white-space: nowrap;
+}
+
+body.rf-console-home-svg.rf-dashboard-2x8 .rf-progress-line,
+body.rf-console-home-svg.rf-dashboard-2x8 .barfwd,
+body.rf-console-home-svg.rf-dashboard-2x8 .barrwd,
+body.rf-console-home-svg.rf-dashboard-2x8 .barrssi,
+body.rf-console-home-svg.rf-dashboard-2x8 .barvswr {
+  height: 4px;
+  margin-top: 4px !important;
+}
+
+body.rf-console-home-svg.rf-dashboard-2x8 .rf-overview-footer {
+  min-height: 32px;
+  grid-template-columns: 1fr 1fr 1.1fr auto;
+  gap: 8px;
+  margin-top: 10px;
+  padding: 0 10px;
+  font-size: 9px;
+  line-height: 1.1;
+}
+
+body.rf-console-home-svg.rf-dashboard-2x8 .rf-live-dot {
+  width: 6px;
+  height: 6px;
+  margin-right: 4px;
+}
+
+body.rf-console-home-svg.rf-dashboard-2x8 .rf-trend-head {
+  min-height: 26px;
+  margin-bottom: 6px;
+}
+
+body.rf-console-home-svg.rf-dashboard-2x8 .rf-trend-head h3 {
+  font-size: 14px;
+  line-height: 1.2;
+}
+
+body.rf-console-home-svg.rf-dashboard-2x8 .rf-trend-head span {
+  font-size: 9px;
+  line-height: 1.1;
+}
+
+body.rf-console-home-svg.rf-dashboard-2x8 .rf-trend-plot,
+body.rf-console-home-svg.rf-dashboard-2x8 [id^="myPlot"] {
+  height: calc(100% - 34px) !important;
+  min-height: 260px;
+}
+
+@media (max-width: 1500px) {
+  body.rf-console-home-svg.rf-dashboard-2x8 .rf-dashboard-stack {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  body.rf-console-home-svg.rf-dashboard-2x8 .rf-device-layout {
+    grid-template-columns: minmax(250px, 38%) minmax(0, 62%);
+    gap: 10px;
+  }
+
+  body.rf-console-home-svg.rf-dashboard-2x8 .rf-device-overview,
+  body.rf-console-home-svg.rf-dashboard-2x8 .rf-trend-card {
+    height: 330px !important;
+    min-height: 330px !important;
+    padding: 10px 12px;
+  }
+
+  body.rf-console-home-svg.rf-dashboard-2x8 .rf-overview-head .title {
+    font-size: 13px;
+  }
+
+  body.rf-console-home-svg.rf-dashboard-2x8 .rf-forward-block .fwdLabel {
+    font-size: 34px;
+  }
+
+  body.rf-console-home-svg.rf-dashboard-2x8 .rf-metric-card {
+    min-height: 54px;
+    padding: 7px 8px;
+  }
+
+  body.rf-console-home-svg.rf-dashboard-2x8 .rf-metric-top strong,
+  body.rf-console-home-svg.rf-dashboard-2x8 .rf-metric-top .rssiValue,
+  body.rf-console-home-svg.rf-dashboard-2x8 .rf-metric-top .vswrLabel,
+  body.rf-console-home-svg.rf-dashboard-2x8 .rf-metric-top .rwdLabel {
+    font-size: 15px;
+  }
+
+  body.rf-console-home-svg.rf-dashboard-2x8 .rf-trend-plot,
+  body.rf-console-home-svg.rf-dashboard-2x8 [id^="myPlot"] {
+    height: calc(100% - 30px) !important;
+    min-height: 240px;
+  }
+}
+
+/* --------------------------------------------------------------------------
+   FINAL 2x8 layout fit pass
+   Root cause fixed: previous patches used fixed card heights while text/metrics
+   were still too large for the left panel. This pass makes each device row
+   scroll-friendly, keeps 2 columns, and allows the left overview card to grow
+   instead of clipping data.
+   -------------------------------------------------------------------------- */
+body.rf-console-home-svg.rf-dashboard-2x8 {
+  --rf-2x8-row-min: 420px;
+  --rf-2x8-overview-min: 300px;
+  --rf-2x8-gap: 14px;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+body.rf-console-home-svg.rf-dashboard-2x8 #site_content {
+  height: auto !important;
+  overflow: visible !important;
+  padding-bottom: 32px;
+}
+
+body.rf-console-home-svg.rf-dashboard-2x8 .rf-dashboard-stack {
+  height: auto !important;
+  display: grid !important;
+  grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  grid-template-rows: none !important;
+  grid-auto-rows: auto !important;
+  gap: 16px !important;
+  align-items: start;
+  overflow: visible !important;
+}
+
+body.rf-console-home-svg.rf-dashboard-2x8 .rf-device-row {
+  min-width: 0;
+  min-height: var(--rf-2x8-row-min);
+  overflow: visible !important;
+}
+
+body.rf-console-home-svg.rf-dashboard-2x8 .rf-device-layout {
+  display: grid !important;
+  grid-template-columns: minmax(280px, 36%) minmax(0, 64%) !important;
+  gap: var(--rf-2x8-gap) !important;
+  align-items: stretch !important;
+  min-height: var(--rf-2x8-row-min);
+}
+
+body.rf-console-home-svg.rf-dashboard-2x8 .rf-device-overview {
+  min-height: var(--rf-2x8-row-min) !important;
+  height: auto !important;
+  display: grid !important;
+  grid-template-rows: auto auto minmax(0, 1fr) auto;
+  gap: 10px;
+  padding: 14px !important;
+  overflow: hidden !important;
+}
+
+body.rf-console-home-svg.rf-dashboard-2x8 .rf-trend-card {
+  min-height: var(--rf-2x8-row-min) !important;
+  height: var(--rf-2x8-row-min) !important;
+  display: grid !important;
+  grid-template-rows: auto minmax(0, 1fr);
+  gap: 8px;
+  padding: 14px !important;
+  overflow: hidden !important;
+}
+
+body.rf-console-home-svg.rf-dashboard-2x8 .rf-overview-head {
+  min-height: 26px !important;
+  align-items: center !important;
+}
+
+body.rf-console-home-svg.rf-dashboard-2x8 .rf-overview-head .title {
+  max-width: calc(100% - 78px) !important;
+  font-size: clamp(13px, .74vw, 17px) !important;
+  line-height: 1.15 !important;
+  letter-spacing: .035em !important;
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+}
+
+body.rf-console-home-svg.rf-dashboard-2x8 .rf-alert-pill {
+  min-height: 20px !important;
+  padding: 0 10px !important;
+  font-size: 8px !important;
+  flex-shrink: 0;
+}
+
+body.rf-console-home-svg.rf-dashboard-2x8 .rf-forward-block {
+  margin-top: 0 !important;
+  min-height: 88px;
+}
+
+body.rf-console-home-svg.rf-dashboard-2x8 .rf-forward-block .fwdLabel {
+  font-size: clamp(34px, 2vw, 48px) !important;
+  line-height: .9 !important;
+}
+
+body.rf-console-home-svg.rf-dashboard-2x8 .rf-forward-block .fwdpowerw {
+  margin-top: 3px !important;
+  font-size: 9px !important;
+  line-height: 1.1 !important;
+}
+
+body.rf-console-home-svg.rf-dashboard-2x8 .rf-overview-metrics {
+  min-height: 0 !important;
+  display: grid !important;
+  grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  grid-auto-rows: minmax(56px, auto) !important;
+  gap: 8px !important;
+  margin-top: 0 !important;
+  overflow: visible !important;
+}
+
+body.rf-console-home-svg.rf-dashboard-2x8 .rf-metric-card {
+  min-height: 56px !important;
+  display: grid !important;
+  grid-template-columns: minmax(0, 1fr) auto;
+  grid-template-rows: auto auto auto;
+  column-gap: 6px;
+  row-gap: 3px;
+  padding: 7px 8px !important;
+  overflow: hidden !important;
+}
+
+body.rf-console-home-svg.rf-dashboard-2x8 .rf-metric-top {
+  grid-column: 1 / -1;
+  min-height: 18px !important;
+  display: flex !important;
+  align-items: baseline !important;
+  justify-content: space-between !important;
+  gap: 6px !important;
+}
+
+body.rf-console-home-svg.rf-dashboard-2x8 .rf-metric-top strong,
+body.rf-console-home-svg.rf-dashboard-2x8 .rf-metric-top .rssiValue,
+body.rf-console-home-svg.rf-dashboard-2x8 .rf-metric-top .vswrLabel,
+body.rf-console-home-svg.rf-dashboard-2x8 .rf-metric-top .rwdLabel {
+  font-size: clamp(15px, .92vw, 20px) !important;
+  line-height: 1 !important;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+body.rf-console-home-svg.rf-dashboard-2x8 .rf-metric-top span {
+  font-size: 8px !important;
+  line-height: 1 !important;
+  flex-shrink: 0;
+}
+
+body.rf-console-home-svg.rf-dashboard-2x8 .rf-metric-card > span:not(.rf-mini-pill),
+body.rf-console-home-svg.rf-dashboard-2x8 .rf-metric-card .rwdpowerlabel,
+body.rf-console-home-svg.rf-dashboard-2x8 .rf-metric-card .vswrlabel {
+  grid-column: 1;
+  margin: 0 !important;
+  font-size: 8px !important;
+  line-height: 1.05 !important;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+body.rf-console-home-svg.rf-dashboard-2x8 .rf-metric-card .rf-mini-pill {
+  grid-column: 2;
+  grid-row: 2;
+  align-self: center;
+  justify-self: end;
+  min-height: 14px !important;
+  padding: 0 6px !important;
+  font-size: 7px !important;
+  line-height: 1 !important;
+  white-space: nowrap;
+}
+
+body.rf-console-home-svg.rf-dashboard-2x8 .rf-progress-line,
+body.rf-console-home-svg.rf-dashboard-2x8 .barfwd,
+body.rf-console-home-svg.rf-dashboard-2x8 .barrwd,
+body.rf-console-home-svg.rf-dashboard-2x8 .barrssi,
+body.rf-console-home-svg.rf-dashboard-2x8 .barvswr {
+  grid-column: 1 / -1;
+  height: 4px !important;
+  margin-top: 2px !important;
+}
+
+body.rf-console-home-svg.rf-dashboard-2x8 .rf-overview-footer {
+  min-height: 34px !important;
+  display: grid !important;
+  grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  gap: 4px 8px !important;
+  margin-top: 0 !important;
+  padding: 6px 8px !important;
+  font-size: 8px !important;
+  line-height: 1.05 !important;
+  overflow: hidden;
+}
+
+body.rf-console-home-svg.rf-dashboard-2x8 .rf-overview-footer span {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+body.rf-console-home-svg.rf-dashboard-2x8 .rf-live-dot {
+  width: 6px !important;
+  height: 6px !important;
+  margin-right: 4px !important;
+}
+
+body.rf-console-home-svg.rf-dashboard-2x8 .rf-trend-head {
+  min-height: 24px !important;
+  margin-bottom: 0 !important;
+}
+
+body.rf-console-home-svg.rf-dashboard-2x8 .rf-trend-head h3 {
+  font-size: 13px !important;
+  line-height: 1.15 !important;
+}
+
+body.rf-console-home-svg.rf-dashboard-2x8 .rf-trend-head span {
+  font-size: 9px !important;
+  line-height: 1.1 !important;
+}
+
+body.rf-console-home-svg.rf-dashboard-2x8 .rf-trend-plot,
+body.rf-console-home-svg.rf-dashboard-2x8 [id^="myPlot"] {
+  height: 100% !important;
+  min-height: 0 !important;
+  border-radius: 8px;
+}
+
+@media (max-width: 1500px) {
+  body.rf-console-home-svg.rf-dashboard-2x8 .rf-dashboard-stack {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  }
+
+  body.rf-console-home-svg.rf-dashboard-2x8 .rf-device-layout {
+    grid-template-columns: minmax(250px, 38%) minmax(0, 62%) !important;
+  }
+}
+
+@media (max-width: 1120px) {
+  body.rf-console-home-svg.rf-dashboard-2x8 .rf-dashboard-stack {
+    grid-template-columns: 1fr !important;
+  }
+
+  body.rf-console-home-svg.rf-dashboard-2x8 .rf-device-layout {
+    grid-template-columns: minmax(260px, 38%) minmax(0, 62%) !important;
+  }
+}
+
+/* --------------------------------------------------------------------------
+   STABLE FIT FINAL - no clipped/overflowing text
+   Important: previous attempts had several fixed-height compact rules. This
+   class intentionally resets the layout to normal-flow cards. The left info
+   card is auto-height, so all data can render. The right chart keeps a stable
+   height. Page scroll is allowed.
+   -------------------------------------------------------------------------- */
+body.rf-console-home-svg.rf-dashboard-2x8.rf-dashboard-stable-fit {
+  overflow-x: hidden !important;
+  overflow-y: auto !important;
+}
+
+body.rf-console-home-svg.rf-dashboard-2x8.rf-dashboard-stable-fit #site_content {
+  height: auto !important;
+  min-height: 0 !important;
+  overflow: visible !important;
+  padding-top: 14px !important;
+  padding-bottom: 36px !important;
+}
+
+body.rf-console-home-svg.rf-dashboard-2x8.rf-dashboard-stable-fit .rf-dashboard-stack {
+  width: 100% !important;
+  height: auto !important;
+  min-height: 0 !important;
+  display: grid !important;
+  grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  grid-template-rows: none !important;
+  grid-auto-rows: auto !important;
+  gap: 16px !important;
+  align-items: start !important;
+  align-content: start !important;
+  overflow: visible !important;
+}
+
+body.rf-console-home-svg.rf-dashboard-2x8.rf-dashboard-stable-fit .rf-device-row {
+  width: 100% !important;
+  min-width: 0 !important;
+  height: auto !important;
+  min-height: 0 !important;
+  overflow: visible !important;
+}
+
+body.rf-console-home-svg.rf-dashboard-2x8.rf-dashboard-stable-fit .rf-device-layout {
+  width: 100% !important;
+  height: auto !important;
+  min-height: 0 !important;
+  display: grid !important;
+  grid-template-columns: minmax(260px, 36%) minmax(0, 64%) !important;
+  gap: 12px !important;
+  align-items: stretch !important;
+  overflow: visible !important;
+}
+
+/* Left card: auto-height is the main fix. Do not clip content. */
+body.rf-console-home-svg.rf-dashboard-2x8.rf-dashboard-stable-fit .rf-device-overview {
+  width: auto !important;
+  height: auto !important;
+  min-height: 0 !important;
+  display: grid !important;
+  grid-template-rows: auto auto auto auto !important;
+  gap: 9px !important;
+  padding: 12px !important;
+  border-radius: 12px !important;
+  overflow: visible !important;
+}
+
+/* Right card: chart keeps a predictable height and does not affect text flow. */
+body.rf-console-home-svg.rf-dashboard-2x8.rf-dashboard-stable-fit .rf-trend-card {
+  width: auto !important;
+  height: 320px !important;
+  min-height: 320px !important;
+  display: grid !important;
+  grid-template-rows: auto minmax(0, 1fr) !important;
+  gap: 8px !important;
+  padding: 12px !important;
+  border-radius: 12px !important;
+  overflow: hidden !important;
+}
+
+body.rf-console-home-svg.rf-dashboard-2x8.rf-dashboard-stable-fit .rf-overview-head {
+  min-height: 24px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  gap: 8px !important;
+}
+
+body.rf-console-home-svg.rf-dashboard-2x8.rf-dashboard-stable-fit .rf-overview-head .title {
+  position: static !important;
+  width: auto !important;
+  max-width: calc(100% - 72px) !important;
+  margin: 0 !important;
+  overflow: hidden !important;
+  color: var(--rf-svg-text) !important;
+  font-size: 13px !important;
+  font-weight: 900 !important;
+  line-height: 1.15 !important;
+  letter-spacing: .03em !important;
+  text-align: left !important;
+  text-overflow: ellipsis !important;
+  text-transform: uppercase !important;
+  white-space: nowrap !important;
+}
+
+body.rf-console-home-svg.rf-dashboard-2x8.rf-dashboard-stable-fit .rf-alert-pill {
+  min-width: 54px !important;
+  min-height: 18px !important;
+  padding: 0 8px !important;
+  font-size: 7px !important;
+  line-height: 1 !important;
+  flex: 0 0 auto !important;
+}
+
+body.rf-console-home-svg.rf-dashboard-2x8.rf-dashboard-stable-fit .rf-forward-block {
+  min-height: 52px !important;
+  margin: 0 !important;
+  overflow: visible !important;
+}
+
+body.rf-console-home-svg.rf-dashboard-2x8.rf-dashboard-stable-fit .rf-forward-block .fwdLabel {
+  position: static !important;
+  display: block !important;
+  width: auto !important;
+  margin: 0 !important;
+  color: var(--rf-svg-blue) !important;
+  font-size: clamp(30px, 2vw, 42px) !important;
+  font-weight: 950 !important;
+  line-height: .92 !important;
+  text-align: left !important;
+}
+
+body.rf-console-home-svg.rf-dashboard-2x8.rf-dashboard-stable-fit .rf-forward-block .fwdpowerw {
+  position: static !important;
+  display: block !important;
+  width: auto !important;
+  margin: 3px 0 0 !important;
+  color: var(--rf-svg-muted) !important;
+  font-size: 8px !important;
+  font-weight: 800 !important;
+  line-height: 1.05 !important;
+  text-align: left !important;
+}
+
+body.rf-console-home-svg.rf-dashboard-2x8.rf-dashboard-stable-fit .rf-overview-metrics {
+  min-height: 0 !important;
+  display: grid !important;
+  grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  grid-auto-rows: minmax(48px, auto) !important;
+  gap: 7px !important;
+  margin: 0 !important;
+  overflow: visible !important;
+}
+
+body.rf-console-home-svg.rf-dashboard-2x8.rf-dashboard-stable-fit .rf-metric-card {
+  min-width: 0 !important;
+  min-height: 48px !important;
+  height: auto !important;
+  display: grid !important;
+  grid-template-columns: minmax(0, 1fr) auto !important;
+  grid-template-rows: auto auto auto !important;
+  column-gap: 6px !important;
+  row-gap: 2px !important;
+  padding: 6px 7px !important;
+  border-radius: 8px !important;
+  overflow: hidden !important;
+}
+
+body.rf-console-home-svg.rf-dashboard-2x8.rf-dashboard-stable-fit .rf-metric-top {
+  grid-column: 1 / -1 !important;
+  min-width: 0 !important;
+  min-height: 16px !important;
+  display: flex !important;
+  align-items: baseline !important;
+  justify-content: space-between !important;
+  gap: 5px !important;
+}
+
+body.rf-console-home-svg.rf-dashboard-2x8.rf-dashboard-stable-fit .rf-metric-top strong,
+body.rf-console-home-svg.rf-dashboard-2x8.rf-dashboard-stable-fit .rf-metric-top .rssiValue,
+body.rf-console-home-svg.rf-dashboard-2x8.rf-dashboard-stable-fit .rf-metric-top .vswrLabel,
+body.rf-console-home-svg.rf-dashboard-2x8.rf-dashboard-stable-fit .rf-metric-top .rwdLabel {
+  position: static !important;
+  display: block !important;
+  min-width: 0 !important;
+  width: auto !important;
+  margin: 0 !important;
+  overflow: hidden !important;
+  font-size: clamp(14px, .95vw, 18px) !important;
+  font-weight: 950 !important;
+  line-height: 1 !important;
+  text-align: left !important;
+  text-overflow: ellipsis !important;
+  white-space: nowrap !important;
+}
+
+body.rf-console-home-svg.rf-dashboard-2x8.rf-dashboard-stable-fit .rf-metric-top span {
+  flex: 0 0 auto !important;
+  font-size: 7px !important;
+  line-height: 1 !important;
+}
+
+body.rf-console-home-svg.rf-dashboard-2x8.rf-dashboard-stable-fit .rf-metric-card > span:not(.rf-mini-pill),
+body.rf-console-home-svg.rf-dashboard-2x8.rf-dashboard-stable-fit .rf-metric-card .rwdpowerlabel,
+body.rf-console-home-svg.rf-dashboard-2x8.rf-dashboard-stable-fit .rf-metric-card .vswrlabel {
+  grid-column: 1 !important;
+  min-width: 0 !important;
+  margin: 0 !important;
+  overflow: hidden !important;
+  font-size: 7px !important;
+  font-weight: 800 !important;
+  line-height: 1.05 !important;
+  letter-spacing: .025em !important;
+  text-overflow: ellipsis !important;
+  white-space: nowrap !important;
+}
+
+body.rf-console-home-svg.rf-dashboard-2x8.rf-dashboard-stable-fit .rf-metric-card .rf-mini-pill {
+  grid-column: 2 !important;
+  grid-row: 2 !important;
+  align-self: center !important;
+  justify-self: end !important;
+  min-height: 13px !important;
+  padding: 0 5px !important;
+  font-size: 6px !important;
+  line-height: 1 !important;
+  white-space: nowrap !important;
+}
+
+body.rf-console-home-svg.rf-dashboard-2x8.rf-dashboard-stable-fit .rf-progress-line,
+body.rf-console-home-svg.rf-dashboard-2x8.rf-dashboard-stable-fit .barfwd,
+body.rf-console-home-svg.rf-dashboard-2x8.rf-dashboard-stable-fit .barrwd,
+body.rf-console-home-svg.rf-dashboard-2x8.rf-dashboard-stable-fit .barrssi,
+body.rf-console-home-svg.rf-dashboard-2x8.rf-dashboard-stable-fit .barvswr {
+  grid-column: 1 / -1 !important;
+  position: relative !important;
+  top: auto !important;
+  left: auto !important;
+  right: auto !important;
+  width: 100% !important;
+  height: 3px !important;
+  margin: 2px 0 0 !important;
+  padding: 0 !important;
+}
+
+body.rf-console-home-svg.rf-dashboard-2x8.rf-dashboard-stable-fit .rf-overview-footer {
+  min-height: 30px !important;
+  display: grid !important;
+  grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  gap: 3px 8px !important;
+  margin: 0 !important;
+  padding: 5px 7px !important;
+  border-radius: 8px !important;
+  overflow: hidden !important;
+  font-size: 7px !important;
+  line-height: 1.05 !important;
+}
+
+body.rf-console-home-svg.rf-dashboard-2x8.rf-dashboard-stable-fit .rf-overview-footer span {
+  min-width: 0 !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  white-space: nowrap !important;
+}
+
+body.rf-console-home-svg.rf-dashboard-2x8.rf-dashboard-stable-fit .rf-live-dot {
+  width: 5px !important;
+  height: 5px !important;
+  margin-right: 4px !important;
+}
+
+body.rf-console-home-svg.rf-dashboard-2x8.rf-dashboard-stable-fit .rf-trend-head {
+  min-height: 22px !important;
+  display: flex !important;
+  align-items: center !important;
+  margin: 0 !important;
+}
+
+body.rf-console-home-svg.rf-dashboard-2x8.rf-dashboard-stable-fit .rf-trend-head h3 {
+  margin: 0 !important;
+  font-size: 13px !important;
+  line-height: 1.15 !important;
+}
+
+body.rf-console-home-svg.rf-dashboard-2x8.rf-dashboard-stable-fit .rf-trend-head span {
+  overflow: hidden !important;
+  font-size: 8px !important;
+  line-height: 1.05 !important;
+  text-overflow: ellipsis !important;
+  white-space: nowrap !important;
+}
+
+body.rf-console-home-svg.rf-dashboard-2x8.rf-dashboard-stable-fit .rf-trend-plot,
+body.rf-console-home-svg.rf-dashboard-2x8.rf-dashboard-stable-fit [id^="myPlot"] {
+  width: 100% !important;
+  height: 100% !important;
+  min-height: 0 !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  border-radius: 8px !important;
+  overflow: hidden !important;
+}
+
+@media (max-width: 1500px) {
+  body.rf-console-home-svg.rf-dashboard-2x8.rf-dashboard-stable-fit .rf-dashboard-stack {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  }
+
+  body.rf-console-home-svg.rf-dashboard-2x8.rf-dashboard-stable-fit .rf-device-layout {
+    grid-template-columns: minmax(240px, 38%) minmax(0, 62%) !important;
+    gap: 10px !important;
+  }
+}
+
+@media (max-width: 1180px) {
+  body.rf-console-home-svg.rf-dashboard-2x8.rf-dashboard-stable-fit .rf-dashboard-stack {
+    grid-template-columns: 1fr !important;
+  }
+
+  body.rf-console-home-svg.rf-dashboard-2x8.rf-dashboard-stable-fit .rf-device-layout {
+    grid-template-columns: minmax(260px, 38%) minmax(0, 62%) !important;
+  }
+}
+
+/* --------------------------------------------------------------------------
+   Phase 1 UI-only: device title readability
+   Shows device name and frequency on separate lines while preserving title* IDs.
+   Native title + custom hover tooltip expose the full value when text is truncated.
+   -------------------------------------------------------------------------- */
+body.rf-console-home-svg.rf-dashboard-2x8.rf-dashboard-stable-fit .rf-device-title {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: flex-start !important;
+  justify-content: center !important;
+  gap: 2px !important;
+  min-width: 0 !important;
+  max-width: calc(100% - 72px) !important;
+  white-space: normal !important;
+  overflow: visible !important;
+  text-overflow: clip !important;
+  position: relative !important;
+  cursor: help !important;
+}
+
+body.rf-console-home-svg.rf-dashboard-2x8.rf-dashboard-stable-fit .rf-device-title .rf-device-name,
+body.rf-console-home-svg.rf-dashboard-2x8.rf-dashboard-stable-fit .rf-device-title .rf-device-frequency {
+  display: block !important;
+  max-width: 100% !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  white-space: nowrap !important;
+}
+
+body.rf-console-home-svg.rf-dashboard-2x8.rf-dashboard-stable-fit .rf-device-title .rf-device-name {
+  color: var(--rf-svg-text) !important;
+  font-size: 13px !important;
+  font-weight: 900 !important;
+  line-height: 1.05 !important;
+  letter-spacing: .04em !important;
+  text-transform: uppercase !important;
+}
+
+body.rf-console-home-svg.rf-dashboard-2x8.rf-dashboard-stable-fit .rf-device-title .rf-device-frequency {
+  color: var(--rf-svg-muted) !important;
+  font-size: 9px !important;
+  font-weight: 800 !important;
+  line-height: 1.05 !important;
+  letter-spacing: .04em !important;
+  text-transform: uppercase !important;
+}
+
+body.rf-console-home-svg.rf-dashboard-2x8.rf-dashboard-stable-fit .rf-device-title:hover::after,
+body.rf-console-home-svg.rf-dashboard-2x8.rf-dashboard-stable-fit .rf-device-title:focus-visible::after {
+  content: attr(data-full-title);
+  position: absolute;
+  left: 0;
+  top: calc(100% + 8px);
+  z-index: 9999;
+  max-width: min(460px, 80vw);
+  width: max-content;
+  padding: 8px 10px;
+  border: 1px solid var(--rf-svg-border);
+  border-radius: 8px;
+  background: #07111f;
+  box-shadow: 0 14px 30px rgba(0, 0, 0, .36);
+  color: var(--rf-svg-text);
+  font-size: 11px;
+  font-weight: 800;
+  line-height: 1.35;
+  letter-spacing: .02em;
+  text-transform: none;
+  white-space: normal;
+  pointer-events: none;
+}
+
+body.rf-console-home-svg.rf-dashboard-2x8.rf-dashboard-stable-fit .rf-device-title:hover::before,
+body.rf-console-home-svg.rf-dashboard-2x8.rf-dashboard-stable-fit .rf-device-title:focus-visible::before {
+  content: "";
+  position: absolute;
+  left: 14px;
+  top: calc(100% + 3px);
+  z-index: 10000;
+  border-left: 5px solid transparent;
+  border-right: 5px solid transparent;
+  border-bottom: 5px solid var(--rf-svg-border);
+  pointer-events: none;
+}
+
+/* --------------------------------------------------------------------------
+   Phase 1 UI-only: remove device-title hover tooltip and increase title scale.
+   Keeps the two-line device name/frequency layout, but disables hover popups.
+   -------------------------------------------------------------------------- */
+body.rf-console-home-svg.rf-dashboard-2x8.rf-dashboard-stable-fit .rf-overview-head {
+  min-height: 38px !important;
+}
+
+body.rf-console-home-svg.rf-dashboard-2x8.rf-dashboard-stable-fit .rf-device-title {
+  cursor: default !important;
+}
+
+body.rf-console-home-svg.rf-dashboard-2x8.rf-dashboard-stable-fit .rf-device-title:hover::after,
+body.rf-console-home-svg.rf-dashboard-2x8.rf-dashboard-stable-fit .rf-device-title:focus-visible::after,
+body.rf-console-home-svg.rf-dashboard-2x8.rf-dashboard-stable-fit .rf-device-title:hover::before,
+body.rf-console-home-svg.rf-dashboard-2x8.rf-dashboard-stable-fit .rf-device-title:focus-visible::before {
+  content: none !important;
+  display: none !important;
+}
+
+body.rf-console-home-svg.rf-dashboard-2x8.rf-dashboard-stable-fit .rf-device-title .rf-device-name {
+  font-size: clamp(15px, .95vw, 18px) !important;
+  line-height: 1.08 !important;
+  letter-spacing: .045em !important;
+}
+
+body.rf-console-home-svg.rf-dashboard-2x8.rf-dashboard-stable-fit .rf-device-title .rf-device-frequency {
+  font-size: clamp(11px, .72vw, 13px) !important;
+  line-height: 1.08 !important;
+  letter-spacing: .045em !important;
+}
+
+/* --------------------------------------------------------------------------
+   Phase 1 UI-only: match Live Trend panel height to the left overview panel.
+   The left card remains auto-height; the chart card stretches to the same row height.
+   -------------------------------------------------------------------------- */
+body.rf-console-home-svg.rf-dashboard-2x8.rf-dashboard-stable-fit .rf-device-layout {
+  align-items: stretch !important;
+}
+
+body.rf-console-home-svg.rf-dashboard-2x8.rf-dashboard-stable-fit .rf-trend-card {
+  height: auto !important;
+  min-height: 100% !important;
+  display: grid !important;
+  grid-template-rows: auto minmax(0, 1fr) !important;
+  align-self: stretch !important;
+}
+
+body.rf-console-home-svg.rf-dashboard-2x8.rf-dashboard-stable-fit .rf-trend-plot,
+body.rf-console-home-svg.rf-dashboard-2x8.rf-dashboard-stable-fit [id^="myPlot"] {
+  height: 100% !important;
+  min-height: 300px !important;
+}
+
+/* --------------------------------------------------------------------------
+   Phase 1 UI-only: improve small-text readability without changing layout size.
+   Scoped to the stable 2x8 index dashboard only.
+   -------------------------------------------------------------------------- */
+body.rf-console-home-svg.rf-dashboard-2x8.rf-dashboard-stable-fit .rf-forward-block .fwdpowerw {
+  font-size: 9px !important;
+  line-height: 1.12 !important;
+}
+
+body.rf-console-home-svg.rf-dashboard-2x8.rf-dashboard-stable-fit .rf-metric-top span {
+  font-size: 8px !important;
+  font-weight: 850 !important;
+  line-height: 1.05 !important;
+}
+
+body.rf-console-home-svg.rf-dashboard-2x8.rf-dashboard-stable-fit .rf-metric-card > span:not(.rf-mini-pill),
+body.rf-console-home-svg.rf-dashboard-2x8.rf-dashboard-stable-fit .rf-metric-card .rwdpowerlabel,
+body.rf-console-home-svg.rf-dashboard-2x8.rf-dashboard-stable-fit .rf-metric-card .vswrlabel {
+  font-size: 8px !important;
+  font-weight: 850 !important;
+  line-height: 1.08 !important;
+  letter-spacing: .03em !important;
+}
+
+body.rf-console-home-svg.rf-dashboard-2x8.rf-dashboard-stable-fit .rf-metric-card .rf-mini-pill {
+  min-height: 14px !important;
+  padding: 0 6px !important;
+  font-size: 7px !important;
+  font-weight: 850 !important;
+}
+
+body.rf-console-home-svg.rf-dashboard-2x8.rf-dashboard-stable-fit .rf-overview-footer {
+  font-size: 8px !important;
+  line-height: 1.12 !important;
+  font-weight: 850 !important;
+}
+
+body.rf-console-home-svg.rf-dashboard-2x8.rf-dashboard-stable-fit .rf-trend-head span {
+  font-size: 9px !important;
+  line-height: 1.1 !important;
+  font-weight: 850 !important;
+}
+
+body.rf-console-home-svg.rf-dashboard-2x8.rf-dashboard-stable-fit .rf-live-dot {
+  width: 6px !important;
+  height: 6px !important;
+}
+
+/* --------------------------------------------------------------------------
+   Phase 1 UI-only: left-panel label readability bump.
+   Only targets the small labels requested by the user and keeps layout stable.
+   -------------------------------------------------------------------------- */
+body.rf-console-home-svg.rf-dashboard-2x8.rf-dashboard-stable-fit .rf-forward-block .fwdpowerw {
+  font-size: 10px !important;
+  line-height: 1.16 !important;
+  font-weight: 900 !important;
+  letter-spacing: .02em !important;
+}
+
+body.rf-console-home-svg.rf-dashboard-2x8.rf-dashboard-stable-fit .rf-metric-top span {
+  font-size: 9px !important;
+  line-height: 1.08 !important;
+  font-weight: 900 !important;
+}
+
+body.rf-console-home-svg.rf-dashboard-2x8.rf-dashboard-stable-fit .rf-metric-card > span:not(.rf-mini-pill),
+body.rf-console-home-svg.rf-dashboard-2x8.rf-dashboard-stable-fit .rf-metric-card .rwdpowerlabel,
+body.rf-console-home-svg.rf-dashboard-2x8.rf-dashboard-stable-fit .rf-metric-card .vswrlabel {
+  font-size: 9px !important;
+  line-height: 1.12 !important;
+  font-weight: 900 !important;
+  letter-spacing: .035em !important;
+}
+
+body.rf-console-home-svg.rf-dashboard-2x8.rf-dashboard-stable-fit .rf-overview-footer {
+  min-height: 36px !important;
+  padding: 6px 8px !important;
+  gap: 4px 10px !important;
+  font-size: 9px !important;
+  line-height: 1.15 !important;
+  font-weight: 900 !important;
+}
+
+body.rf-console-home-svg.rf-dashboard-2x8.rf-dashboard-stable-fit .rf-overview-footer b,
+body.rf-console-home-svg.rf-dashboard-2x8.rf-dashboard-stable-fit .rf-maxhold-label {
+  font-size: 9px !important;
+  font-weight: 950 !important;
+}
+
+body.rf-console-home-svg.rf-dashboard-2x8.rf-dashboard-stable-fit .rf-live-dot {
+  width: 7px !important;
+  height: 7px !important;
+}
+
+/* --------------------------------------------------------------------------
+   Phase 1 UI-only: requested +5px label increase on the left information panel.
+   Vertical scroll is allowed, so the left panel can grow without clipping.
+   -------------------------------------------------------------------------- */
+body.rf-console-home-svg.rf-dashboard-2x8.rf-dashboard-stable-fit .rf-forward-block {
+  min-height: 66px !important;
+}
+
+body.rf-console-home-svg.rf-dashboard-2x8.rf-dashboard-stable-fit .rf-forward-block .fwdpowerw {
+  font-size: 15px !important;
+  line-height: 1.15 !important;
+  font-weight: 950 !important;
+}
+
+body.rf-console-home-svg.rf-dashboard-2x8.rf-dashboard-stable-fit .rf-overview-metrics {
+  grid-auto-rows: minmax(66px, auto) !important;
+  gap: 8px !important;
+}
+
+body.rf-console-home-svg.rf-dashboard-2x8.rf-dashboard-stable-fit .rf-metric-card {
+  min-height: 66px !important;
+  padding: 8px 10px !important;
+}
+
+body.rf-console-home-svg.rf-dashboard-2x8.rf-dashboard-stable-fit .rf-metric-top span {
+  font-size: 14px !important;
+  line-height: 1.08 !important;
+  font-weight: 950 !important;
+}
+
+body.rf-console-home-svg.rf-dashboard-2x8.rf-dashboard-stable-fit .rf-metric-card > span:not(.rf-mini-pill),
+body.rf-console-home-svg.rf-dashboard-2x8.rf-dashboard-stable-fit .rf-metric-card .rwdpowerlabel,
+body.rf-console-home-svg.rf-dashboard-2x8.rf-dashboard-stable-fit .rf-metric-card .vswrlabel {
+  font-size: 14px !important;
+  line-height: 1.08 !important;
+  font-weight: 950 !important;
+  letter-spacing: .025em !important;
+}
+
+body.rf-console-home-svg.rf-dashboard-2x8.rf-dashboard-stable-fit .rf-overview-footer {
+  min-height: 52px !important;
+  padding: 8px 10px !important;
+  gap: 5px 12px !important;
+  font-size: 14px !important;
+  line-height: 1.12 !important;
+  font-weight: 950 !important;
+}
+
+body.rf-console-home-svg.rf-dashboard-2x8.rf-dashboard-stable-fit .rf-overview-footer b,
+body.rf-console-home-svg.rf-dashboard-2x8.rf-dashboard-stable-fit .rf-maxhold-label {
+  font-size: 14px !important;
+  font-weight: 950 !important;
+}
+
+/* --------------------------------------------------------------------------
+   Phase 1 UI-only: reduce the previous +5px label bump by 3px.
+   Final requested sizes: Forward label 12px; metric/footer labels 11px.
+   -------------------------------------------------------------------------- */
+body.rf-console-home-svg.rf-dashboard-2x8.rf-dashboard-stable-fit .rf-forward-block {
+  min-height: 60px !important;
+}
+
+body.rf-console-home-svg.rf-dashboard-2x8.rf-dashboard-stable-fit .rf-forward-block .fwdpowerw {
+  font-size: 12px !important;
+  line-height: 1.15 !important;
+}
+
+body.rf-console-home-svg.rf-dashboard-2x8.rf-dashboard-stable-fit .rf-overview-metrics {
+  grid-auto-rows: minmax(60px, auto) !important;
+}
+
+body.rf-console-home-svg.rf-dashboard-2x8.rf-dashboard-stable-fit .rf-metric-card {
+  min-height: 60px !important;
+  padding: 8px 9px !important;
+}
+
+body.rf-console-home-svg.rf-dashboard-2x8.rf-dashboard-stable-fit .rf-metric-top span {
+  font-size: 11px !important;
+  line-height: 1.08 !important;
+}
+
+body.rf-console-home-svg.rf-dashboard-2x8.rf-dashboard-stable-fit .rf-metric-card > span:not(.rf-mini-pill),
+body.rf-console-home-svg.rf-dashboard-2x8.rf-dashboard-stable-fit .rf-metric-card .rwdpowerlabel,
+body.rf-console-home-svg.rf-dashboard-2x8.rf-dashboard-stable-fit .rf-metric-card .vswrlabel {
+  font-size: 11px !important;
+  line-height: 1.1 !important;
+}
+
+body.rf-console-home-svg.rf-dashboard-2x8.rf-dashboard-stable-fit .rf-overview-footer {
+  min-height: 44px !important;
+  padding: 7px 9px !important;
+  font-size: 11px !important;
+  line-height: 1.12 !important;
+}
+
+body.rf-console-home-svg.rf-dashboard-2x8.rf-dashboard-stable-fit .rf-overview-footer b,
+body.rf-console-home-svg.rf-dashboard-2x8.rf-dashboard-stable-fit .rf-maxhold-label {
+  font-size: 11px !important;
+}
+
+/* --------------------------------------------------------------------------
+   Phase 1 UI-only: Live Trend offline overlay.
+   The chart stays visible but dimmed; OFFLINE is displayed large in the panel.
+   -------------------------------------------------------------------------- */
+body.rf-console-home-svg.rf-dashboard-2x8.rf-dashboard-stable-fit .rf-trend-card {
+  position: relative !important;
+  overflow: hidden !important;
+}
+
+body.rf-console-home-svg.rf-dashboard-2x8.rf-dashboard-stable-fit .rf-trend-offline-overlay {
+  position: absolute !important;
+  inset: 0 !important;
+  z-index: 7 !important;
+  display: none !important;
+  align-items: center !important;
+  justify-content: center !important;
+  background: rgba(5, 13, 24, .58) !important;
+  backdrop-filter: blur(1px) !important;
+  pointer-events: none !important;
+}
+
+body.rf-console-home-svg.rf-dashboard-2x8.rf-dashboard-stable-fit .rf-trend-offline-overlay span {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  min-width: 220px !important;
+  padding: 12px 22px !important;
+  border: 1px solid rgba(239, 68, 68, .74) !important;
+  border-radius: 16px !important;
+  background: rgba(127, 29, 29, .28) !important;
+  color: rgba(255, 255, 255, .94) !important;
+  font-size: clamp(34px, 3.1vw, 56px) !important;
+  font-weight: 950 !important;
+  letter-spacing: .16em !important;
+  line-height: 1 !important;
+  text-transform: uppercase !important;
+  text-shadow: 0 3px 18px rgba(0, 0, 0, .62) !important;
+}
+
+body.rf-console-home-svg.rf-dashboard-2x8.rf-dashboard-stable-fit .rf-trend-card.is-offline .rf-trend-offline-overlay {
+  display: flex !important;
+}
+
+body.rf-console-home-svg.rf-dashboard-2x8.rf-dashboard-stable-fit .rf-trend-card.is-offline .rf-trend-plot,
+body.rf-console-home-svg.rf-dashboard-2x8.rf-dashboard-stable-fit .rf-trend-card.is-offline [id^="myPlot"] {
+  opacity: .38 !important;
+  transition: opacity 180ms ease !important;
+}
+
+/* --------------------------------------------------------------------------
+   Phase 1 UI-only: CAL Profile device cards use a catalog-style card layout.
+   The top visual area is an empty placeholder until real device artwork exists.
+   Preserves cardTxId*, cardNameId*, cardFreqId*, cardIpId*, cardStatusId*.
+   -------------------------------------------------------------------------- */
+body.rf-console-cal .cal-profile-wrapper {
+  width: 100% !important;
+  max-width: none !important;
+  margin: 0 !important;
+  padding: clamp(18px, 1.6vw, 28px) !important;
+  border: 1px solid var(--rf-border);
+  border-radius: 14px;
+  background: linear-gradient(180deg, rgba(16, 27, 43, .94), rgba(9, 18, 32, .98));
+  box-shadow: var(--rf-shadow-panel);
+}
+
+body.rf-console-cal .cal-page-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  margin: 0 0 18px;
+}
+
+body.rf-console-cal .cal-page-title {
+  margin: 0 0 6px !important;
+  color: var(--rf-ink-strong) !important;
+  font-size: clamp(19px, 1.25vw, 24px) !important;
+  line-height: 1.15 !important;
+  font-weight: 950 !important;
+  letter-spacing: .02em !important;
+}
+
+body.rf-console-cal .cal-page-subtitle {
+  margin: 0 !important;
+  color: var(--rf-muted) !important;
+  font-size: 13px !important;
+  line-height: 1.45 !important;
+}
+
+body.rf-console-cal .cal-page-count {
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  min-height: 30px;
+  padding: 6px 12px;
+  border: 1px solid rgba(43, 183, 246, .34);
+  border-radius: 999px;
+  background: rgba(43, 183, 246, .10);
+  color: var(--rf-primary);
+  font-size: 11px;
+  font-weight: 900;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+}
+
+body.rf-console-cal .device-card-grid {
+  display: grid !important;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 360px)) !important;
+  gap: clamp(16px, 1.4vw, 24px) !important;
+  align-items: stretch !important;
+  justify-content: start !important;
+}
+
+body.rf-console-cal .device-card {
+  display: none;
+  width: 100% !important;
+  min-height: 390px !important;
+  padding: 0 !important;
+  border: 1px solid rgba(49, 80, 110, .92) !important;
+  border-radius: 24px !important;
+  background: linear-gradient(180deg, rgba(14, 27, 44, .98), rgba(9, 18, 32, .99)) !important;
+  color: var(--rf-ink) !important;
+  text-align: left !important;
+  overflow: hidden !important;
+  cursor: pointer !important;
+  box-shadow: 0 18px 42px rgba(0, 0, 0, .24), inset 0 1px 0 rgba(255, 255, 255, .04);
+  transition:
+    border-color var(--rf-duration) var(--rf-ease),
+    box-shadow var(--rf-duration) var(--rf-ease),
+    transform var(--rf-duration) var(--rf-ease),
+    background var(--rf-duration) var(--rf-ease);
+}
+
+body.rf-console-cal .device-card:hover,
+body.rf-console-cal .device-card:focus-visible {
+  border-color: rgba(43, 183, 246, .66) !important;
+  background: linear-gradient(180deg, rgba(16, 35, 56, .99), rgba(10, 22, 38, .99)) !important;
+  box-shadow: 0 22px 52px rgba(0, 0, 0, .30), 0 0 0 3px rgba(43, 183, 246, .12);
+  transform: translateY(-2px);
+}
+
+body.rf-console-cal .device-card:focus-visible {
+  outline: 3px solid var(--rf-focus);
+  outline-offset: 4px;
+}
+
+body.rf-console-cal .device-card-visual {
+  position: relative;
+  height: 210px;
+  display: grid;
+  place-items: center;
+  background:
+    radial-gradient(circle at 50% 34%, rgba(43, 183, 246, .16), transparent 34%),
+    linear-gradient(135deg, rgba(19, 48, 62, .80), rgba(9, 20, 34, .96));
+  border-bottom: 1px solid rgba(49, 80, 110, .74);
+}
+
+body.rf-console-cal .device-card-placeholder {
+  width: calc(100% - 42px);
+  height: calc(100% - 42px);
+  display: grid;
+  place-items: center;
+  border: 1px dashed rgba(143, 162, 184, .32);
+  border-radius: 18px;
+  background:
+    linear-gradient(135deg, rgba(255, 255, 255, .035), rgba(255, 255, 255, .01)),
+    rgba(5, 13, 24, .20);
+}
+
+body.rf-console-cal .device-card-placeholder span {
+  color: rgba(229, 237, 247, .28);
+  font-size: 30px;
+  line-height: 1;
+  font-weight: 950;
+  letter-spacing: .18em;
+}
+
+body.rf-console-cal .device-status-badge {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  display: inline-flex;
+  align-items: center;
+  min-height: 28px;
+  padding: 6px 12px;
+  border: 1px solid rgba(143, 162, 184, .44);
+  border-radius: 999px;
+  background: rgba(15, 23, 42, .70);
+  color: var(--rf-muted);
+  font-size: 11px;
+  font-weight: 950;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  backdrop-filter: blur(8px);
+}
+
+body.rf-console-cal .device-card.connected .device-status-badge {
+  border-color: rgba(67, 211, 158, .50);
+  background: rgba(20, 83, 45, .36);
+  color: var(--rf-success);
+}
+
+body.rf-console-cal .device-card-body {
+  min-height: 180px;
+  display: grid;
+  grid-template-rows: auto auto 1fr auto;
+  gap: 10px;
+  padding: 26px 28px 24px;
+  background: linear-gradient(180deg, rgba(13, 24, 38, .98), rgba(8, 17, 30, .99));
+}
+
+body.rf-console-cal .device-card-kicker {
+  color: var(--rf-muted);
+  font-size: 11px;
+  line-height: 1;
+  font-weight: 900;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+}
+
+body.rf-console-cal .device-card-title-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 14px;
+}
+
+body.rf-console-cal .device-card-name {
+  color: var(--rf-ink-strong) !important;
+  font-size: clamp(25px, 1.7vw, 34px) !important;
+  line-height: 1.04 !important;
+  font-weight: 950 !important;
+  letter-spacing: .025em !important;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+body.rf-console-cal .device-card-arrow {
+  color: var(--rf-muted);
+  font-size: 48px;
+  line-height: 1;
+  font-weight: 300;
+  transform: translateY(-1px);
+  transition: transform var(--rf-duration) var(--rf-ease), color var(--rf-duration) var(--rf-ease);
+}
+
+body.rf-console-cal .device-card:hover .device-card-arrow,
+body.rf-console-cal .device-card:focus-visible .device-card-arrow {
+  color: var(--rf-primary);
+  transform: translate(4px, -1px);
+}
+
+body.rf-console-cal .device-card-meta {
+  display: grid;
+  gap: 5px;
+  color: var(--rf-muted) !important;
+  font-size: 13px !important;
+  line-height: 1.25 !important;
+  font-weight: 800 !important;
+  letter-spacing: .015em;
+}
+
+body.rf-console-cal .device-card-freq,
+body.rf-console-cal .device-card-ip {
+  color: inherit !important;
+}
+
+body.rf-console-cal .device-card-action {
+  align-self: end;
+  color: var(--rf-primary) !important;
+  font-size: 13px !important;
+  line-height: 1.2;
+  font-weight: 950 !important;
+  letter-spacing: .04em;
+}
+
+@media (max-width: 760px) {
+  body.rf-console-cal .cal-page-head {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  body.rf-console-cal .cal-page-count {
+    width: fit-content;
+  }
+
+  body.rf-console-cal .device-card-grid {
+    grid-template-columns: minmax(0, 1fr) !important;
+  }
+
+  body.rf-console-cal .device-card {
+    min-height: 360px !important;
+    border-radius: 20px !important;
+  }
+
+  body.rf-console-cal .device-card-visual {
+    height: 188px;
+  }
+
+  body.rf-console-cal .device-card-body {
+    padding: 22px 22px 20px;
+  }
+
+  body.rf-console-cal .device-card-name {
+    font-size: 26px !important;
+  }
+}
+
+/* --------------------------------------------------------------------------
+   Phase 1 UI-only: project-wide day/night theme support.
+   Default remains dark to preserve existing RF console behavior.
+   rf-theme.js sets html[data-rf-theme="light"|"dark"] and injects a toggle.
+   -------------------------------------------------------------------------- */
+body.rf-console #menubar {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+}
+
+body.rf-console ul#menu {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+body.rf-console .rf-theme-toggle {
+  flex: 0 0 auto;
+  min-height: 32px;
+  margin: 0 0 6px;
+  padding: 7px 12px;
+  border: 1px solid rgba(125, 211, 252, .38);
+  border-radius: 999px;
+  background: rgba(43, 183, 246, .12);
+  color: var(--rf-ink-strong);
+  font: 900 11px/1 system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  cursor: pointer;
+  white-space: nowrap;
+  transition:
+    background var(--rf-duration) var(--rf-ease),
+    border-color var(--rf-duration) var(--rf-ease),
+    color var(--rf-duration) var(--rf-ease),
+    transform var(--rf-duration) var(--rf-ease);
+}
+
+body.rf-console .rf-theme-toggle:hover {
+  border-color: rgba(125, 211, 252, .72);
+  background: rgba(43, 183, 246, .20);
+  transform: translateY(-1px);
+}
+
+body.rf-console .rf-theme-toggle-floating {
+  position: fixed;
+  top: 14px;
+  right: 14px;
+  z-index: 9999;
+  box-shadow: 0 12px 30px rgba(0, 0, 0, .28);
+}
+
+html[data-rf-theme="dark"] body.rf-console {
+  color-scheme: dark;
+}
+
+html[data-rf-theme="light"] body.rf-console {
+  color-scheme: light;
+  --rf-page: #eef4fa;
+  --rf-card: #ffffff;
+  --rf-panel: #f8fbff;
+  --rf-panel-2: #edf4fb;
+  --rf-ink: #142238;
+  --rf-ink-strong: #071525;
+  --rf-muted: #53657c;
+  --rf-muted-2: #6d7f95;
+  --rf-border: #c8d8e8;
+  --rf-border-strong: #9fb7cf;
+  --rf-focus: #0ea5e9;
+  --rf-blue: #0284c7;
+  --rf-green: #059669;
+  --rf-orange: #b7791f;
+  --rf-red: #dc2626;
+  --rf-primary: var(--rf-blue);
+  --rf-success: var(--rf-green);
+  --rf-warning: var(--rf-orange);
+  --rf-danger: var(--rf-red);
+  --rf-shadow-panel: 0 12px 32px rgba(15, 23, 42, .10);
+  background: linear-gradient(180deg, #f7fbff 0%, #e8f1fa 100%) !important;
+  background-image: linear-gradient(180deg, #f7fbff 0%, #e8f1fa 100%) !important;
+  color: var(--rf-ink) !important;
+}
+
+html[data-rf-theme="light"] {
+  background: #eef4fa !important;
+}
+
+html[data-rf-theme="light"] body.rf-console #header,
+html[data-rf-theme="light"] body.rf-console #site_content,
+html[data-rf-theme="light"] body.rf-console .container,
+html[data-rf-theme="light"] body.rf-console .container1,
+html[data-rf-theme="light"] body.rf-console .container6,
+html[data-rf-theme="light"] body.rf-console .container7,
+html[data-rf-theme="light"] body.rf-console .container8,
+html[data-rf-theme="light"] body.rf-console .container9,
+html[data-rf-theme="light"] body.rf-console .container10,
+html[data-rf-theme="light"] body.rf-console .sidebar,
+html[data-rf-theme="light"] body.rf-console .sidebar2,
+html[data-rf-theme="light"] body.rf-console #network_content,
+html[data-rf-theme="light"] body.rf-console .rf-home-toolbar,
+html[data-rf-theme="light"] body.rf-console .rf-device-overview,
+html[data-rf-theme="light"] body.rf-console .rf-trend-card,
+html[data-rf-theme="light"] body.rf-console .rf-radio-control,
+html[data-rf-theme="light"] body.rf-console .rf-metric-card,
+html[data-rf-theme="light"] body.rf-console .rf-overview-footer,
+html[data-rf-theme="light"] body.rf-console .cal-profile-wrapper,
+html[data-rf-theme="light"] body.rf-console .device-card,
+html[data-rf-theme="light"] body.rf-console .form,
+html[data-rf-theme="light"] body.rf-console .logx-card,
+html[data-rf-theme="light"] body.rf-console .logx-panel,
+html[data-rf-theme="light"] body.rf-console .wifi-card,
+html[data-rf-theme="light"] body.rf-console .wifi-panel {
+  background-color: var(--rf-card) !important;
+  color: var(--rf-ink) !important;
+  border-color: var(--rf-border) !important;
+}
+
+html[data-rf-theme="light"] body.rf-console #logo_text h1 a,
+html[data-rf-theme="light"] body.rf-console #logo_text h1 a:hover,
+html[data-rf-theme="light"] body.rf-console #logo_text h1 a .logo_colour,
+html[data-rf-theme="light"] body.rf-console h1,
+html[data-rf-theme="light"] body.rf-console h2,
+html[data-rf-theme="light"] body.rf-console h3,
+html[data-rf-theme="light"] body.rf-console h4,
+html[data-rf-theme="light"] body.rf-console h5,
+html[data-rf-theme="light"] body.rf-console h6,
+html[data-rf-theme="light"] body.rf-console .title,
+html[data-rf-theme="light"] body.rf-console .truelanLabel,
+html[data-rf-theme="light"] body.rf-console .cal-page-title,
+html[data-rf-theme="light"] body.rf-console .device-card-name,
+html[data-rf-theme="light"] body.rf-console .rf-auth-brand h1 {
+  color: var(--rf-ink-strong) !important;
+}
+
+html[data-rf-theme="light"] body.rf-console ul#menu li a {
+  color: var(--rf-ink-strong) !important;
+}
+
+html[data-rf-theme="light"] body.rf-console ul#menu li a:hover,
+html[data-rf-theme="light"] body.rf-console ul#menu li.selected a,
+html[data-rf-theme="light"] body.rf-console ul#menu li.selected a:hover {
+  color: #ffffff !important;
+  background: var(--rf-primary) !important;
+}
+
+html[data-rf-theme="light"] body.rf-console .rf-theme-toggle {
+  border-color: rgba(2, 132, 199, .34);
+  background: rgba(2, 132, 199, .10);
+  color: var(--rf-primary);
+}
+
+html[data-rf-theme="light"] body.rf-console input,
+html[data-rf-theme="light"] body.rf-console select,
+html[data-rf-theme="light"] body.rf-console textarea,
+html[data-rf-theme="light"] body.rf-console .form-control,
+html[data-rf-theme="light"] body.rf-console .logx-filter-input,
+html[data-rf-theme="light"] body.rf-console .logx-filter-select {
+  background-color: #ffffff !important;
+  background-image: none !important;
+  border-color: var(--rf-border) !important;
+  color: var(--rf-ink-strong) !important;
+}
+
+html[data-rf-theme="light"] body.rf-console input::placeholder,
+html[data-rf-theme="light"] body.rf-console textarea::placeholder {
+  color: #7890a8 !important;
+}
+
+html[data-rf-theme="light"] body.rf-console table,
+html[data-rf-theme="light"] body.rf-console th,
+html[data-rf-theme="light"] body.rf-console td,
+html[data-rf-theme="light"] body.rf-console .table,
+html[data-rf-theme="light"] body.rf-console .logx-table {
+  color: var(--rf-ink) !important;
+  border-color: var(--rf-border) !important;
+}
+
+html[data-rf-theme="light"] body.rf-console th,
+html[data-rf-theme="light"] body.rf-console .logx-table thead th {
+  background: #e6f0f9 !important;
+  color: var(--rf-ink-strong) !important;
+}
+
+html[data-rf-theme="light"] body.rf-console td,
+html[data-rf-theme="light"] body.rf-console .logx-table tbody td {
+  background: rgba(255, 255, 255, .78) !important;
+}
+
+html[data-rf-theme="light"] body.rf-console .rf-trend-plot,
+html[data-rf-theme="light"] body.rf-console [id^="myPlot"],
+html[data-rf-theme="light"] body.rf-console #logxMainTrend,
+html[data-rf-theme="light"] body.rf-console #logxRssiTrend,
+html[data-rf-theme="light"] body.rf-console #logxDurationTrend,
+html[data-rf-theme="light"] body.rf-console .device-card-visual {
+  background:
+    linear-gradient(135deg, rgba(232, 241, 250, .98), rgba(246, 250, 255, .98)) !important;
+  border-color: var(--rf-border) !important;
+}
+
+html[data-rf-theme="light"] body.rf-console .rf-metric-card,
+html[data-rf-theme="light"] body.rf-console .rf-forward-block,
+html[data-rf-theme="light"] body.rf-console .device-card-body,
+html[data-rf-theme="light"] body.rf-console .device-card-placeholder {
+  background: #f8fbff !important;
+  border-color: var(--rf-border) !important;
+}
+
+html[data-rf-theme="light"] body.rf-console .emptybar,
+html[data-rf-theme="light"] body.rf-console .rf-progress-line {
+  background: #d7e5f2 !important;
+}
+
+html[data-rf-theme="light"] body.rf-console .device-status-badge,
+html[data-rf-theme="light"] body.rf-console .rf-alert-pill,
+html[data-rf-theme="light"] body.rf-console .rf-mini-pill {
+  background: rgba(255, 255, 255, .72) !important;
+  color: var(--rf-muted) !important;
+}
+
+html[data-rf-theme="light"] body.rf-console .device-card.connected .device-status-badge,
+html[data-rf-theme="light"] body.rf-console [data-state="ok"].rf-alert-pill,
+html[data-rf-theme="light"] body.rf-console [data-state="ok"].rf-mini-pill {
+  background: rgba(5, 150, 105, .12) !important;
+  color: var(--rf-success) !important;
+  border-color: rgba(5, 150, 105, .35) !important;
+}
+
+html[data-rf-theme="light"] body.rf-console [data-state="warn"].rf-alert-pill,
+html[data-rf-theme="light"] body.rf-console [data-state="warn"].rf-mini-pill {
+  background: rgba(183, 121, 31, .13) !important;
+  color: var(--rf-warning) !important;
+  border-color: rgba(183, 121, 31, .34) !important;
+}
+
+html[data-rf-theme="light"] body.rf-console [data-state="alert"].rf-alert-pill,
+html[data-rf-theme="light"] body.rf-console [data-state="alert"].rf-mini-pill {
+  background: rgba(220, 38, 38, .12) !important;
+  color: var(--rf-danger) !important;
+  border-color: rgba(220, 38, 38, .34) !important;
+}
+
+html[data-rf-theme="light"] body.rf-console-auth {
+  background:
+    radial-gradient(circle at 50% 0%, rgba(2, 132, 199, .12), transparent 35%),
+    linear-gradient(180deg, #f7fbff 0%, #e8f1fa 100%) !important;
+}
+
+html[data-rf-theme="light"] body.rf-console-auth .form-group label {
+  background: #ffffff !important;
+  color: var(--rf-muted) !important;
+}
+
+@media (max-width: 760px) {
+  body.rf-console #menubar {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  body.rf-console .rf-theme-toggle {
+    width: fit-content;
+  }
+}
+
+/* --------------------------------------------------------------------------
+   Phase 1 UI-only: offline SVG icon-only theme toggle.
+   Sun = switch to day mode, Moon = switch to night mode.
+   -------------------------------------------------------------------------- */
+body.rf-console .rf-theme-toggle {
+  width: 38px !important;
+  height: 38px !important;
+  min-width: 38px !important;
+  min-height: 38px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  padding: 0 !important;
+  border-radius: 999px !important;
+  line-height: 1 !important;
+  font-size: 0 !important;
+}
+
+body.rf-console .rf-theme-toggle .rf-theme-icon {
+  width: 19px;
+  height: 19px;
+  display: block;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+body.rf-console .rf-theme-toggle .rf-theme-icon-sun circle {
+  fill: currentColor;
+  stroke: none;
+}
+
+body.rf-console .rf-theme-toggle[data-theme="dark"] {
+  color: #fbbf24;
+  border-color: rgba(251, 191, 36, .38);
+  background: rgba(251, 191, 36, .12);
+}
+
+body.rf-console .rf-theme-toggle[data-theme="dark"]:hover {
+  border-color: rgba(251, 191, 36, .72);
+  background: rgba(251, 191, 36, .20);
+}
+
+body.rf-console .rf-theme-toggle[data-theme="light"] {
+  color: #334155;
+  border-color: rgba(51, 65, 85, .22);
+  background: rgba(15, 23, 42, .06);
+}
+
+body.rf-console .rf-theme-toggle[data-theme="light"]:hover {
+  border-color: rgba(51, 65, 85, .42);
+  background: rgba(15, 23, 42, .10);
+}
+
+body.rf-console .rf-theme-toggle-floating {
+  width: 42px !important;
+  height: 42px !important;
+}
+
+/* --------------------------------------------------------------------------
+   Phase 1 UI-only: CAL Profile product image from project root path.
+   Uses img/Thrulan.png inside the catalog card visual area; placeholder stays
+   available only when the image is missing or fails to load.
+   -------------------------------------------------------------------------- */
+body.rf-console-cal .device-card-visual {
+  isolation: isolate;
+}
+
+body.rf-console-cal .device-card-image {
+  position: relative;
+  z-index: 2;
+  width: 100%;
+  height: 100%;
+  display: block;
+  padding: clamp(18px, 1.4vw, 28px);
+  object-fit: contain;
+  object-position: center;
+  filter: drop-shadow(0 18px 18px rgba(0, 0, 0, .34));
+}
+
+body.rf-console-cal .device-card-placeholder {
+  position: absolute;
+  inset: 22px;
+  z-index: 1;
+  opacity: 0;
+  transition: opacity var(--rf-duration) var(--rf-ease);
+}
+
+body.rf-console-cal .device-card-visual.no-device-image .device-card-placeholder {
+  opacity: 1;
+}
+
+html[data-rf-theme="light"] body.rf-console-cal .device-card-image {
+  filter: drop-shadow(0 18px 20px rgba(15, 23, 42, .18));
+}
+
+/* --------------------------------------------------------------------------
+   Phase 1 UI-only: constrain CAL product image inside the top visual box.
+   Prevents img/Thrulan.png from overlapping the lower device information area.
+   -------------------------------------------------------------------------- */
+body.rf-console-cal .device-card-visual {
+  position: relative !important;
+  overflow: hidden !important;
+}
+
+body.rf-console-cal .device-card-image {
+  position: absolute !important;
+  inset: 0 !important;
+  z-index: 2 !important;
+  width: 100% !important;
+  height: 100% !important;
+  max-width: 100% !important;
+  max-height: 100% !important;
+  padding: clamp(20px, 1.8vw, 34px) !important;
+  object-fit: contain !important;
+  object-position: center !important;
+  pointer-events: none !important;
+}
+
+body.rf-console-cal .device-card-placeholder {
+  position: absolute !important;
+  inset: 22px !important;
+  z-index: 1 !important;
+}
+
+body.rf-console-cal .device-card-visual.no-device-image .device-card-placeholder {
+  z-index: 2 !important;
+}
+
+/* --------------------------------------------------------------------------
+   Phase 1 UI-only: enlarge CAL product image while preserving aspect ratio.
+   The image fills more of the visual box without stretching or changing layout.
+   -------------------------------------------------------------------------- */
+body.rf-console-cal .device-card-image {
+  padding: 4px !important;
+  object-fit: contain !important;
+  object-position: center !important;
+  transform: scale(1.85);
+  transform-origin: center;
+}
+
+@media (max-width: 760px) {
+  body.rf-console-cal .device-card-image {
+    transform: scale(1.7);
+  }
+}
+
+
+
+/* Role page refinement: list + mapping layout, scoped only to role.php */
+body.rf-console-role #site_content {
+  grid-template-columns: minmax(280px, 380px) minmax(0, 1fr);
+  gap: var(--rf-space-4);
+}
+
+body.rf-console-role .container6 {
+  max-height: calc(100vh - 220px);
+}
+
+body.rf-console-role .container8 {
+  grid-column: 2;
+}
+
+body.rf-console-role .container8 > .card {
+  padding: var(--rf-space-4);
+}
+
+body.rf-console-role .container9 {
+  grid-column: 2;
+  display: grid !important;
+  grid-template-columns: repeat(2, minmax(320px, 1fr));
+  gap: var(--rf-space-4);
+}
+
+body.rf-console-role .container9 > .card {
+  display: flex !important;
+  flex-direction: column;
+  gap: var(--rf-space-3);
+  min-width: 0;
+  overflow: visible;
+}
+
+body.rf-console-role .cardRole {
+  grid-template-columns: 42px 88px minmax(0, 1fr);
+  min-height: 104px;
+  padding: 14px 16px;
+  min-width: 0;
+  overflow: visible;
+}
+
+body.rf-console-role .cardRoleTextID {
+  grid-column: 1;
+  order: 1;
+}
+
+body.rf-console-role .cardRoleTabImage {
+  grid-column: 2;
+  order: 2;
+  width: 72px;
+  height: 72px;
+  justify-self: center;
+}
+
+body.rf-console-role .selectedTrueLan {
+  grid-column: 3;
+  order: 3;
+  position: static !important;
+  inset: auto !important;
+  top: auto !important;
+  right: auto !important;
+  bottom: auto !important;
+  left: auto !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  min-width: 0 !important;
+  height: 48px !important;
+  min-height: 48px !important;
+  padding: 0 14px !important;
+  margin: 0 !important;
+  box-sizing: border-box;
+  text-align-last: left;
+}
+
+body.rf-console-role #cardButton {
+  display: flex !important;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--rf-space-2);
+  min-height: auto;
+  margin-top: var(--rf-space-2);
+}
+
+body.rf-console-role #saverolebutton,
+body.rf-console-role #selectrolebutton,
+body.rf-console-role #removerolebutton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 120px;
+  margin-top: 0 !important;
+}
+
+body.rf-console-role #selectrolebutton[style*="display: none"],
+body.rf-console-role #removerolebutton[style*="display: none"] {
+  display: none !important;
+}
+
+@media (max-width: 1100px) {
+  body.rf-console-role #site_content {
+    grid-template-columns: 1fr;
+  }
+
+  body.rf-console-role .container6,
+  body.rf-console-role .container8,
+  body.rf-console-role .container9 {
+    grid-column: 1;
+  }
+
+  body.rf-console-role .container9 {
+    grid-template-columns: 1fr;
+  }
+}
+
+
+/* --------------------------------------------------------------------------
+   Phase 1 consistency pass: normalize day/night colors across all rf-console
+   pages without touching backend, ids, forms, WebSocket payloads or JS logic.
+   -------------------------------------------------------------------------- */
+body.rf-console .card,
+body.rf-console .sidebar,
+body.rf-console .sidebar2,
+body.rf-console #network_content,
+body.rf-console .container,
+body.rf-console .container1,
+body.rf-console .container6,
+body.rf-console .container7,
+body.rf-console .container8,
+body.rf-console .container9,
+body.rf-console .container10 {
+  border-color: var(--rf-border) !important;
+  color: var(--rf-ink) !important;
+}
+
+body.rf-console .card,
+body.rf-console .sidebar,
+body.rf-console .sidebar2,
+body.rf-console #network_content {
+  background: var(--rf-card) !important;
+}
+
+body.rf-console input,
+body.rf-console select,
+body.rf-console textarea,
+body.rf-console .form-control,
+body.rf-console .systemselect,
+body.rf-console .sampleselect,
+body.rf-console .selectedTrueLan,
+body.rf-console .dropbtn {
+  background-color: var(--rf-panel) !important;
+  background-image: none !important;
+  border-color: var(--rf-border) !important;
+  color: var(--rf-ink-strong) !important;
+}
+
+body.rf-console input::placeholder,
+body.rf-console textarea::placeholder,
+body.rf-console .form-control::placeholder {
+  color: var(--rf-muted-2) !important;
+  opacity: 1;
+}
+
+body.rf-console-editor .cardTxTab,
+body.rf-console-editor .cardRole,
+body.rf-console-editor .dropdown-content,
+body.rf-console .logx-card,
+body.rf-console .logx-panel,
+body.rf-console .wifi-card,
+body.rf-console .wifi-panel,
+body.rf-console .device-card,
+body.rf-console .rf-metric-card,
+body.rf-console .rf-forward-block,
+body.rf-console .rf-device-overview,
+body.rf-console .rf-trend-card,
+body.rf-console .rf-radio-control {
+  background: var(--rf-panel) !important;
+  border-color: var(--rf-border) !important;
+  color: var(--rf-ink) !important;
+}
+
+body.rf-console-editor .cardTxTab:hover,
+body.rf-console-editor .cardRole:hover,
+body.rf-console .device-card:hover {
+  border-color: var(--rf-border-strong) !important;
+  background: var(--rf-panel-2) !important;
+}
+
+body.rf-console-editor .cardTxTab[style*="0, 255, 0"],
+body.rf-console-editor .cardRole[style*="0, 255, 0"],
+body.rf-console .device-card.connected {
+  background: rgba(67, 211, 158, .20) !important;
+  border-color: rgba(67, 211, 158, .62) !important;
+}
+
+body.rf-console .button,
+body.rf-console button,
+body.rf-console .button2 {
+  border-color: var(--rf-border-strong) !important;
+}
+
+html[data-rf-theme="light"] body.rf-console .card,
+html[data-rf-theme="light"] body.rf-console .sidebar,
+html[data-rf-theme="light"] body.rf-console .sidebar2,
+html[data-rf-theme="light"] body.rf-console #network_content,
+html[data-rf-theme="light"] body.rf-console .container,
+html[data-rf-theme="light"] body.rf-console .container1,
+html[data-rf-theme="light"] body.rf-console .container6,
+html[data-rf-theme="light"] body.rf-console .container7,
+html[data-rf-theme="light"] body.rf-console .container8,
+html[data-rf-theme="light"] body.rf-console .container9,
+html[data-rf-theme="light"] body.rf-console .container10 {
+  background: var(--rf-card) !important;
+  color: var(--rf-ink) !important;
+  border-color: var(--rf-border) !important;
+}
+
+html[data-rf-theme="light"] body.rf-console-editor .cardTxTab,
+html[data-rf-theme="light"] body.rf-console-editor .cardRole,
+html[data-rf-theme="light"] body.rf-console-editor .dropdown-content,
+html[data-rf-theme="light"] body.rf-console .rf-device-overview,
+html[data-rf-theme="light"] body.rf-console .rf-trend-card,
+html[data-rf-theme="light"] body.rf-console .rf-radio-control,
+html[data-rf-theme="light"] body.rf-console .rf-metric-card,
+html[data-rf-theme="light"] body.rf-console .device-card,
+html[data-rf-theme="light"] body.rf-console .wifi-card,
+html[data-rf-theme="light"] body.rf-console .wifi-panel,
+html[data-rf-theme="light"] body.rf-console .logx-card,
+html[data-rf-theme="light"] body.rf-console .logx-panel {
+  background: var(--rf-panel) !important;
+  color: var(--rf-ink) !important;
+  border-color: var(--rf-border) !important;
+}
+
+html[data-rf-theme="light"] body.rf-console-editor .cardTxTab:hover,
+html[data-rf-theme="light"] body.rf-console-editor .cardRole:hover,
+html[data-rf-theme="light"] body.rf-console .device-card:hover {
+  background: var(--rf-panel-2) !important;
+  border-color: var(--rf-border-strong) !important;
+}
+
+html[data-rf-theme="light"] body.rf-console-editor .cardTxTab[style*="0, 255, 0"],
+html[data-rf-theme="light"] body.rf-console-editor .cardRole[style*="0, 255, 0"],
+html[data-rf-theme="light"] body.rf-console .device-card.connected {
+  background: rgba(5, 150, 105, .14) !important;
+  border-color: rgba(5, 150, 105, .42) !important;
+  color: var(--rf-ink-strong) !important;
+}
+
+html[data-rf-theme="light"] body.rf-console .button,
+html[data-rf-theme="light"] body.rf-console button,
+html[data-rf-theme="light"] body.rf-console .button2 {
+  color: var(--rf-ink-strong);
+}
+
+html[data-rf-theme="light"] body.rf-console .button2[id*="delete"],
+html[data-rf-theme="light"] body.rf-console #deletetruelanbutton,
+html[data-rf-theme="light"] body.rf-console #removerolebutton,
+html[data-rf-theme="light"] body.rf-console .wifi-modal-btn-danger {
+  background: #dc2626 !important;
+  border-color: rgba(220, 38, 38, .55) !important;
+  color: #fff !important;
+}
+
+html[data-rf-theme="light"] body.rf-console .button2[id*="apply"],
+html[data-rf-theme="light"] body.rf-console #newtruelanbutton,
+html[data-rf-theme="light"] body.rf-console #saverolebutton,
+html[data-rf-theme="light"] body.rf-console #selectrolebutton,
+html[data-rf-theme="light"] body.rf-console #wifiJoinBtn,
+html[data-rf-theme="light"] body.rf-console #wifiAdvSave {
+  background: var(--rf-primary) !important;
+  border-color: rgba(2, 132, 199, .50) !important;
+  color: #fff !important;
+}
+
+html[data-rf-theme="light"] body.rf-console .rf-live-dot,
+html[data-rf-theme="light"] body.rf-console .device-status-badge::before,
+html[data-rf-theme="light"] body.rf-console .wifi-badge::before {
+  box-shadow: none;
+}
+
+
+/* --------------------------------------------------------------------------
+   Phase 1 consistency pass v2: one visual system for all pages in dark/light.
+   This is intentionally placed at the end to override legacy style.css values
+   and inline-looking old page styles without changing DOM ids or behavior.
+   -------------------------------------------------------------------------- */
+html[data-rf-theme="dark"] body.rf-console,
+body.rf-console {
+  --rf-page: #07111f;
+  --rf-card: #0e1a2c;
+  --rf-panel: #091524;
+  --rf-panel-2: #122138;
+  --rf-ink: #eaf2ff;
+  --rf-ink-strong: #f8fbff;
+  --rf-muted: #9fb1ca;
+  --rf-muted-2: #7f93ad;
+  --rf-border: #29435e;
+  --rf-border-strong: #3a5a7c;
+  --rf-focus: #7dd3fc;
+  --rf-blue: #38bdf8;
+  --rf-green: #22c55e;
+  --rf-orange: #f59e0b;
+  --rf-red: #ef4444;
+  --rf-primary: var(--rf-blue);
+  --rf-success: var(--rf-green);
+  --rf-warning: var(--rf-orange);
+  --rf-danger: var(--rf-red);
+  --rf-shadow-panel: 0 14px 38px rgba(0, 0, 0, .28);
+  background: var(--rf-page) !important;
+  background-image: none !important;
+  color: var(--rf-ink) !important;
+}
+
+html[data-rf-theme="light"] body.rf-console {
+  --rf-page: #edf4fb;
+  --rf-card: #ffffff;
+  --rf-panel: #f8fbff;
+  --rf-panel-2: #eaf2fa;
+  --rf-ink: #17243a;
+  --rf-ink-strong: #071525;
+  --rf-muted: #586b84;
+  --rf-muted-2: #8294ab;
+  --rf-border: #c8d8e8;
+  --rf-border-strong: #9fb7cf;
+  --rf-focus: #0ea5e9;
+  --rf-blue: #0284c7;
+  --rf-green: #059669;
+  --rf-orange: #b7791f;
+  --rf-red: #dc2626;
+  --rf-primary: var(--rf-blue);
+  --rf-success: var(--rf-green);
+  --rf-warning: var(--rf-orange);
+  --rf-danger: var(--rf-red);
+  --rf-shadow-panel: 0 14px 32px rgba(15, 23, 42, .10);
+  background: var(--rf-page) !important;
+  background-image: none !important;
+  color: var(--rf-ink) !important;
+}
+
+html[data-rf-theme="dark"],
+html[data-rf-theme="dark"] body,
+html[data-rf-theme="dark"] body.rf-console {
+  background-color: #07111f !important;
+}
+
+html[data-rf-theme="light"],
+html[data-rf-theme="light"] body,
+html[data-rf-theme="light"] body.rf-console {
+  background-color: #edf4fb !important;
+}
+
+body.rf-console #header,
+body.rf-console #site_content,
+body.rf-console .card,
+body.rf-console .sidebar,
+body.rf-console .sidebar2,
+body.rf-console #network_content,
+body.rf-console .container,
+body.rf-console .container1,
+body.rf-console .container6,
+body.rf-console .container7,
+body.rf-console .container8,
+body.rf-console .container9,
+body.rf-console .container10,
+body.rf-console .rf-home-toolbar,
+body.rf-console .rf-device-overview,
+body.rf-console .rf-trend-card,
+body.rf-console .rf-radio-control,
+body.rf-console .rf-metric-card,
+body.rf-console .rf-overview-footer,
+body.rf-console .cal-profile-wrapper,
+body.rf-console .device-card,
+body.rf-console .form,
+body.rf-console .logx-card,
+body.rf-console .logx-panel,
+body.rf-console .wifi-card,
+body.rf-console .wifi-panel {
+  color: var(--rf-ink) !important;
+  border-color: var(--rf-border) !important;
+}
+
+body.rf-console .card,
+body.rf-console .sidebar,
+body.rf-console .sidebar2,
+body.rf-console #network_content,
+body.rf-console .rf-home-toolbar,
+body.rf-console .rf-device-overview,
+body.rf-console .rf-trend-card,
+body.rf-console .rf-radio-control,
+body.rf-console .rf-metric-card,
+body.rf-console .rf-overview-footer,
+body.rf-console .cal-profile-wrapper,
+body.rf-console .device-card,
+body.rf-console .form,
+body.rf-console .logx-card,
+body.rf-console .logx-panel,
+body.rf-console .wifi-card,
+body.rf-console .wifi-panel {
+  background: var(--rf-card) !important;
+}
+
+body.rf-console-editor .cardTxTab,
+body.rf-console-editor .cardRole,
+body.rf-console-editor .dropdown-content,
+body.rf-console .device-card-body,
+body.rf-console .device-card-placeholder,
+body.rf-console .rf-forward-block,
+body.rf-console .rf-trend-plot,
+body.rf-console [id^="myPlot"],
+body.rf-console #logxMainTrend,
+body.rf-console #logxRssiTrend,
+body.rf-console #logxDurationTrend {
+  background: var(--rf-panel) !important;
+  color: var(--rf-ink) !important;
+  border-color: var(--rf-border) !important;
+}
+
+body.rf-console h1,
+body.rf-console h2,
+body.rf-console h3,
+body.rf-console h4,
+body.rf-console h5,
+body.rf-console h6,
+body.rf-console .title,
+body.rf-console .truelanLabel,
+body.rf-console .cal-page-title,
+body.rf-console .device-card-name,
+body.rf-console #logo_text h1 a,
+body.rf-console #logo_text h1 a:hover,
+body.rf-console #logo_text h1 a .logo_colour {
+  color: var(--rf-ink-strong) !important;
+}
+
+body.rf-console .selected_list span,
+body.rf-console .systemdiv span,
+body.rf-console .sampleselected span,
+body.rf-console label,
+body.rf-console small,
+body.rf-console .rf-muted,
+body.rf-console .device-card-meta {
+  color: var(--rf-muted) !important;
+}
+
+body.rf-console input,
+body.rf-console select,
+body.rf-console textarea,
+body.rf-console .form-control,
+body.rf-console .systemselect,
+body.rf-console .sampleselect,
+body.rf-console .selectedTrueLan,
+body.rf-console .dropbtn,
+body.rf-console .logx-filter-input,
+body.rf-console .logx-filter-select {
+  background: var(--rf-panel) !important;
+  background-image: none !important;
+  border-color: var(--rf-border) !important;
+  color: var(--rf-ink-strong) !important;
+  box-shadow: none !important;
+}
+
+html[data-rf-theme="light"] body.rf-console input,
+html[data-rf-theme="light"] body.rf-console select,
+html[data-rf-theme="light"] body.rf-console textarea,
+html[data-rf-theme="light"] body.rf-console .form-control,
+html[data-rf-theme="light"] body.rf-console .systemselect,
+html[data-rf-theme="light"] body.rf-console .sampleselect,
+html[data-rf-theme="light"] body.rf-console .selectedTrueLan,
+html[data-rf-theme="light"] body.rf-console .dropbtn,
+html[data-rf-theme="light"] body.rf-console .logx-filter-input,
+html[data-rf-theme="light"] body.rf-console .logx-filter-select {
+  background: #ffffff !important;
+}
+
+body.rf-console input::placeholder,
+body.rf-console textarea::placeholder,
+body.rf-console .form-control::placeholder {
+  color: var(--rf-muted-2) !important;
+  opacity: 1 !important;
+}
+
+body.rf-console ul#menu li a {
+  color: var(--rf-ink-strong) !important;
+}
+
+body.rf-console ul#menu li a:hover,
+body.rf-console ul#menu li.selected a,
+body.rf-console ul#menu li.selected a:hover {
+  color: #ffffff !important;
+  background: var(--rf-primary) !important;
+}
+
+body.rf-console-editor .cardTxTab:hover,
+body.rf-console-editor .cardRole:hover,
+body.rf-console .device-card:hover {
+  background: var(--rf-panel-2) !important;
+  border-color: var(--rf-border-strong) !important;
+}
+
+body.rf-console-editor .cardTxTab[style*="0, 255, 0"],
+body.rf-console-editor .cardRole[style*="0, 255, 0"],
+body.rf-console .device-card.connected {
+  background: rgba(34, 197, 94, .28) !important;
+  border-color: rgba(34, 197, 94, .62) !important;
+  color: var(--rf-ink-strong) !important;
+}
+
+html[data-rf-theme="light"] body.rf-console-editor .cardTxTab[style*="0, 255, 0"],
+html[data-rf-theme="light"] body.rf-console-editor .cardRole[style*="0, 255, 0"],
+html[data-rf-theme="light"] body.rf-console .device-card.connected {
+  background: rgba(5, 150, 105, .16) !important;
+  border-color: rgba(5, 150, 105, .44) !important;
+}
+
+body.rf-console table,
+body.rf-console th,
+body.rf-console td,
+body.rf-console .table,
+body.rf-console .logx-table {
+  color: var(--rf-ink) !important;
+  border-color: var(--rf-border) !important;
+}
+
+body.rf-console th,
+body.rf-console .logx-table thead th {
+  background: var(--rf-panel-2) !important;
+  color: var(--rf-ink-strong) !important;
+}
+
+body.rf-console td,
+body.rf-console .logx-table tbody td {
+  background: var(--rf-panel) !important;
+}
+
+html[data-rf-theme="light"] body.rf-console td,
+html[data-rf-theme="light"] body.rf-console .logx-table tbody td {
+  background: rgba(255, 255, 255, .86) !important;
+}
+
+body.rf-console .emptybar,
+body.rf-console .rf-progress-line {
+  background: var(--rf-border) !important;
+}
+
+body.rf-console .device-status-badge,
+body.rf-console .rf-alert-pill,
+body.rf-console .rf-mini-pill,
+body.rf-console .wifi-badge {
+  background: var(--rf-panel-2) !important;
+  color: var(--rf-muted) !important;
+  border-color: var(--rf-border) !important;
+}
+
+body.rf-console .device-card.connected .device-status-badge,
+body.rf-console [data-state="ok"].rf-alert-pill,
+body.rf-console [data-state="ok"].rf-mini-pill,
+body.rf-console .wifi-badge-on {
+  background: rgba(34, 197, 94, .16) !important;
+  color: var(--rf-success) !important;
+  border-color: rgba(34, 197, 94, .44) !important;
+}
+
+body.rf-console [data-state="warn"].rf-alert-pill,
+body.rf-console [data-state="warn"].rf-mini-pill,
+body.rf-console .wifi-banner-warning {
+  background: rgba(245, 158, 11, .16) !important;
+  color: var(--rf-warning) !important;
+  border-color: rgba(245, 158, 11, .44) !important;
+}
+
+body.rf-console [data-state="alert"].rf-alert-pill,
+body.rf-console [data-state="alert"].rf-mini-pill,
+body.rf-console .wifi-badge-off {
+  background: rgba(239, 68, 68, .16) !important;
+  color: var(--rf-danger) !important;
+  border-color: rgba(239, 68, 68, .44) !important;
+}
+
+body.rf-console .button2[id*="delete"],
+body.rf-console #deletetruelanbutton,
+body.rf-console #removerolebutton,
+body.rf-console .wifi-modal-btn-danger {
+  background: var(--rf-danger) !important;
+  border-color: rgba(239, 68, 68, .58) !important;
+  color: #ffffff !important;
+}
+
+body.rf-console .button2[id*="apply"],
+body.rf-console #newtruelanbutton,
+body.rf-console #saverolebutton,
+body.rf-console #selectrolebutton,
+body.rf-console #wifiJoinBtn,
+body.rf-console #wifiAdvSave {
+  background: var(--rf-primary) !important;
+  border-color: rgba(56, 189, 248, .58) !important;
+  color: #ffffff !important;
+}
+
+/* --------------------------------------------------------------------------
+   Theme consistency v3: fix light-mode dashboard title strip and auth button.
+   Scope: visual-only overrides; keeps all ids, forms, WebSocket and JS behavior.
+   -------------------------------------------------------------------------- */
+body.rf-console .rf-overview-head,
+body.rf-console .rf-device-title,
+body.rf-console .rf-overview-head .title,
+body.rf-console-home .title,
+body.rf-console-home-svg .rf-overview-head .title,
+body.rf-console-home-svg .rf-device-title {
+  background: transparent !important;
+  background-color: transparent !important;
+  background-image: none !important;
+  border: 0 !important;
+  box-shadow: none !important;
+}
+
+body.rf-console .rf-device-title,
+body.rf-console .rf-device-title .rf-device-name,
+body.rf-console .rf-overview-head .title,
+body.rf-console-home-svg .rf-device-title .rf-device-name {
+  color: var(--rf-ink-strong) !important;
+}
+
+body.rf-console .rf-device-title .rf-device-frequency,
+body.rf-console-home-svg .rf-device-title .rf-device-frequency {
+  color: var(--rf-muted) !important;
+}
+
+html[data-rf-theme="light"] body.rf-console .rf-overview-head,
+html[data-rf-theme="light"] body.rf-console .rf-device-title,
+html[data-rf-theme="light"] body.rf-console .rf-overview-head .title,
+html[data-rf-theme="light"] body.rf-console-home .title,
+html[data-rf-theme="light"] body.rf-console-home-svg .rf-overview-head .title,
+html[data-rf-theme="light"] body.rf-console-home-svg .rf-device-title {
+  background: transparent !important;
+  background-color: transparent !important;
+  background-image: none !important;
+  color: var(--rf-ink-strong) !important;
+}
+
+html[data-rf-theme="light"] body.rf-console .rf-device-title .rf-device-name,
+html[data-rf-theme="light"] body.rf-console-home-svg .rf-device-title .rf-device-name {
+  color: var(--rf-ink-strong) !important;
+}
+
+html[data-rf-theme="light"] body.rf-console .rf-device-title .rf-device-frequency,
+html[data-rf-theme="light"] body.rf-console-home-svg .rf-device-title .rf-device-frequency {
+  color: var(--rf-muted) !important;
+}
+
+body.rf-console-auth,
+html[data-rf-theme="light"] body.rf-console-auth,
+html[data-rf-theme="dark"] body.rf-console-auth {
+  background: var(--rf-page) !important;
+  background-image: none !important;
+  color: var(--rf-ink) !important;
+}
+
+body.rf-console-auth .form,
+html[data-rf-theme="light"] body.rf-console-auth .form,
+html[data-rf-theme="dark"] body.rf-console-auth .form {
+  background: var(--rf-card) !important;
+  border: 1px solid var(--rf-border) !important;
+  color: var(--rf-ink) !important;
+  box-shadow: var(--rf-shadow-panel) !important;
+}
+
+body.rf-console-auth .form::before,
+body.rf-console-auth .form h1,
+body.rf-console-auth .form h2,
+body.rf-console-auth .form h3,
+html[data-rf-theme="light"] body.rf-console-auth .form::before,
+html[data-rf-theme="light"] body.rf-console-auth .form h1,
+html[data-rf-theme="light"] body.rf-console-auth .form h2,
+html[data-rf-theme="light"] body.rf-console-auth .form h3 {
+  color: var(--rf-ink-strong) !important;
+}
+
+body.rf-console-auth .form-group label,
+html[data-rf-theme="light"] body.rf-console-auth .form-group label {
+  background: transparent !important;
+  color: var(--rf-muted) !important;
+}
+
+body.rf-console-auth .form-control,
+html[data-rf-theme="dark"] body.rf-console-auth .form-control {
+  background: var(--rf-panel) !important;
+  border-color: var(--rf-border) !important;
+  color: var(--rf-ink-strong) !important;
+}
+
+html[data-rf-theme="light"] body.rf-console-auth .form-control {
+  background: #ffffff !important;
+  border-color: var(--rf-border) !important;
+  color: var(--rf-ink-strong) !important;
+}
+
+body.rf-console-auth .button2,
+body.rf-console-auth button[type="submit"],
+body.rf-console-auth input[type="submit"],
+html[data-rf-theme="light"] body.rf-console-auth .button2,
+html[data-rf-theme="light"] body.rf-console-auth button[type="submit"],
+html[data-rf-theme="light"] body.rf-console-auth input[type="submit"],
+html[data-rf-theme="dark"] body.rf-console-auth .button2,
+html[data-rf-theme="dark"] body.rf-console-auth button[type="submit"],
+html[data-rf-theme="dark"] body.rf-console-auth input[type="submit"] {
+  background: var(--rf-primary) !important;
+  border: 1px solid var(--rf-primary) !important;
+  color: #ffffff !important;
+  font-weight: 900 !important;
+  letter-spacing: .04em !important;
+  text-shadow: none !important;
+}
+
+body.rf-console-auth .button2:hover,
+body.rf-console-auth button[type="submit"]:hover,
+body.rf-console-auth input[type="submit"]:hover {
+  filter: brightness(1.06);
+}
+
+/* --------------------------------------------------------------------------
+   Theme consistency v4: page-wide light/dark cleanup for screenshots.
+   Fixes low-contrast action buttons, log/datalogger dark islands in light mode,
+   and form/control surfaces across SNMP, Network, WiFi, Update and System pages.
+   -------------------------------------------------------------------------- */
+body.rf-console .button,
+body.rf-console .button2,
+body.rf-console input.button,
+body.rf-console input.button2,
+body.rf-console button.button,
+body.rf-console button.button2,
+body.rf-console .logx-btn,
+body.rf-console .wifi-modal-btn,
+body.rf-console .wifi-action-btn {
+  color: #ffffff !important;
+  text-shadow: none !important;
+}
+
+html[data-rf-theme="light"] body.rf-console .button,
+html[data-rf-theme="light"] body.rf-console .button2,
+html[data-rf-theme="light"] body.rf-console input.button,
+html[data-rf-theme="light"] body.rf-console input.button2,
+html[data-rf-theme="light"] body.rf-console button.button,
+html[data-rf-theme="light"] body.rf-console button.button2,
+html[data-rf-theme="light"] body.rf-console .logx-btn,
+html[data-rf-theme="light"] body.rf-console .wifi-modal-btn,
+html[data-rf-theme="light"] body.rf-console .wifi-action-btn {
+  background: #122033 !important;
+  border-color: rgba(15, 35, 58, .72) !important;
+  color: #ffffff !important;
+  text-shadow: none !important;
+}
+
+html[data-rf-theme="light"] body.rf-console .button2[id*="delete"],
+html[data-rf-theme="light"] body.rf-console #deletetruelanbutton,
+html[data-rf-theme="light"] body.rf-console #removerolebutton,
+html[data-rf-theme="light"] body.rf-console .logx-btn-red,
+html[data-rf-theme="light"] body.rf-console .wifi-modal-btn-danger {
+  background: #dc2626 !important;
+  border-color: rgba(220, 38, 38, .58) !important;
+  color: #ffffff !important;
+}
+
+html[data-rf-theme="light"] body.rf-console .button2[id*="new"],
+html[data-rf-theme="light"] body.rf-console #newtruelanbutton,
+html[data-rf-theme="light"] body.rf-console #saverolebutton,
+html[data-rf-theme="light"] body.rf-console #selectrolebutton,
+html[data-rf-theme="light"] body.rf-console #wifiJoinBtn,
+html[data-rf-theme="light"] body.rf-console #wifiAdvSave,
+html[data-rf-theme="light"] body.rf-console .logx-btn-blue,
+html[data-rf-theme="light"] body.rf-console .logx-btn-green,
+html[data-rf-theme="light"] body.rf-console .logx-chip-active,
+html[data-rf-theme="light"] body.rf-console .logx-page-active {
+  background: var(--rf-primary) !important;
+  border-color: rgba(2, 132, 199, .55) !important;
+  color: #ffffff !important;
+}
+
+html[data-rf-theme="light"] body.rf-console button:disabled,
+html[data-rf-theme="light"] body.rf-console .button:disabled,
+html[data-rf-theme="light"] body.rf-console .button2:disabled,
+html[data-rf-theme="light"] body.rf-console .logx-btn:disabled {
+  opacity: .55 !important;
+  color: rgba(255, 255, 255, .82) !important;
+}
+
+html[data-rf-theme="light"] body.rf-console input,
+html[data-rf-theme="light"] body.rf-console select,
+html[data-rf-theme="light"] body.rf-console textarea,
+html[data-rf-theme="light"] body.rf-console .form-control,
+html[data-rf-theme="light"] body.rf-console .selectedTrueLan,
+html[data-rf-theme="light"] body.rf-console .logx-search,
+html[data-rf-theme="light"] body.rf-console .logx-filter-input,
+html[data-rf-theme="light"] body.rf-console .logx-filter-select {
+  background: #ffffff !important;
+  border-color: var(--rf-border) !important;
+  color: var(--rf-ink-strong) !important;
+  box-shadow: none !important;
+}
+
+html[data-rf-theme="light"] body.rf-console input::placeholder,
+html[data-rf-theme="light"] body.rf-console textarea::placeholder,
+html[data-rf-theme="light"] body.rf-console .logx-search::placeholder {
+  color: var(--rf-muted-2) !important;
+  opacity: 1 !important;
+}
+
+html[data-rf-theme="light"] body.rf-console .logx-root {
+  --logx-page: var(--rf-page) !important;
+  --logx-card: var(--rf-card) !important;
+  --logx-panel: var(--rf-panel) !important;
+  --logx-panel-2: var(--rf-panel-2) !important;
+  --logx-ink: var(--rf-ink) !important;
+  --logx-ink-strong: var(--rf-ink-strong) !important;
+  --logx-muted: var(--rf-muted) !important;
+  --logx-muted-2: var(--rf-muted-2) !important;
+  --logx-border: var(--rf-border) !important;
+  --logx-border-strong: var(--rf-border-strong) !important;
+  color: var(--rf-ink) !important;
+}
+
+html[data-rf-theme="light"] body.rf-console .logx-card,
+html[data-rf-theme="light"] body.rf-console .logx-chart-card,
+html[data-rf-theme="light"] body.rf-console .logx-mini-chart,
+html[data-rf-theme="light"] body.rf-console .logx-panel,
+html[data-rf-theme="light"] body.rf-console .logx-metric,
+html[data-rf-theme="light"] body.rf-console .logx-control-box {
+  background: var(--rf-card) !important;
+  border-color: var(--rf-border) !important;
+  color: var(--rf-ink) !important;
+}
+
+html[data-rf-theme="light"] body.rf-console .logx-filter-card,
+html[data-rf-theme="light"] body.rf-console .logx-toolbar {
+  background: var(--rf-panel-2) !important;
+  border-color: var(--rf-border) !important;
+  box-shadow: none !important;
+}
+
+html[data-rf-theme="light"] body.rf-console .logx-big-svg,
+html[data-rf-theme="light"] body.rf-console .logx-small-svg,
+html[data-rf-theme="light"] body.rf-console .logx-svg,
+html[data-rf-theme="light"] body.rf-console .logx-chart-empty,
+html[data-rf-theme="light"] body.rf-console .rf-trend-plot,
+html[data-rf-theme="light"] body.rf-console [id^="myPlot"],
+html[data-rf-theme="light"] body.rf-console #logxMainTrend,
+html[data-rf-theme="light"] body.rf-console #logxRssiTrend,
+html[data-rf-theme="light"] body.rf-console #logxDurationTrend {
+  background: #ffffff !important;
+  border-color: var(--rf-border) !important;
+  color: var(--rf-muted) !important;
+}
+
+html[data-rf-theme="light"] body.rf-console .js-plotly-plot,
+html[data-rf-theme="light"] body.rf-console .js-plotly-plot .plot-container,
+html[data-rf-theme="light"] body.rf-console .js-plotly-plot .svg-container,
+html[data-rf-theme="light"] body.rf-console .js-plotly-plot .main-svg {
+  background: #ffffff !important;
+}
+
+html[data-rf-theme="light"] body.rf-console .js-plotly-plot .bg,
+html[data-rf-theme="light"] body.rf-console .js-plotly-plot rect.bg {
+  fill: #ffffff !important;
+}
+
+html[data-rf-theme="light"] body.rf-console .js-plotly-plot .xtick text,
+html[data-rf-theme="light"] body.rf-console .js-plotly-plot .ytick text,
+html[data-rf-theme="light"] body.rf-console .js-plotly-plot .gtitle,
+html[data-rf-theme="light"] body.rf-console .js-plotly-plot .xtitle,
+html[data-rf-theme="light"] body.rf-console .js-plotly-plot .ytitle,
+html[data-rf-theme="light"] body.rf-console .js-plotly-plot .legendtext {
+  fill: var(--rf-ink) !important;
+  color: var(--rf-ink) !important;
+}
+
+html[data-rf-theme="light"] body.rf-console .logx-pill,
+html[data-rf-theme="light"] body.rf-console .rf-alert-pill,
+html[data-rf-theme="light"] body.rf-console .rf-mini-pill,
+html[data-rf-theme="light"] body.rf-console .device-status-badge,
+html[data-rf-theme="light"] body.rf-console .wifi-badge {
+  background: var(--rf-panel-2) !important;
+  border-color: var(--rf-border) !important;
+  color: var(--rf-muted) !important;
+}
+
+html[data-rf-theme="light"] body.rf-console .logx-pill-blue,
+html[data-rf-theme="light"] body.rf-console .logx-pill-green,
+html[data-rf-theme="light"] body.rf-console .logx-pill-orange,
+html[data-rf-theme="light"] body.rf-console .logx-pill-red {
+  background: var(--rf-panel-2) !important;
+}
+
+/* --------------------------------------------------------------------------
+   Deep theme normalization v5.
+   Purpose: keep day/night visual language consistent even when old pages,
+   injected JS styles, wifi_theme.css, or legacy style.css define their own colors.
+   -------------------------------------------------------------------------- */
+body.rf-console {
+  background: var(--rf-page) !important;
+  color: var(--rf-ink) !important;
+}
+
+body.rf-console #main,
+body.rf-console #site_content,
+body.rf-console #wifi_content,
+body.rf-console #dataloggerContainer,
+body.rf-console .container,
+body.rf-console .container1,
+body.rf-console .container6,
+body.rf-console .container7,
+body.rf-console .container8,
+body.rf-console .container9,
+body.rf-console .container10,
+body.rf-console .sidebar,
+body.rf-console .sidebar2,
+body.rf-console #network_content,
+body.rf-console .card,
+body.rf-console .form,
+body.rf-console .wifi-panel,
+body.rf-console .wifi-card,
+body.rf-console .wifi-network-card,
+body.rf-console .logx-card,
+body.rf-console .logx-panel,
+body.rf-console .cal-profile-wrapper,
+body.rf-console .device-card,
+body.rf-console .rf-device-overview,
+body.rf-console .rf-trend-card,
+body.rf-console .rf-radio-control,
+body.rf-console .rf-metric-card {
+  background-color: var(--rf-card) !important;
+  background-image: none !important;
+  color: var(--rf-ink) !important;
+  border-color: var(--rf-border) !important;
+}
+
+body.rf-console .rf-home-toolbar,
+body.rf-console .logx-toolbar,
+body.rf-console .wifi-summary-top,
+body.rf-console .wifi-toolbar,
+body.rf-console .wifi-method-card,
+body.rf-console .wifi-advanced-panel,
+body.rf-console .selected_list,
+body.rf-console .sampleselected,
+body.rf-console .systemdiv,
+body.rf-console .cardRole,
+body.rf-console .cardTxTab,
+body.rf-console .dropdown-content,
+body.rf-console .rf-overview-footer,
+body.rf-console .rf-forward-block,
+body.rf-console .device-card-body,
+body.rf-console .device-card-placeholder,
+body.rf-console .logx-metric,
+body.rf-console .logx-control-box,
+body.rf-console .logx-chart-card,
+body.rf-console .logx-mini-chart {
+  background-color: var(--rf-panel) !important;
+  background-image: none !important;
+  color: var(--rf-ink) !important;
+  border-color: var(--rf-border) !important;
+}
+
+body.rf-console input:not([type="checkbox"]):not([type="radio"]):not([type="file"]),
+body.rf-console select,
+body.rf-console textarea,
+body.rf-console .form-control,
+body.rf-console .systemselect,
+body.rf-console .selectedTrueLan,
+body.rf-console .dropbtn,
+body.rf-console .logx-search,
+body.rf-console .logx-filter-input,
+body.rf-console .logx-filter-select,
+body.rf-console .wifi-input,
+body.rf-console .wifi-select {
+  background: var(--rf-panel) !important;
+  border: 1px solid var(--rf-border) !important;
+  color: var(--rf-ink-strong) !important;
+  box-shadow: none !important;
+}
+
+body.rf-console input::placeholder,
+body.rf-console textarea::placeholder {
+  color: var(--rf-muted-2) !important;
+  opacity: 1 !important;
+}
+
+body.rf-console label,
+body.rf-console .selected_list span,
+body.rf-console .systemdiv span,
+body.rf-console .sampleselected span,
+body.rf-console .form-group label,
+body.rf-console .wifi-label,
+body.rf-console .wifi-panel-kicker,
+body.rf-console .logx-filter-label,
+body.rf-console .logx-control-title,
+body.rf-console .logx-card-subtitle,
+body.rf-console .logx-chart-sub,
+body.rf-console .rf-device-frequency {
+  color: var(--rf-muted) !important;
+}
+
+body.rf-console h1,
+body.rf-console h2,
+body.rf-console h3,
+body.rf-console h4,
+body.rf-console h5,
+body.rf-console h6,
+body.rf-console .title,
+body.rf-console .truelanLabel,
+body.rf-console .wifi-title-wrap h3,
+body.rf-console .wifi-panel-title-row h4,
+body.rf-console .logx-card-title,
+body.rf-console .logx-chart-title,
+body.rf-console .logx-panel-title,
+body.rf-console .rf-device-name {
+  color: var(--rf-ink-strong) !important;
+}
+
+body.rf-console .button,
+body.rf-console .button2,
+body.rf-console button.button,
+body.rf-console button.button2,
+body.rf-console input.button,
+body.rf-console input.button2,
+body.rf-console .dropbtn,
+body.rf-console .logx-btn,
+body.rf-console .logx-page-btn,
+body.rf-console .wifi-inline-btn,
+body.rf-console .wifi-modal-btn,
+body.rf-console .wifi-action-btn {
+  background: var(--rf-primary) !important;
+  border-color: var(--rf-border-strong) !important;
+  color: #ffffff !important;
+  text-shadow: none !important;
+}
+
+body.rf-console .button:hover,
+body.rf-console .button2:hover,
+body.rf-console .logx-btn:hover,
+body.rf-console .logx-page-btn:hover:not(:disabled),
+body.rf-console .wifi-inline-btn:hover,
+body.rf-console .wifi-modal-btn:hover,
+body.rf-console .wifi-action-btn:hover {
+  filter: brightness(1.06) !important;
+}
+
+body.rf-console .button:disabled,
+body.rf-console .button2:disabled,
+body.rf-console button:disabled,
+body.rf-console .logx-btn:disabled,
+body.rf-console .wifi-inline-btn:disabled {
+  opacity: .55 !important;
+  cursor: not-allowed !important;
+  color: rgba(255,255,255,.82) !important;
+}
+
+body.rf-console .button2[id*="delete"],
+body.rf-console #deletetruelanbutton,
+body.rf-console #removerolebutton,
+body.rf-console .logx-btn-red,
+body.rf-console .wifi-modal-btn-danger {
+  background: var(--rf-danger) !important;
+  border-color: rgba(239, 68, 68, .58) !important;
+  color: #ffffff !important;
+}
+
+body.rf-console table,
+body.rf-console .table,
+body.rf-console .logx-event-table {
+  color: var(--rf-ink) !important;
+  border-color: var(--rf-border) !important;
+}
+
+body.rf-console th,
+body.rf-console .logx-event-table th {
+  background: var(--rf-panel-2) !important;
+  color: var(--rf-ink-strong) !important;
+  border-color: var(--rf-border) !important;
+}
+
+body.rf-console td,
+body.rf-console .logx-event-table td {
+  background: var(--rf-card) !important;
+  color: var(--rf-ink) !important;
+  border-color: var(--rf-border) !important;
+}
+
+html[data-rf-theme="light"] body.rf-console input:not([type="checkbox"]):not([type="radio"]):not([type="file"]),
+html[data-rf-theme="light"] body.rf-console select,
+html[data-rf-theme="light"] body.rf-console textarea,
+html[data-rf-theme="light"] body.rf-console .form-control,
+html[data-rf-theme="light"] body.rf-console .systemselect,
+html[data-rf-theme="light"] body.rf-console .selectedTrueLan,
+html[data-rf-theme="light"] body.rf-console .logx-search,
+html[data-rf-theme="light"] body.rf-console .logx-filter-input,
+html[data-rf-theme="light"] body.rf-console .logx-filter-select,
+html[data-rf-theme="light"] body.rf-console .wifi-input,
+html[data-rf-theme="light"] body.rf-console .wifi-select {
+  background: #ffffff !important;
+  color: var(--rf-ink-strong) !important;
+}
+
+html[data-rf-theme="light"] body.rf-console .rf-trend-plot,
+html[data-rf-theme="light"] body.rf-console .logx-chart-empty,
+html[data-rf-theme="light"] body.rf-console .logx-big-svg,
+html[data-rf-theme="light"] body.rf-console .logx-small-svg,
+html[data-rf-theme="light"] body.rf-console .logx-svg,
+html[data-rf-theme="light"] body.rf-console [id^="myPlot"],
+html[data-rf-theme="light"] body.rf-console #logxMainTrend,
+html[data-rf-theme="light"] body.rf-console #logxRssiTrend,
+html[data-rf-theme="light"] body.rf-console #logxDurationTrend {
+  background: #ffffff !important;
+  color: var(--rf-muted) !important;
+  border-color: var(--rf-border) !important;
+}
+
+html[data-rf-theme="dark"] body.rf-console .rf-trend-plot,
+html[data-rf-theme="dark"] body.rf-console .logx-chart-empty,
+html[data-rf-theme="dark"] body.rf-console .logx-big-svg,
+html[data-rf-theme="dark"] body.rf-console .logx-small-svg,
+html[data-rf-theme="dark"] body.rf-console .logx-svg,
+html[data-rf-theme="dark"] body.rf-console [id^="myPlot"],
+html[data-rf-theme="dark"] body.rf-console #logxMainTrend,
+html[data-rf-theme="dark"] body.rf-console #logxRssiTrend,
+html[data-rf-theme="dark"] body.rf-console #logxDurationTrend {
+  background: #0b1420 !important;
+  color: var(--rf-muted) !important;
+  border-color: var(--rf-border) !important;
+}
+
+/* Keep status colors semantic, but surfaces use the active theme. */
+body.rf-console .rf-alert-pill,
+body.rf-console .rf-mini-pill,
+body.rf-console .device-status-badge,
+body.rf-console .wifi-badge,
+body.rf-console .logx-pill {
+  background: var(--rf-panel-2) !important;
+  border-color: var(--rf-border) !important;
+  color: var(--rf-muted) !important;
+}
+
+/* --------------------------------------------------------------------------
+   Final RF Console design system
+   Centralized theme tokens and modern component overrides. Scoped to
+   body.rf-console so legacy/backend-only PHP endpoints keep their behavior.
+   -------------------------------------------------------------------------- */
+body.rf-console,
+html[data-rf-theme="dark"] body.rf-console {
+  color-scheme: dark;
+  --rf-bg: #07111f;
+  --rf-surface: #0b1626;
+  --rf-card: #101d30;
+  --rf-card-muted: #17263b;
+  --rf-text: #eaf2ff;
+  --rf-text-soft: #c6d4e6;
+  --rf-text-muted: #94a7bf;
+  --rf-border: #29435e;
+  --rf-primary: #38bdf8;
+  --rf-secondary: #64748b;
+  --rf-success: #22c55e;
+  --rf-warning: #f59e0b;
+  --rf-danger: #ef4444;
+  --rf-info: #60a5fa;
+  --rf-input-bg: #0b1626;
+  --rf-input-text: #f8fbff;
+  --rf-input-border: #35506f;
+  --rf-table-head-bg: #17263b;
+  --rf-table-row-bg: #101d30;
+  --rf-table-row-hover: #172942;
+  --rf-modal-bg: #101d30;
+  --rf-dropdown-bg: #101d30;
+  --rf-focus-ring: #7dd3fc;
+  --rf-shadow: 0 14px 34px rgba(0, 0, 0, .30);
+  --rf-chart-primary: #38bdf8;
+  --rf-chart-secondary: #22c55e;
+
+  --rf-page: var(--rf-bg);
+  --rf-panel: var(--rf-surface);
+  --rf-panel-2: var(--rf-card-muted);
+  --rf-ink: var(--rf-text);
+  --rf-ink-strong: #f8fbff;
+  --rf-muted: var(--rf-text-muted);
+  --rf-muted-2: #7f93ad;
+  --rf-border-strong: var(--rf-input-border);
+  --rf-focus: var(--rf-focus-ring);
+  --rf-blue: var(--rf-primary);
+  --rf-green: var(--rf-success);
+  --rf-orange: var(--rf-warning);
+  --rf-red: var(--rf-danger);
+  --rf-shadow-panel: var(--rf-shadow);
+}
+
+html[data-rf-theme="light"] body.rf-console {
+  color-scheme: light;
+  --rf-bg: #eef4fa;
+  --rf-surface: #f8fbff;
+  --rf-card: #ffffff;
+  --rf-card-muted: #eaf2fa;
+  --rf-text: #17243a;
+  --rf-text-soft: #31445d;
+  --rf-text-muted: #586b84;
+  --rf-border: #c8d8e8;
+  --rf-primary: #0369a1;
+  --rf-secondary: #64748b;
+  --rf-success: #047857;
+  --rf-warning: #a16207;
+  --rf-danger: #dc2626;
+  --rf-info: #2563eb;
+  --rf-input-bg: #ffffff;
+  --rf-input-text: #071525;
+  --rf-input-border: #9fb7cf;
+  --rf-table-head-bg: #e2edf8;
+  --rf-table-row-bg: #ffffff;
+  --rf-table-row-hover: #edf6ff;
+  --rf-modal-bg: #ffffff;
+  --rf-dropdown-bg: #ffffff;
+  --rf-focus-ring: #0284c7;
+  --rf-shadow: 0 12px 28px rgba(15, 23, 42, .10);
+  --rf-chart-primary: #0369a1;
+  --rf-chart-secondary: #047857;
+
+  --rf-page: var(--rf-bg);
+  --rf-panel: var(--rf-surface);
+  --rf-panel-2: var(--rf-card-muted);
+  --rf-ink: var(--rf-text);
+  --rf-ink-strong: #071525;
+  --rf-muted: var(--rf-text-muted);
+  --rf-muted-2: #6d7f95;
+  --rf-border-strong: var(--rf-input-border);
+  --rf-focus: var(--rf-focus-ring);
+  --rf-blue: var(--rf-primary);
+  --rf-green: var(--rf-success);
+  --rf-orange: var(--rf-warning);
+  --rf-red: var(--rf-danger);
+  --rf-shadow-panel: var(--rf-shadow);
+}
+
+html,
+body.rf-console {
+  background: var(--rf-bg) !important;
+}
+
+body.rf-console {
+  min-height: 100vh !important;
+  color: var(--rf-text) !important;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif !important;
+  font-size: 15px !important;
+  line-height: 1.5;
+}
+
+body.rf-console *,
+body.rf-console *::before,
+body.rf-console *::after {
+  letter-spacing: 0 !important;
+}
+
+body.rf-console #header,
+body.rf-console #site_content,
+body.rf-console #footer {
+  width: min(96vw, 2800px) !important;
+}
+
+body.rf-console #header {
+  padding-top: 10px;
+}
+
+body.rf-console #logo {
+  min-height: 68px;
+  height: auto !important;
+}
+
+body.rf-console #logo_text h1,
+body.rf-console #logo_text h1 a,
+body.rf-console #logo_text h1 a:hover,
+body.rf-console #logo_text h1 a .logo_colour {
+  color: var(--rf-ink-strong) !important;
+  font-size: 25px !important;
+  font-weight: 850 !important;
+  text-decoration: none !important;
+}
+
+body.rf-console #menubar {
+  min-height: 44px;
+  align-items: center;
+  padding: 0 0 8px;
+}
+
+body.rf-console ul#menu {
+  gap: 6px;
+  padding-bottom: 0 !important;
+}
+
+body.rf-console ul#menu li a {
+  min-height: 38px !important;
+  padding: 0 13px !important;
+  border: 1px solid transparent;
+  border-radius: 8px !important;
+  color: var(--rf-text-soft) !important;
+  font-size: 12px !important;
+  font-weight: 800 !important;
+  text-transform: uppercase;
+  transition:
+    background var(--rf-duration, 180ms) var(--rf-ease, ease),
+    border-color var(--rf-duration, 180ms) var(--rf-ease, ease),
+    color var(--rf-duration, 180ms) var(--rf-ease, ease);
+}
+
+body.rf-console ul#menu li a:hover,
+body.rf-console ul#menu li.selected a,
+body.rf-console ul#menu li.selected a:hover {
+  border-color: color-mix(in srgb, var(--rf-primary) 42%, transparent) !important;
+  background: color-mix(in srgb, var(--rf-primary) 14%, var(--rf-card)) !important;
+  color: var(--rf-ink-strong) !important;
+}
+
+html[data-rf-theme="light"] body.rf-console ul#menu li a:hover,
+html[data-rf-theme="light"] body.rf-console ul#menu li.selected a,
+html[data-rf-theme="light"] body.rf-console ul#menu li.selected a:hover {
+  background: #d9edf9 !important;
+  color: #073451 !important;
+}
+
+body.rf-console .rf-theme-toggle {
+  border-color: var(--rf-border) !important;
+  background: var(--rf-card) !important;
+  color: var(--rf-primary) !important;
+  box-shadow: none !important;
+}
+
+body.rf-console #site_content {
+  padding: 18px 0 34px !important;
+}
+
+body.rf-console h1,
+body.rf-console h2,
+body.rf-console h3,
+body.rf-console h4,
+body.rf-console h5,
+body.rf-console h6 {
+  color: var(--rf-ink-strong) !important;
+  font-weight: 850 !important;
+  line-height: 1.25;
+  text-wrap: balance;
+}
+
+body.rf-console p,
+body.rf-console span,
+body.rf-console div,
+body.rf-console li,
+body.rf-console td {
+  color: inherit;
+}
+
+body.rf-console a {
+  color: var(--rf-primary);
+}
+
+body.rf-console .card,
+body.rf-console .cardRssi,
+body.rf-console .sidebar,
+body.rf-console .sidebar2,
+body.rf-console #content,
+body.rf-console #monitor_content,
+body.rf-console #network_content,
+body.rf-console .chartDiv,
+body.rf-console .showLevelDiv,
+body.rf-console .showLevelHomeDiv,
+body.rf-console .container,
+body.rf-console .container1,
+body.rf-console .container6,
+body.rf-console .container7,
+body.rf-console .container8,
+body.rf-console .container9,
+body.rf-console .container10,
+body.rf-console .form,
+body.rf-console .rf-panel,
+body.rf-console .wifi-panel,
+body.rf-console .wifi-card,
+body.rf-console .wifi-network-card,
+body.rf-console .logx-card,
+body.rf-console .logx-panel,
+body.rf-console .cal-profile-wrapper,
+body.rf-console .device-card,
+body.rf-console .rf-device-overview,
+body.rf-console .rf-trend-card,
+body.rf-console .rf-radio-control,
+body.rf-console .rf-metric-card,
+body.rf-console .rf-overview-footer {
+  border-color: var(--rf-border) !important;
+  background-color: var(--rf-card) !important;
+  background-image: none !important;
+  color: var(--rf-text) !important;
+  box-shadow: none !important;
+}
+
+body.rf-console .selected_list,
+body.rf-console .sampleselected,
+body.rf-console .systemdiv,
+body.rf-console .sidebardiv,
+body.rf-console .subsystemdiv,
+body.rf-console .subsystemdiv2,
+body.rf-console .cardRole,
+body.rf-console .cardTxTab,
+body.rf-console .dropdown-content,
+body.rf-console .rf-home-toolbar,
+body.rf-console .rf-role-summary,
+body.rf-console .rf-forward-block,
+body.rf-console .rf-trend-plot,
+body.rf-console .device-card-body,
+body.rf-console .device-card-placeholder,
+body.rf-console .logx-toolbar,
+body.rf-console .logx-filter-card,
+body.rf-console .logx-metric,
+body.rf-console .logx-control-box,
+body.rf-console .logx-chart-card,
+body.rf-console .logx-mini-chart,
+body.rf-console .wifi-summary-top,
+body.rf-console .wifi-toolbar,
+body.rf-console .wifi-method-card,
+body.rf-console .wifi-advanced-panel {
+  border-color: var(--rf-border) !important;
+  background-color: var(--rf-surface) !important;
+  background-image: none !important;
+  color: var(--rf-text) !important;
+}
+
+body.rf-console label,
+body.rf-console small,
+body.rf-console .selected_list span,
+body.rf-console .systemdiv span,
+body.rf-console .sampleselected span,
+body.rf-console .sidebardiv span,
+body.rf-console .subsystemdiv span,
+body.rf-console .subsystemdiv2 span,
+body.rf-console .wifi-label,
+body.rf-console .wifi-panel-kicker,
+body.rf-console .logx-filter-label,
+body.rf-console .logx-card-subtitle,
+body.rf-console .logx-chart-sub,
+body.rf-console .logx-control-title,
+body.rf-console .rf-home-subtitle,
+body.rf-console .rf-device-frequency,
+body.rf-console .device-card-meta,
+body.rf-console .device-card-kicker {
+  color: var(--rf-text-muted) !important;
+  font-size: 13px !important;
+}
+
+body.rf-console .title,
+body.rf-console .truelanLabel,
+body.rf-console .rf-device-name,
+body.rf-console .wifi-title-wrap h3,
+body.rf-console .wifi-panel-title-row h4,
+body.rf-console .logx-card-title,
+body.rf-console .logx-chart-title,
+body.rf-console .logx-panel-title,
+body.rf-console .device-card-name {
+  color: var(--rf-ink-strong) !important;
+}
+
+body.rf-console input:not([type="checkbox"]):not([type="radio"]),
+body.rf-console select,
+body.rf-console textarea,
+body.rf-console .form-control,
+body.rf-console .systemselect,
+body.rf-console .sampleselect,
+body.rf-console .selectedTrueLan,
+body.rf-console .logx-search,
+body.rf-console .logx-filter-input,
+body.rf-console .logx-filter-select,
+body.rf-console .wifi-input,
+body.rf-console .wifi-select {
+  min-height: 44px !important;
+  border: 1px solid var(--rf-input-border) !important;
+  border-radius: 8px !important;
+  background: var(--rf-input-bg) !important;
+  background-image: none !important;
+  color: var(--rf-input-text) !important;
+  font-size: 14px !important;
+  font-weight: 650 !important;
+  box-shadow: none !important;
+}
+
+body.rf-console input[type="file"] {
+  padding: 10px 12px !important;
+}
+
+body.rf-console input::placeholder,
+body.rf-console textarea::placeholder,
+body.rf-console .form-control::placeholder,
+body.rf-console .logx-search::placeholder {
+  color: var(--rf-text-muted) !important;
+  opacity: 1 !important;
+}
+
+body.rf-console input:focus,
+body.rf-console select:focus,
+body.rf-console textarea:focus,
+body.rf-console .form-control:focus,
+body.rf-console .systemselect:focus,
+body.rf-console .logx-search:focus,
+body.rf-console .logx-filter-input:focus,
+body.rf-console .logx-filter-select:focus {
+  border-color: var(--rf-focus-ring) !important;
+  outline: 3px solid color-mix(in srgb, var(--rf-focus-ring) 35%, transparent) !important;
+  outline-offset: 1px;
+}
+
+body.rf-console .button,
+body.rf-console .button2,
+body.rf-console button.button,
+body.rf-console button.button2,
+body.rf-console input.button,
+body.rf-console input.button2,
+body.rf-console .logx-btn,
+body.rf-console .logx-page-btn,
+body.rf-console .wifi-inline-btn,
+body.rf-console .wifi-modal-btn,
+body.rf-console .wifi-action-btn,
+body.rf-console .powerButton,
+body.rf-console .upDownButton,
+body.rf-console .contentButton,
+body.rf-console .rf-btn {
+  min-height: 42px !important;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 0 16px !important;
+  border: 1px solid var(--rf-primary) !important;
+  border-radius: 8px !important;
+  background: var(--rf-primary) !important;
+  color: #ffffff !important;
+  font-size: 13px !important;
+  font-weight: 850 !important;
+  text-decoration: none !important;
+  text-shadow: none !important;
+  cursor: pointer;
+  transition:
+    transform var(--rf-duration, 180ms) var(--rf-ease, ease),
+    filter var(--rf-duration, 180ms) var(--rf-ease, ease),
+    background var(--rf-duration, 180ms) var(--rf-ease, ease);
+}
+
+body.rf-console .button:hover,
+body.rf-console .button2:hover,
+body.rf-console .logx-btn:hover,
+body.rf-console .logx-page-btn:hover:not(:disabled),
+body.rf-console .wifi-inline-btn:hover,
+body.rf-console .wifi-modal-btn:hover,
+body.rf-console .wifi-action-btn:hover,
+body.rf-console .powerButton:hover,
+body.rf-console .upDownButton:hover,
+body.rf-console .contentButton:hover,
+body.rf-console .rf-btn:hover {
+  filter: brightness(1.06) !important;
+}
+
+body.rf-console .button:active,
+body.rf-console .button2:active,
+body.rf-console button:active,
+body.rf-console .rf-btn:active {
+  transform: translateY(1px);
+}
+
+body.rf-console .rf-btn-secondary,
+body.rf-console .dropbtn {
+  border-color: var(--rf-border-strong) !important;
+  background: var(--rf-card-muted) !important;
+  color: var(--rf-ink-strong) !important;
+}
+
+body.rf-console .button2[id*="delete"],
+body.rf-console #deletetruelanbutton,
+body.rf-console #removerolebutton,
+body.rf-console .logx-btn-red,
+body.rf-console .wifi-modal-btn-danger {
+  border-color: var(--rf-danger) !important;
+  background: var(--rf-danger) !important;
+  color: #ffffff !important;
+}
+
+body.rf-console button:disabled,
+body.rf-console .button:disabled,
+body.rf-console .button2:disabled,
+body.rf-console .logx-btn:disabled,
+body.rf-console .wifi-inline-btn:disabled {
+  opacity: .56 !important;
+  cursor: not-allowed !important;
+  transform: none !important;
+}
+
+body.rf-console table,
+body.rf-console .table,
+body.rf-console .logx-event-table {
+  color: var(--rf-text) !important;
+  border-color: var(--rf-border) !important;
+}
+
+body.rf-console th,
+body.rf-console .logx-event-table th,
+body.rf-console .logx-table thead th {
+  background: var(--rf-table-head-bg) !important;
+  color: var(--rf-ink-strong) !important;
+  border-color: var(--rf-border) !important;
+}
+
+body.rf-console td,
+body.rf-console .logx-event-table td,
+body.rf-console .logx-table tbody td {
+  background: var(--rf-table-row-bg) !important;
+  color: var(--rf-text) !important;
+  border-color: var(--rf-border) !important;
+}
+
+body.rf-console tr:hover td,
+body.rf-console .logx-event-table tbody tr:hover td {
+  background: var(--rf-table-row-hover) !important;
+}
+
+body.rf-console .dropdown-content,
+body.rf-console .wifi-modal-box,
+body.rf-console .modal,
+body.rf-console .modal-content {
+  background: var(--rf-modal-bg) !important;
+  color: var(--rf-text) !important;
+  border-color: var(--rf-border) !important;
+  box-shadow: var(--rf-shadow) !important;
+}
+
+body.rf-console .dropdown-content {
+  background: var(--rf-dropdown-bg) !important;
+}
+
+body.rf-console .dropdown-content a {
+  color: var(--rf-text) !important;
+}
+
+body.rf-console .dropdown-content a:hover {
+  background: var(--rf-card-muted) !important;
+  color: var(--rf-ink-strong) !important;
+}
+
+body.rf-console .rf-alert-pill,
+body.rf-console .rf-mini-pill,
+body.rf-console .device-status-badge,
+body.rf-console .wifi-badge,
+body.rf-console .logx-pill,
+body.rf-console .wifi-tag,
+body.rf-console .wifi-tag-muted {
+  background: var(--rf-card-muted) !important;
+  border-color: var(--rf-border) !important;
+  color: var(--rf-text-muted) !important;
+}
+
+body.rf-console [data-state="ok"].rf-alert-pill,
+body.rf-console [data-state="ok"].rf-mini-pill,
+body.rf-console .device-card.connected .device-status-badge,
+body.rf-console .wifi-badge-on,
+body.rf-console .wifi-tag-success,
+body.rf-console .logx-pill-green {
+  background: color-mix(in srgb, var(--rf-success) 14%, var(--rf-card)) !important;
+  border-color: color-mix(in srgb, var(--rf-success) 44%, var(--rf-border)) !important;
+  color: var(--rf-success) !important;
+}
+
+body.rf-console [data-state="warn"].rf-alert-pill,
+body.rf-console [data-state="warn"].rf-mini-pill,
+body.rf-console .wifi-banner-warning,
+body.rf-console .logx-pill-orange {
+  background: color-mix(in srgb, var(--rf-warning) 14%, var(--rf-card)) !important;
+  border-color: color-mix(in srgb, var(--rf-warning) 44%, var(--rf-border)) !important;
+  color: var(--rf-warning) !important;
+}
+
+body.rf-console [data-state="alert"].rf-alert-pill,
+body.rf-console [data-state="alert"].rf-mini-pill,
+body.rf-console .wifi-badge-off,
+body.rf-console .wifi-banner-danger,
+body.rf-console .logx-pill-red {
+  background: color-mix(in srgb, var(--rf-danger) 14%, var(--rf-card)) !important;
+  border-color: color-mix(in srgb, var(--rf-danger) 44%, var(--rf-border)) !important;
+  color: var(--rf-danger) !important;
+}
+
+body.rf-console .logx-pill-blue,
+body.rf-console .wifi-tag-primary,
+body.rf-console .wifi-badge-hotspot-on {
+  background: color-mix(in srgb, var(--rf-primary) 14%, var(--rf-card)) !important;
+  border-color: color-mix(in srgb, var(--rf-primary) 44%, var(--rf-border)) !important;
+  color: var(--rf-primary) !important;
+}
+
+body.rf-console .rf-trend-plot,
+body.rf-console [id^="myPlot"],
+body.rf-console #logxMainTrend,
+body.rf-console #logxRssiTrend,
+body.rf-console #logxDurationTrend,
+body.rf-console #chartContainer,
+body.rf-console .logx-big-svg,
+body.rf-console .logx-small-svg,
+body.rf-console .logx-svg,
+body.rf-console .logx-chart-empty {
+  background: var(--rf-input-bg) !important;
+  border-color: var(--rf-border) !important;
+  color: var(--rf-text-muted) !important;
+}
+
+body.rf-console .emptybar,
+body.rf-console .rf-progress-line {
+  background: var(--rf-border) !important;
+}
+
+body.rf-console .filledbar {
+  background: var(--rf-chart-primary);
+}
+
+body.rf-console-home-svg {
+  --rf-svg-page: var(--rf-bg);
+  --rf-svg-panel: var(--rf-card);
+  --rf-svg-panel-2: var(--rf-surface);
+  --rf-svg-chart: var(--rf-input-bg);
+  --rf-svg-border: var(--rf-border);
+  --rf-svg-text: var(--rf-ink-strong);
+  --rf-svg-muted: var(--rf-text-muted);
+  --rf-svg-blue: var(--rf-chart-primary);
+  --rf-svg-green: var(--rf-success);
+  --rf-svg-orange: var(--rf-warning);
+  --rf-svg-pink: var(--rf-info);
+}
+
+body.rf-console .logx-root {
+  --logx-page: var(--rf-bg) !important;
+  --logx-card: var(--rf-card) !important;
+  --logx-panel: var(--rf-surface) !important;
+  --logx-panel-2: var(--rf-card-muted) !important;
+  --logx-ink: var(--rf-text) !important;
+  --logx-ink-strong: var(--rf-ink-strong) !important;
+  --logx-muted: var(--rf-text-muted) !important;
+  --logx-muted-2: var(--rf-muted-2) !important;
+  --logx-border: var(--rf-border) !important;
+  --logx-border-strong: var(--rf-border-strong) !important;
+  --logx-focus: var(--rf-focus-ring) !important;
+  --logx-blue: var(--rf-chart-primary) !important;
+  --logx-green: var(--rf-chart-secondary) !important;
+  --logx-orange: var(--rf-warning) !important;
+  --logx-red: var(--rf-danger) !important;
+  --logx-chart: var(--rf-input-bg) !important;
+  --logx-button: var(--rf-primary) !important;
+  --logx-button-hover: var(--rf-primary) !important;
+}
+
+body.rf-console .logx-event-table tbody tr,
+body.rf-console .logx-event-table tbody tr:nth-child(even),
+body.rf-console .logx-event-table tbody tr.logx-row-warning,
+body.rf-console .logx-event-table tbody tr.logx-row-alarm {
+  background: var(--rf-table-row-bg) !important;
+  color: var(--rf-text) !important;
+}
+
+body.rf-console .logx-event-table tbody tr:hover {
+  background: var(--rf-table-row-hover) !important;
+}
+
+body.rf-console .logx-fwd-text {
+  color: var(--rf-chart-primary) !important;
+}
+
+body.rf-console .logx-rwd-text {
+  color: var(--rf-chart-secondary) !important;
+}
+
+body.rf-console .logx-cond-text {
+  color: var(--rf-warning) !important;
+}
+
+body.rf-console .logx-muted-text {
+  color: var(--rf-text-muted) !important;
+}
+
+body.rf-console .wifi-modal-overlay {
+  background: color-mix(in srgb, #000000 54%, transparent) !important;
+}
+
+body.rf-console .wifi-modal-header,
+body.rf-console .wifi-modal-footer {
+  background: var(--rf-surface) !important;
+  border-color: var(--rf-border) !important;
+}
+
+body.rf-console-auth .login-page {
+  width: min(92vw, 480px);
+}
+
+body.rf-console-auth .form {
+  padding: 28px !important;
+  border-radius: 12px !important;
+  box-shadow: var(--rf-shadow) !important;
+}
+
+body.rf-console-auth .form::before {
+  color: var(--rf-ink-strong) !important;
+  font-size: 20px !important;
+  font-weight: 850 !important;
+}
+
+body.rf-console-auth .form-group label {
+  margin-top: 7px !important;
+  color: var(--rf-text-muted) !important;
+  font-size: 13px !important;
+}
+
+body.rf-console-auth .rf-auth-actions {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 10px;
+  margin-top: 18px;
+}
+
+body.rf-console-auth .rf-auth-actions .button2,
+body.rf-console-auth .rf-auth-actions .rf-btn {
+  width: 100%;
+}
+
+body.rf-console-monitor #site_content,
+body.rf-console-radio #site_content,
+body.rf-console-chart #site_content {
+  display: grid;
+  grid-template-columns: minmax(240px, 320px) minmax(0, 1fr);
+  gap: 18px;
+  align-items: start;
+}
+
+body.rf-console-monitor #monitor_content,
+body.rf-console-radio #content,
+body.rf-console-chart .chartDiv,
+body.rf-console-chart #chartContainer {
+  width: auto !important;
+  min-width: 0;
+  padding: 18px 20px;
+  border: 1px solid var(--rf-border);
+  border-radius: 12px;
+}
+
+body.rf-console-chart .chartDiv {
+  margin-bottom: 18px;
+}
+
+body.rf-console-chart #chartContainer {
+  min-height: 360px;
+  height: 360px !important;
+  float: none !important;
+}
+
+body.rf-console-chart #site_content {
+  display: block;
+}
+
+body.rf-console-monitor .showLevelDiv,
+body.rf-console-radio .showLevelHomeDiv {
+  margin: 0 0 14px;
+  padding: 16px;
+  border: 1px solid var(--rf-border);
+  border-radius: 10px;
+}
+
+body.rf-console myLabelLeft,
+body.rf-console myLabelRight,
+body.rf-console myLabelLeft2,
+body.rf-console myLabelRight2 {
+  color: var(--rf-ink-strong) !important;
+  font-family: inherit !important;
+}
+
+body.rf-console myLabelLeft,
+body.rf-console myLabelRight {
+  font-size: 30px !important;
+  font-weight: 850 !important;
+  line-height: 1.1;
+}
+
+body.rf-console myLabelLeft2,
+body.rf-console myLabelRight2 {
+  color: var(--rf-text-muted) !important;
+  font-size: 14px !important;
+  font-weight: 750 !important;
+}
+
+body.rf-console canvas {
+  max-width: 100%;
+}
+
+body.rf-console #footer {
+  color: var(--rf-text-muted) !important;
+}
+
+body.rf-console #footer h4 {
+  color: inherit !important;
+}
+
+@media (max-width: 1100px) {
+  body.rf-console-monitor #site_content,
+  body.rf-console-radio #site_content,
+  body.rf-console-chart #site_content {
+    grid-template-columns: 1fr;
+  }
+
+  body.rf-console-chart .chartDiv,
+  body.rf-console-chart #chartContainer {
+    grid-column: 1;
+  }
+}
+
+@media (max-width: 760px) {
+  body.rf-console {
+    font-size: 15px !important;
+  }
+
+  body.rf-console #header,
+  body.rf-console #site_content,
+  body.rf-console #footer {
+    width: calc(100vw - 24px) !important;
+  }
+
+  body.rf-console-auth .form {
+    padding: 22px !important;
+  }
+}
+
+/* Role page action spacing fix: keep the footer buttons off the card edge. */
+body.rf-console-role .role-device-panel,
+body.rf-console-role .container9 > .card.role-device-panel {
+  min-height: 0 !important;
+  height: auto !important;
+  padding: var(--rf-space-4) var(--rf-space-4) 32px !important;
+  overflow: visible !important;
+  gap: 14px !important;
+}
+
+body.rf-console-role .role-action-panel,
+body.rf-console-role #cardButton.role-action-panel {
+  display: flex !important;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px !important;
+  min-height: auto !important;
+  margin-top: 24px !important;
+  margin-bottom: 12px !important;
+  padding: 12px 0 4px !important;
+  border: 0 !important;
+  background: transparent !important;
+  overflow: visible !important;
+}
+
+body.rf-console-role .role-action-panel .button,
+body.rf-console-role .role-action-panel .button2,
+body.rf-console-role .role-action-panel button {
+  min-height: 42px !important;
+  margin-top: 0 !important;
+  margin-bottom: 0 !important;
+}
+
+@media (max-width: 760px) {
+  body.rf-console-role .role-device-panel,
+  body.rf-console-role .container9 > .card.role-device-panel {
+    padding: var(--rf-space-4) var(--rf-space-3) 28px !important;
+  }
+
+  body.rf-console-role .role-action-panel,
+  body.rf-console-role #cardButton.role-action-panel {
+    margin-top: 20px !important;
+    margin-bottom: 10px !important;
+    padding-top: 10px !important;
+  }
+
+  body.rf-console-role .role-action-panel .button,
+  body.rf-console-role .role-action-panel .button2,
+  body.rf-console-role .role-action-panel button {
+    width: 100%;
+  }
+}
+
+/* --------------------------------------------------------------------------
+   Role/Site page: keep UPDATE and SELECT inside their parent card.
+   The action row uses its own layout instead of inheriting cardRole grid height.
+   -------------------------------------------------------------------------- */
+body.rf-console-role .container9 > .card {
+  padding-bottom: var(--rf-space-4, 16px) !important;
+  overflow: visible !important;
+}
+
+body.rf-console-role .role-action-panel {
+  grid-column: 1 / -1 !important;
+  display: grid !important;
+  grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  gap: 10px !important;
+  width: 100% !important;
+  min-width: 0 !important;
+  min-height: auto !important;
+  height: auto !important;
+  margin: 10px 0 0 !important;
+  padding: 0 !important;
+  border: 0 !important;
+  background: transparent !important;
+  overflow: visible !important;
+}
+
+body.rf-console-role .role-action-panel #saverolebutton,
+body.rf-console-role .role-action-panel #selectrolebutton,
+body.rf-console-role .role-action-panel #removerolebutton {
+  width: 100% !important;
+  max-width: 100% !important;
+  min-width: 0 !important;
+  height: 42px !important;
+  min-height: 42px !important;
+  margin: 0 !important;
+  padding: 0 14px !important;
+  box-sizing: border-box !important;
+}
+
+body.rf-console-role .role-action-panel #removerolebutton {
+  grid-column: 1 / -1 !important;
+}
+
+body.rf-console-role .role-action-panel #selectrolebutton[style*="display: none"],
+body.rf-console-role .role-action-panel #removerolebutton[style*="display: none"] {
+  display: none !important;
+}
+
+@media (max-width: 900px) {
+  body.rf-console-role .role-action-panel {
+    grid-template-columns: 1fr !important;
+  }
+}
+
+/* --------------------------------------------------------------------------
+   Index Live Trend light-mode plot readability fix.
+   Fixes invisible title/axes caused by legacy header CSS and dark Plotly colors.
+   -------------------------------------------------------------------------- */
+body.rf-console-home-svg .rf-trend-head,
+body.rf-console-home-svg.rf-dashboard-2x8 .rf-trend-head,
+body.rf-console-home-svg.rf-dashboard-2x8.rf-dashboard-stable-fit .rf-trend-head,
+body.rf-console .rf-trend-head {
+  float: none !important;
+  width: auto !important;
+  position: relative !important;
+  background: transparent !important;
+  background-color: transparent !important;
+  background-image: none !important;
+  border: 0 !important;
+  box-shadow: none !important;
+}
+
+body.rf-console-home-svg .rf-trend-head h3,
+body.rf-console-home-svg.rf-dashboard-2x8 .rf-trend-head h3,
+body.rf-console-home-svg.rf-dashboard-2x8.rf-dashboard-stable-fit .rf-trend-head h3 {
+  color: var(--rf-ink-strong) !important;
+  background: transparent !important;
+}
+
+html[data-rf-theme="light"] body.rf-console-home-svg .rf-trend-card,
+html[data-rf-theme="light"] body.rf-console-home-svg.rf-dashboard-2x8 .rf-trend-card,
+html[data-rf-theme="light"] body.rf-console-home-svg.rf-dashboard-2x8.rf-dashboard-stable-fit .rf-trend-card {
+  background: #ffffff !important;
+  border-color: var(--rf-border) !important;
+  color: var(--rf-ink) !important;
+}
+
+html[data-rf-theme="light"] body.rf-console-home-svg .rf-trend-head h3,
+html[data-rf-theme="light"] body.rf-console-home-svg.rf-dashboard-2x8 .rf-trend-head h3,
+html[data-rf-theme="light"] body.rf-console-home-svg.rf-dashboard-2x8.rf-dashboard-stable-fit .rf-trend-head h3 {
+  color: #102844 !important;
+}
+
+html[data-rf-theme="light"] body.rf-console-home-svg .rf-trend-plot,
+html[data-rf-theme="light"] body.rf-console-home-svg [id^="myPlot"],
+html[data-rf-theme="light"] body.rf-console-home-svg .js-plotly-plot,
+html[data-rf-theme="light"] body.rf-console-home-svg .js-plotly-plot .plot-container,
+html[data-rf-theme="light"] body.rf-console-home-svg .js-plotly-plot .svg-container,
+html[data-rf-theme="light"] body.rf-console-home-svg .js-plotly-plot .main-svg {
+  background: #ffffff !important;
+  color: #17243a !important;
+}
+
+html[data-rf-theme="light"] body.rf-console-home-svg .js-plotly-plot .bg,
+html[data-rf-theme="light"] body.rf-console-home-svg .js-plotly-plot rect.bg {
+  fill: #ffffff !important;
+}
+
+html[data-rf-theme="light"] body.rf-console-home-svg .js-plotly-plot .xtick text,
+html[data-rf-theme="light"] body.rf-console-home-svg .js-plotly-plot .ytick text,
+html[data-rf-theme="light"] body.rf-console-home-svg .js-plotly-plot .gtitle,
+html[data-rf-theme="light"] body.rf-console-home-svg .js-plotly-plot .xtitle,
+html[data-rf-theme="light"] body.rf-console-home-svg .js-plotly-plot .ytitle,
+html[data-rf-theme="light"] body.rf-console-home-svg .js-plotly-plot .legendtext {
+  fill: #17243a !important;
+  color: #17243a !important;
+}
+
+/* --------------------------------------------------------------------------
+   Index Live Trend: visible empty/offline states in light mode.
+   Ensures the graph area and text remain readable even with no samples/offline.
+   -------------------------------------------------------------------------- */
+body.rf-console-home-svg .rf-trend-empty-state {
+  width: 100%;
+  height: 100%;
+  min-height: 220px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  border: 1px dashed var(--rf-border);
+  border-radius: 10px;
+  background: #0b1420;
+  color: var(--rf-muted);
+  text-align: center;
+}
+
+body.rf-console-home-svg .rf-trend-empty-title {
+  color: var(--rf-ink-strong);
+  font-size: 15px;
+  font-weight: 900;
+  letter-spacing: .04em;
+}
+
+body.rf-console-home-svg .rf-trend-empty-state small {
+  color: var(--rf-muted);
+  font-size: 12px;
+  font-weight: 700;
+}
+
+html[data-rf-theme="light"] body.rf-console-home-svg .rf-trend-empty-state {
+  background: #ffffff !important;
+  border-color: #c8d8e8 !important;
+  color: #53657c !important;
+}
+
+html[data-rf-theme="light"] body.rf-console-home-svg .rf-trend-empty-title {
+  color: #102844 !important;
+}
+
+html[data-rf-theme="light"] body.rf-console-home-svg .rf-trend-empty-state small {
+  color: #53657c !important;
+}
+
+html[data-rf-theme="light"] body.rf-console-home-svg.rf-dashboard-2x8.rf-dashboard-stable-fit .rf-trend-offline-overlay {
+  background: rgba(255, 255, 255, .56) !important;
+  backdrop-filter: none !important;
+}
+
+html[data-rf-theme="light"] body.rf-console-home-svg.rf-dashboard-2x8.rf-dashboard-stable-fit .rf-trend-offline-overlay span {
+  background: rgba(254, 226, 226, .88) !important;
+  border-color: rgba(220, 38, 38, .72) !important;
+  color: #991b1b !important;
+  text-shadow: none !important;
+}
+
+html[data-rf-theme="light"] body.rf-console-home-svg.rf-dashboard-2x8.rf-dashboard-stable-fit .rf-trend-card.is-offline .rf-trend-plot,
+html[data-rf-theme="light"] body.rf-console-home-svg.rf-dashboard-2x8.rf-dashboard-stable-fit .rf-trend-card.is-offline [id^="myPlot"] {
+  opacity: .88 !important;
+}
+
+/* --------------------------------------------------------------------------
+   Index Live Trend light chart final pass.
+   Use a light-blue chart surface and force Plotly SVG contrast in day mode.
+   -------------------------------------------------------------------------- */
+html[data-rf-theme="light"] body.rf-console-home-svg .rf-trend-card,
+html[data-rf-theme="light"] body.rf-console-home-svg.rf-dashboard-2x8 .rf-trend-card,
+html[data-rf-theme="light"] body.rf-console-home-svg.rf-dashboard-2x8.rf-dashboard-stable-fit .rf-trend-card {
+  background: #ffffff !important;
+}
+
+html[data-rf-theme="light"] body.rf-console-home-svg .rf-trend-plot,
+html[data-rf-theme="light"] body.rf-console-home-svg [id^="myPlot"] {
+  background: #f3f8fd !important;
+  border: 1px solid #c8d8e8 !important;
+  border-radius: 10px !important;
+  color: #0f172a !important;
+}
+
+html[data-rf-theme="light"] body.rf-console-home-svg .js-plotly-plot,
+html[data-rf-theme="light"] body.rf-console-home-svg .js-plotly-plot .plot-container,
+html[data-rf-theme="light"] body.rf-console-home-svg .js-plotly-plot .svg-container,
+html[data-rf-theme="light"] body.rf-console-home-svg .js-plotly-plot .main-svg {
+  background: #f3f8fd !important;
+}
+
+html[data-rf-theme="light"] body.rf-console-home-svg .js-plotly-plot .bg,
+html[data-rf-theme="light"] body.rf-console-home-svg .js-plotly-plot rect.bg {
+  fill: #f3f8fd !important;
+}
+
+html[data-rf-theme="light"] body.rf-console-home-svg .js-plotly-plot text,
+html[data-rf-theme="light"] body.rf-console-home-svg .js-plotly-plot .xtick text,
+html[data-rf-theme="light"] body.rf-console-home-svg .js-plotly-plot .ytick text,
+html[data-rf-theme="light"] body.rf-console-home-svg .js-plotly-plot .gtitle,
+html[data-rf-theme="light"] body.rf-console-home-svg .js-plotly-plot .xtitle,
+html[data-rf-theme="light"] body.rf-console-home-svg .js-plotly-plot .ytitle,
+html[data-rf-theme="light"] body.rf-console-home-svg .js-plotly-plot .legendtext {
+  fill: #0f172a !important;
+  color: #0f172a !important;
+}
+
+html[data-rf-theme="light"] body.rf-console-home-svg .js-plotly-plot .gridlayer path {
+  stroke: #d4e3f0 !important;
+  stroke-opacity: 1 !important;
+}
+
+html[data-rf-theme="light"] body.rf-console-home-svg .js-plotly-plot .zerolinelayer path,
+html[data-rf-theme="light"] body.rf-console-home-svg .js-plotly-plot .xlines-above path,
+html[data-rf-theme="light"] body.rf-console-home-svg .js-plotly-plot .ylines-above path {
+  stroke: #385b78 !important;
+  stroke-opacity: 1 !important;
+}html[data-rf-theme="light"] body.rf-console-home-svg .js-plotly-plot .xlines-above path,
+html[data-rf-theme="light"] body.rf-console-home-svg .js-plotly-plot .ylines-above path,
+html[data-rf-theme="light"] body.rf-console-home-svg .js-plotly-plot .zerolinelayer path {
+  stroke: #111827 !important;
+  stroke-opacity: 1 !important;
+}
+
+/* --------------------------------------------------------------------------
+   Index Live Trend title color override.
+   Keeps the section label readable and consistent in both light and dark modes.
+   -------------------------------------------------------------------------- */
+body.rf-console-home-svg .rf-trend-head h3,
+body.rf-console-home-svg.rf-dashboard-2x8 .rf-trend-head h3,
+body.rf-console-home-svg.rf-dashboard-2x8.rf-dashboard-stable-fit .rf-trend-head h3 {
+  color: #eaf2ff !important;
+  font-weight: 950 !important;
+}
+
+html[data-rf-theme="light"] body.rf-console-home-svg .rf-trend-head h3,
+html[data-rf-theme="light"] body.rf-console-home-svg.rf-dashboard-2x8 .rf-trend-head h3,
+html[data-rf-theme="light"] body.rf-console-home-svg.rf-dashboard-2x8.rf-dashboard-stable-fit .rf-trend-head h3 {
+  color: #0f172a !important;
+}
+
+html[data-rf-theme="dark"] body.rf-console-home-svg .rf-trend-head h3,
+html[data-rf-theme="dark"] body.rf-console-home-svg.rf-dashboard-2x8 .rf-trend-head h3,
+html[data-rf-theme="dark"] body.rf-console-home-svg.rf-dashboard-2x8.rf-dashboard-stable-fit .rf-trend-head h3 {
+  color: #f8fbff !important;
+}
+
+/* --------------------------------------------------------------------------
+   Index Live Trend: light mode chart surface styled like the dark chart,
+   but with a day-mode compatible blue/gray background.
+   -------------------------------------------------------------------------- */
+html[data-rf-theme="light"] body.rf-console-home-svg .rf-trend-card,
+html[data-rf-theme="light"] body.rf-console-home-svg.rf-dashboard-2x8 .rf-trend-card,
+html[data-rf-theme="light"] body.rf-console-home-svg.rf-dashboard-2x8.rf-dashboard-stable-fit .rf-trend-card {
+  background: #ffffff !important;
+  border-color: #b9cde1 !important;
+}
+
+html[data-rf-theme="light"] body.rf-console-home-svg .rf-trend-plot,
+html[data-rf-theme="light"] body.rf-console-home-svg [id^="myPlot"] {
+  background: #eaf2fa !important;
+  border: 1px solid #b9cde1 !important;
+  border-radius: 10px !important;
+  color: #102844 !important;
+}
+
+html[data-rf-theme="light"] body.rf-console-home-svg .js-plotly-plot,
+html[data-rf-theme="light"] body.rf-console-home-svg .js-plotly-plot .plot-container,
+html[data-rf-theme="light"] body.rf-console-home-svg .js-plotly-plot .svg-container,
+html[data-rf-theme="light"] body.rf-console-home-svg .js-plotly-plot .main-svg {
+  background: #eaf2fa !important;
+}
+
+html[data-rf-theme="light"] body.rf-console-home-svg .js-plotly-plot .bg,
+html[data-rf-theme="light"] body.rf-console-home-svg .js-plotly-plot rect.bg {
+  fill: #eaf2fa !important;
+}
+
+html[data-rf-theme="light"] body.rf-console-home-svg .js-plotly-plot text,
+html[data-rf-theme="light"] body.rf-console-home-svg .js-plotly-plot .xtick text,
+html[data-rf-theme="light"] body.rf-console-home-svg .js-plotly-plot .ytick text,
+html[data-rf-theme="light"] body.rf-console-home-svg .js-plotly-plot .gtitle,
+html[data-rf-theme="light"] body.rf-console-home-svg .js-plotly-plot .xtitle,
+html[data-rf-theme="light"] body.rf-console-home-svg .js-plotly-plot .ytitle,
+html[data-rf-theme="light"] body.rf-console-home-svg .js-plotly-plot .legendtext {
+  fill: #102844 !important;
+  color: #102844 !important;
+}
+
+html[data-rf-theme="light"] body.rf-console-home-svg .js-plotly-plot .gridlayer path {
+  stroke: #c4d6e8 !important;
+  stroke-opacity: 1 !important;
+}
+
+html[data-rf-theme="light"] body.rf-console-home-svg .js-plotly-plot .xlines-above path,
+html[data-rf-theme="light"] body.rf-console-home-svg .js-plotly-plot .ylines-above path,
+html[data-rf-theme="light"] body.rf-console-home-svg .js-plotly-plot .zerolinelayer path {
+  stroke: #102844 !important;
+  stroke-opacity: 1 !important;
+}
+
+html[data-rf-theme="light"] body.rf-console-home-svg .rf-trend-card,
+html[data-rf-theme="light"] body.rf-console-home-svg.rf-dashboard-2x8 .rf-trend-card,
+html[data-rf-theme="light"] body.rf-console-home-svg.rf-dashboard-2x8.rf-dashboard-stable-fit .rf-trend-card {
+  background: #ffffff !important;
+  border-color: #b7cadd !important;
+}
+
+html[data-rf-theme="light"] body.rf-console-home-svg .rf-trend-plot,
+html[data-rf-theme="light"] body.rf-console-home-svg [id^="myPlot"] {
+  min-height: 280px !important;
+  background-color: #dfeaf5 !important;
+  background-image:
+    linear-gradient(rgba(17, 24, 39, .08) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(17, 24, 39, .08) 1px, transparent 1px) !important;
+  background-size: 72px 48px !important;
+  border: 1px solid #9fb6cc !important;
+  border-radius: 10px !important;
+  color: #111827 !important;
+}
+
+html[data-rf-theme="light"] body.rf-console-home-svg .js-plotly-plot,
+html[data-rf-theme="light"] body.rf-console-home-svg .js-plotly-plot .plot-container,
+html[data-rf-theme="light"] body.rf-console-home-svg .js-plotly-plot .svg-container,
+html[data-rf-theme="light"] body.rf-console-home-svg .js-plotly-plot .main-svg {
+  background: #dfeaf5 !important;
+}
+
+html[data-rf-theme="light"] body.rf-console-home-svg .js-plotly-plot .bg,
+html[data-rf-theme="light"] body.rf-console-home-svg .js-plotly-plot rect.bg {
+  fill: #dfeaf5 !important;
+}
+
+html[data-rf-theme="light"] body.rf-console-home-svg .js-plotly-plot text,
+html[data-rf-theme="light"] body.rf-console-home-svg .js-plotly-plot .xtick text,
+html[data-rf-theme="light"] body.rf-console-home-svg .js-plotly-plot .ytick text,
+html[data-rf-theme="light"] body.rf-console-home-svg .js-plotly-plot .gtitle,
+html[data-rf-theme="light"] body.rf-console-home-svg .js-plotly-plot .xtitle,
+html[data-rf-theme="light"] body.rf-console-home-svg .js-plotly-plot .ytitle,
+html[data-rf-theme="light"] body.rf-console-home-svg .js-plotly-plot .legendtext {
+  fill: #111827 !important;
+  color: #111827 !important;
+  opacity: 1 !important;
+}
+
+html[data-rf-theme="light"] body.rf-console-home-svg .js-plotly-plot .gridlayer path {
+  stroke: #9fb6cc !important;
+  stroke-opacity: 1 !important;
+}
+
+/* --------------------------------------------------------------------------
+   Index Live Trend final Plotly fix
+   Keep Plotly trace colors in JavaScript. CSS only fixes panel, sizing,
+   surface, text/grid contrast, and visibility. Do not force scatter line colors.
+   -------------------------------------------------------------------------- */
+body.rf-console-home-svg .rf-trend-card {
+  overflow: hidden !important;
+}
+
+body.rf-console-home-svg .rf-trend-plot,
+body.rf-console-home-svg [id^="myPlot"] {
+  display: block !important;
+  width: 100% !important;
+  min-width: 0 !important;
+  min-height: 240px !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+}
+
+html[data-rf-theme="light"] body.rf-console-home-svg .rf-trend-card {
+  background: #f8fbff !important;
+  border-color: #b9cde1 !important;
+}
+
+html[data-rf-theme="light"] body.rf-console-home-svg .rf-trend-head,
+html[data-rf-theme="light"] body.rf-console-home-svg .rf-trend-head h3 {
+  background: transparent !important;
+  color: #0f172a !important;
+}
+
+html[data-rf-theme="light"] body.rf-console-home-svg .rf-trend-plot,
+html[data-rf-theme="light"] body.rf-console-home-svg [id^="myPlot"] {
+  background: #dfeaf5 !important;
+  background-image: none !important;
+  border: 1px solid #9fb6cc !important;
+  border-radius: 10px !important;
+  color: #111827 !important;
+}
+
+html[data-rf-theme="light"] body.rf-console-home-svg .js-plotly-plot,
+html[data-rf-theme="light"] body.rf-console-home-svg .js-plotly-plot .plot-container,
+html[data-rf-theme="light"] body.rf-console-home-svg .js-plotly-plot .svg-container,
+html[data-rf-theme="light"] body.rf-console-home-svg .js-plotly-plot .main-svg,
+html[data-rf-theme="light"] body.rf-console-home-svg .js-plotly-plot svg {
+  visibility: visible !important;
+  opacity: 1 !important;
+  background: #dfeaf5 !important;
+}
+
+html[data-rf-theme="light"] body.rf-console-home-svg .js-plotly-plot .bg,
+html[data-rf-theme="light"] body.rf-console-home-svg .js-plotly-plot rect.bg {
+  fill: #dfeaf5 !important;
+  opacity: 1 !important;
+}
+
+html[data-rf-theme="light"] body.rf-console-home-svg .js-plotly-plot text,
+html[data-rf-theme="light"] body.rf-console-home-svg .js-plotly-plot .xtick text,
+html[data-rf-theme="light"] body.rf-console-home-svg .js-plotly-plot .ytick text,
+html[data-rf-theme="light"] body.rf-console-home-svg .js-plotly-plot .legendtext,
+html[data-rf-theme="light"] body.rf-console-home-svg .js-plotly-plot .xtitle,
+html[data-rf-theme="light"] body.rf-console-home-svg .js-plotly-plot .ytitle {
+  fill: #111827 !important;
+  color: #111827 !important;
+  opacity: 1 !important;
+}
+
+html[data-rf-theme="light"] body.rf-console-home-svg .js-plotly-plot .gridlayer path {
+  stroke: #8da7bf !important;
+  stroke-opacity: 1 !important;
+}
+
+html[data-rf-theme="light"] body.rf-console-home-svg .js-plotly-plot .xlines-above path,
+html[data-rf-theme="light"] body.rf-console-home-svg .js-plotly-plot .ylines-above path,
+html[data-rf-theme="light"] body.rf-console-home-svg .js-plotly-plot .zerolinelayer path {
+  stroke: #111827 !important;
+  stroke-opacity: 1 !important;
+  opacity: 1 !important;
+}
+
+html[data-rf-theme="dark"] body.rf-console-home-svg .rf-trend-head,
+html[data-rf-theme="dark"] body.rf-console-home-svg .rf-trend-head h3 {
+  background: transparent !important;
+  color: #f8fbff !important;
+}
+
+/* --------------------------------------------------------------------------
+   CanvasJS migration for index Live Trend
+   Local/offline canvas chart surface. Plot colors are controlled in JS.
+   -------------------------------------------------------------------------- */
+body.rf-console-home-svg .rf-canvasjs-plot,
+body.rf-console-home-svg .rf-canvasjs-plot .canvasjs-chart-container,
+body.rf-console-home-svg .rf-canvasjs-plot canvas {
+  width: 100% !important;
+  min-height: 240px !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+}
+
+html[data-rf-theme="light"] body.rf-console-home-svg .rf-canvasjs-plot,
+html[data-rf-theme="light"] body.rf-console-home-svg .rf-canvasjs-plot .canvasjs-chart-container {
+  background: #dfeaf5 !important;
+}
+
+html[data-rf-theme="dark"] body.rf-console-home-svg .rf-canvasjs-plot,
+html[data-rf-theme="dark"] body.rf-console-home-svg .rf-canvasjs-plot .canvasjs-chart-container {
+  background: #0b1420 !important;
+}
+
+/* --------------------------------------------------------------------------
+   CanvasJS tooltip visibility fix
+   Keep hover tooltip near the top of the Live Trend plot and prevent clipping.
+   -------------------------------------------------------------------------- */
+body.rf-console-home-svg .rf-trend-card,
+body.rf-console-home-svg .rf-trend-plot,
+body.rf-console-home-svg [id^="myPlot"],
+body.rf-console-home-svg .rf-canvasjs-plot,
+body.rf-console-home-svg .rf-canvasjs-plot .canvasjs-chart-container {
+  overflow: visible !important;
+}
+
+body.rf-console-home-svg .rf-canvasjs-plot .canvasjs-chart-tooltip,
+body.rf-console-home-svg [id^="myPlot"] .canvasjs-chart-tooltip {
+  top: 8px !important;
+  z-index: 99999 !important;
+  max-width: 230px !important;
+  pointer-events: none !important;
+  white-space: nowrap !important;
+}
+
+html[data-rf-theme="light"] body.rf-console-home-svg .rf-canvasjs-plot .canvasjs-chart-tooltip,
+html[data-rf-theme="light"] body.rf-console-home-svg [id^="myPlot"] .canvasjs-chart-tooltip {
+  color: #111827 !important;
+}
+
+html[data-rf-theme="dark"] body.rf-console-home-svg .rf-canvasjs-plot .canvasjs-chart-tooltip,
+html[data-rf-theme="dark"] body.rf-console-home-svg [id^="myPlot"] .canvasjs-chart-tooltip {
+  color: #eaf2ff !important;
+}
+
+/* --------------------------------------------------------------------------
+   Datalogger CanvasJS chart migration
+   Offline CanvasJS rendering for main, RSSI, and duration trend panels.
+   -------------------------------------------------------------------------- */
+body.rf-console-log .logx-canvasjs-plot,
+body.rf-console-log .logx-canvasjs-plot .canvasjs-chart-container,
+body.rf-console-log .logx-canvasjs-plot canvas {
+  width: 100% !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+}
+
+body.rf-console-log #logxMainTrend.logx-canvasjs-plot {
+  min-height: 330px !important;
+}
+
+body.rf-console-log #logxRssiTrend.logx-canvasjs-plot,
+body.rf-console-log #logxDurationTrend.logx-canvasjs-plot {
+  min-height: 205px !important;
+}
+
+html[data-rf-theme="light"] body.rf-console-log .logx-canvasjs-plot,
+html[data-rf-theme="light"] body.rf-console-log .logx-canvasjs-plot .canvasjs-chart-container {
+  background: #ffffff !important;
+}
+
+html[data-rf-theme="dark"] body.rf-console-log .logx-canvasjs-plot,
+html[data-rf-theme="dark"] body.rf-console-log .logx-canvasjs-plot .canvasjs-chart-container {
+  background: #0b1420 !important;
 }

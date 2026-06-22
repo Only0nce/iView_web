@@ -22,11 +22,13 @@ include('ListAudioGain.php')
   <meta name="keywords" content="ED137, SIP" />
   <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
   <link rel="stylesheet" type="text/css" href="style.css" title="style" />
+  <link rel="stylesheet" type="text/css" href="rf-console.css?v=<?php echo time(); ?>" />
   <link rel="icon" type="image/png" href="favicon.ico" sizes="16x16" />
   <script src="jquery.min.js"></script>
   <script type="text/javascript" src="jquery-latest.min.js"></script>
   <script type="text/javascript" src="jquery-ui.js"></script>
   <script type="text/javascript" src="myfunctionRadioCtrl.js"></script>
+  <script type="text/javascript" src="rf-theme.js?v=<?php echo time(); ?>"></script>
 <!--  <script type="text/javascript" src="countUp.js"></script>-->
   
   <script type = "text/javascript">
@@ -34,7 +36,7 @@ include('ListAudioGain.php')
   </script>
 </head>
 
-<body>
+<body class="rf-console rf-console-radio">
 <div id="header">
   <div id="logo">
 	<div id="logo_text">

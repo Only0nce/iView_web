@@ -17,7 +17,7 @@ include('ListAudioGain.php')
 ?>
 <html>
 <head>
-  <title>iView</title>
+  <title>iView RF Power Monitor</title>
   <meta name="description" content="4 Wire to ED-137 Converter" />
   <meta name="keywords" content="ED137, SIP" />
   <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
@@ -27,20 +27,21 @@ include('ListAudioGain.php')
   <script src="jquery.min.js"></script>
   <script type="text/javascript" src="jquery-latest.min.js"></script>
   <script type="text/javascript" src="jquery-ui.js"></script>
-  <script type="text/javascript" src="plotly-latest.min.js"></script>
+  <script type="text/javascript" src="canvasjs.min.js?v=<?php echo time(); ?>"></script>
   <script type="text/javascript" src="myfunctionDatalogger.js?v=<?php echo time(); ?>"></script>
 <!--  <script type="text/javascript" src="countUp.js"></script>-->
   
   <script type = "text/javascript">
 	  
   </script>
+  <script type="text/javascript" src="rf-theme.js?v=<?php echo time(); ?>"></script>
 </head>
 
 <body class="rf-console rf-console-log">
 <div id="header">
   <div id="logo">
 	<div id="logo_text">
-      <h1><a href="index.php"><span class="logo_colour">RF Power Sensor Monitoring System</span></a></h1>
+      <h1><a href="index.php"><span class="logo_colour">iView RF Power Monitor</span></a></h1>
     </div>
   </div>
 <!--
@@ -55,7 +56,7 @@ include('ListAudioGain.php')
 		<li><a href="cal.php?id=1">CAL</a></li>
         <li><a href="thrulan.php?id=0">Power Sensor</a></li>
 		<li><a href="snmp_update.php">Rx SNMP Info</a></li>
-		<li><a href="role.php?id=0">ROLE</a></li>
+		<li><a href="role.php?id=0">SITE</a></li>
 		<li><a href="network.php">NETWORK</a></li>
 		<li><a href="wifi.php">WiFi</a></li>
 		<li><a href="update.php">system</a></li>

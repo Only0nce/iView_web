@@ -23,10 +23,12 @@ include('ListAudioGain.php')
   <meta name="keywords" content="Audio Streamer, Music Streamer" />
   <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
   <link rel="stylesheet" type="text/css" href="style.css" title="style" />
+  <link rel="stylesheet" type="text/css" href="rf-console.css?v=<?php echo time(); ?>" />
   <script src="jquery.min.js"></script>
   <script type="text/javascript" src="jquery-latest.min.js"></script>
   <script type="text/javascript" src="jquery-ui.js"></script>
   <script type="text/javascript" src="myfunctionMonitor.js"></script>
+  <script type="text/javascript" src="rf-theme.js?v=<?php echo time(); ?>"></script>
   <style type="text/css">
   
 /*
@@ -37,7 +39,7 @@ include('ListAudioGain.php')
 </head>
 </style>
 
-<body>
+<body class="rf-console rf-console-monitor">
   <div id="main">
     <div id="header">
       <div id="logo">

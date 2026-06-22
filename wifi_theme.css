@@ -622,3 +622,77 @@
         width: 100%;
     }
 }
+
+/* --------------------------------------------------------------------------
+   WiFi theme bridge
+   Keep WiFi-specific layout but use the shared rf-console day/night tokens.
+   -------------------------------------------------------------------------- */
+body.rf-console-wifi .wifi-panel,
+body.rf-console-wifi .wifi-card,
+body.rf-console-wifi .wifi-network-card,
+body.rf-console-wifi .wifi-method-card,
+body.rf-console-wifi .wifi-advanced-panel,
+body.rf-console-wifi .wifi-modal-card {
+  background: var(--rf-card, #0e1a2c) !important;
+  color: var(--rf-ink, #eaf2ff) !important;
+  border-color: var(--rf-border, #29435e) !important;
+  box-shadow: var(--rf-shadow-panel, none) !important;
+}
+
+body.rf-console-wifi .wifi-summary-top,
+body.rf-console-wifi .wifi-toolbar,
+body.rf-console-wifi .wifi-empty,
+body.rf-console-wifi .wifi-field,
+body.rf-console-wifi .wifi-modal-body {
+  background: var(--rf-panel, #091524) !important;
+  color: var(--rf-ink, #eaf2ff) !important;
+  border-color: var(--rf-border, #29435e) !important;
+}
+
+body.rf-console-wifi .wifi-title-wrap h3,
+body.rf-console-wifi .wifi-panel-title-row h4,
+body.rf-console-wifi .wifi-current-ssid,
+body.rf-console-wifi .wifi-modal-title {
+  color: var(--rf-ink-strong, #f8fbff) !important;
+}
+
+body.rf-console-wifi .wifi-panel-kicker,
+body.rf-console-wifi .wifi-label,
+body.rf-console-wifi .wifi-help,
+body.rf-console-wifi .wifi-muted,
+body.rf-console-wifi .wifi-detail {
+  color: var(--rf-muted, #9fb1ca) !important;
+}
+
+body.rf-console-wifi input:not([type="checkbox"]):not([type="radio"]),
+body.rf-console-wifi select,
+body.rf-console-wifi textarea,
+body.rf-console-wifi .wifi-input,
+body.rf-console-wifi .wifi-select {
+  background: var(--rf-panel, #091524) !important;
+  color: var(--rf-ink-strong, #f8fbff) !important;
+  border-color: var(--rf-border, #29435e) !important;
+}
+
+body.rf-console-wifi .button,
+body.rf-console-wifi .button2,
+body.rf-console-wifi .wifi-inline-btn,
+body.rf-console-wifi .wifi-modal-btn,
+body.rf-console-wifi .wifi-action-btn {
+  background: var(--rf-primary, #38bdf8) !important;
+  color: #ffffff !important;
+  border-color: var(--rf-border-strong, #3a5a7c) !important;
+}
+
+body.rf-console-wifi .wifi-modal-backdrop {
+  background: rgba(0, 0, 0, .55) !important;
+}
+
+html[data-rf-theme="light"] body.rf-console-wifi input:not([type="checkbox"]):not([type="radio"]),
+html[data-rf-theme="light"] body.rf-console-wifi select,
+html[data-rf-theme="light"] body.rf-console-wifi textarea,
+html[data-rf-theme="light"] body.rf-console-wifi .wifi-input,
+html[data-rf-theme="light"] body.rf-console-wifi .wifi-select {
+  background: #ffffff !important;
+  color: var(--rf-ink-strong, #071525) !important;
+}

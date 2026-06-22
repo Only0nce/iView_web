@@ -23,7 +23,7 @@ include('timezone.php')
 	
 <html>
 <head>
-  <title>iView</title>
+  <title>iView RF Power Monitor</title>
   <meta name="description" content="Professional Audio Streamer" />
   <meta name="keywords" content="Audio Streamer, Music Streamer" />
   <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
@@ -36,6 +36,7 @@ include('timezone.php')
   <link rel="stylesheet" type="text/css" href="jquery.datetimepicker.css">
   <script type="text/javascript" src="jquery.js"></script>
   <script type="text/javascript" src="jquery.datetimepicker.js"></script>
+  <script type="text/javascript" src="rf-theme.js?v=<?php echo time(); ?>"></script>
 </head>
 
 <body class="rf-console rf-console-config rf-console-system">
@@ -44,7 +45,7 @@ include('timezone.php')
       <div id="logo">
         <div id="logo_text">
           <!-- class="logo_colour", allows you to change the colour of the text -->
-          <h1><a href="index.php"><span class="logo_colour">RF Power Sensor Monitoring System</span></a></h1>
+          <h1><a href="index.php"><span class="logo_colour">iView RF Power Monitor</span></a></h1>
 <!--          <h2>IFZ Technologies Co.,Ltd.</h2>-->
         </div>
       </div>
@@ -55,7 +56,7 @@ include('timezone.php')
 			<li><a href="cal.php?id=1">CAL</a></li>
 			<li><a href="thrulan.php?id=0">Power Sensor</a></li>
 			<li><a href="snmp_update.php">Rx SNMP Info</a></li>
-    		<li><a href="role.php?id=0">ROLE</a></li>
+    		<li><a href="role.php?id=0">SITE</a></li>
 			<li><a href="network.php">NETWORK</a></li>
 			<li><a href="wifi.php">WiFi</a></li>
 			<li class="selected"><a href="update.php">SYSTEM</a></li>

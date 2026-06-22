@@ -18,7 +18,7 @@ include('ListAudioGain.php')
 ?>
 <html>
 <head>
-  <title>iView</title>
+  <title>iView RF Power Monitor</title>
   <meta name="description" content="4 Wire to ED-137 Converter" />
   <meta name="keywords" content="ED137, SIP" />
   <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
@@ -34,13 +34,14 @@ include('ListAudioGain.php')
   <script type = "text/javascript">
 	  
   </script>
+  <script type="text/javascript" src="rf-theme.js?v=<?php echo time(); ?>"></script>
 </head>
 
 <body class="rf-console rf-console-editor rf-console-snmp">
 <div id="header">
   <div id="logo">
 	<div id="logo_text">
-      <h1><a href="index.php"><span class="logo_colour">RF Power Sensor Monitoring System</span></a></h1>
+      <h1><a href="index.php"><span class="logo_colour">iView RF Power Monitor</span></a></h1>
     </div>
   </div>
 <!--
@@ -55,7 +56,7 @@ include('ListAudioGain.php')
 		<li><a href="cal.php?id=1">CAL</a></li>
 		<li><a href="thrulan.php?id=0">Power Sensor</a></li>
 		<li class="selected"><a href="snmp_update.php">Rx SNMP Info</a></li>
-		<li><a href="role.php?id=0">ROLE</a></li>
+		<li><a href="role.php?id=0">SITE</a></li>
 		<li><a href="network.php">NETWORK</a></li>
 		<li><a href="wifi.php">WiFi</a></li>
 		<li><a href="update.php">System</a></li>
@@ -111,9 +112,9 @@ include('ListAudioGain.php')
 		<div class="card" id="card0" name="card0" style="display: block; background-color: rgba(0, 0, 0, 0.0)">
 			<?php	
 				
-				echo '<div class="cardTxTab" id="cardTxNew" name="cardTxNew" onclick="setCurrentID(-1)" style="display: block; background-color:rgba(0,0,0,0.3)">';
-				echo '<img class="cardTxTabImage" src="img/newRadio.png" alt="Flowers in Chania">';
-				echo '<span class="cardTxTabText3" id="cardNameIdNew" name="cardNameIdNew"> New </span>';
+				echo '<div class="cardTxTab cardTxTabAdd" id="cardTxNew" name="cardTxNew" onclick="setCurrentID(-1)" style="display: block;">';
+				echo '<span class="cardTxTabIcon cardTxTabIconAdd" aria-hidden="true"><svg viewBox="0 0 48 48" focusable="false" aria-hidden="true"><circle cx="24" cy="24" r="23"/><path d="M24 14v20M14 24h20"/></svg></span>';
+				echo '<span class="cardTxTabText3" id="cardNameIdNew" name="cardNameIdNew"> Add New </span>';
 				echo '</div>';
 			?>
 		</div>

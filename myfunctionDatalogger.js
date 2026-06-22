@@ -5,7 +5,7 @@
  * - Keep table-only layout. No right-side detail panel.
  * - 10 rows per page.
  * - No Device, Status, or Message/Note columns.
- * - Add filters: Date/Time, Site, Station, and text search.
+ * - Add required Device selection plus filters: Date/Time, Site, Station, and text search.
  * - Preserve existing backend/WebSocket menuID behavior as much as possible.
  */
 
@@ -42,11 +42,12 @@ window.logDateStartFilter = "";
 window.logDateEndFilter = "";
 window.logSiteFilter = "";
 window.logStationFilter = "";
+window.logDeviceFilter = "";
 
-window.logTrendAggregate = "raw";
-window.logTrendZoom = "all";
-window.logTrendPowerUnit = "watt";
-window.logTrendPowerValue = "max";
+  window.logTrendAggregate = "raw";
+  window.logTrendZoom = "all";
+  window.logTrendPowerUnit = "watt";
+  window.logTrendPowerValue = "max";
 
 // =========================
 // Safe helpers
@@ -160,6 +161,32 @@ function getSiteName(row) {
 
 function getStationName(row) {
   return safeText(pickFirst(row.stationName, row.station_name, row.station));
+}
+
+function getDeviceIndex(row) {
+  return safeText(pickFirst(row.txIndex, row.tx_index, row.deviceIndex, row.device_id, row.deviceId));
+}
+
+function getDeviceKey(row) {
+  const tx = getDeviceIndex(row);
+  const station = getStationName(row);
+  const freq = getFrequencyMHz(row);
+
+  if (tx) return "tx:" + tx;
+  if (station || freq) return "station:" + station + "|freq:" + freq;
+  return "";
+}
+
+function getDeviceLabel(row) {
+  const tx = getDeviceIndex(row);
+  const station = getStationName(row) || "Unnamed Device";
+  const freq = getFrequencyMHz(row);
+  const prefix = tx ? "Device " + tx : "Device";
+  return freq ? `${prefix} — ${station} • ${freq} MHz` : `${prefix} — ${station}`;
+}
+
+function hasSelectedDevice() {
+  return String(window.logDeviceFilter || "").trim() !== "";
 }
 
 function getFrequencyMHz(row) {
@@ -382,14 +409,14 @@ function installEventLogExplorerStyle() {
   const style = document.createElement("style");
   style.id = "event-log-explorer-style";
   style.textContent = `
-    html { background:#08111e; }
-    body {
+    html { background:var(--rf-page, #08111e); }
+    body.rf-console {
       min-height:100vh !important;
       height:auto !important;
-      background:#08111e !important;
+      background:var(--rf-page, #08111e) !important;
       background-image:none !important;
       animation:none !important;
-      color:#e5edf7 !important;
+      color:var(--rf-ink, #e5edf7) !important;
     }
     #header {
       width:min(96vw, 2800px);
@@ -400,7 +427,7 @@ function installEventLogExplorerStyle() {
       max-width:100% !important;
     }
     #logo_text h1 a .logo_colour {
-      color:#f4f8fc !important;
+      color:var(--rf-ink-strong, #f4f8fc) !important;
     }
     ul#menu li a {
       min-height:36px;
@@ -450,6 +477,9 @@ function installEventLogExplorerStyle() {
       --logx-orange:#ffb020;
       --logx-red:#ff6b6b;
       --logx-purple:#9b5cff;
+      --logx-chart:#0b1420;
+      --logx-button:#1b2a3b;
+      --logx-button-hover:#20354d;
       width:100%;
       color:var(--logx-ink);
       font-family:system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
@@ -462,6 +492,15 @@ function installEventLogExplorerStyle() {
       border-radius:12px;
       margin-bottom:18px;
       overflow:hidden;
+    }
+    .logx-filter-card {
+      border-color:#315b82;
+      background:linear-gradient(180deg, rgba(17,35,56,.98), rgba(11,20,32,.98));
+      box-shadow:0 14px 34px rgba(0,0,0,.24);
+    }
+    .logx-filter-card .logx-toolbar {
+      margin-top:4px;
+      border-top:1px solid rgba(49, 80, 110, .65);
     }
     .logx-card-head { display:flex; align-items:flex-start; justify-content:space-between; gap:16px; padding:18px 20px 12px 20px; }
     .logx-card-title { font-size:18px; line-height:1.25; margin:0; color:var(--logx-ink-strong); font-weight:700; text-wrap:balance; }
@@ -492,6 +531,7 @@ function installEventLogExplorerStyle() {
     }
     .logx-btn-blue { background:#0f8bc4; }
     .logx-btn-green { background:#129a59; border-color:#22c55e; }
+    .logx-btn-orange { background:#b45309; border-color:#f59e0b; }
     .logx-btn-red { background:#9f1d2f; border-color:#ef476f; }
 
     .logx-pill { display:inline-flex; align-items:center; gap:7px; min-height:28px; padding:0 10px; border-radius:999px; border:1px solid var(--logx-border); background:#1c2a3b; color:var(--logx-muted); font-size:12px; font-weight:700; white-space:nowrap; }
@@ -531,6 +571,9 @@ function installEventLogExplorerStyle() {
     #logxMainTrend { width:100%; min-height:330px; }
     #logxRssiTrend, #logxDurationTrend { width:100%; min-height:190px; }
     .logx-plotly-holder { width:100%; min-height:inherit; }
+    #logxMainTrend .js-plotly-plot,
+    #logxRssiTrend .js-plotly-plot,
+    #logxDurationTrend .js-plotly-plot { pointer-events:none !important; }
     .logx-small-chart-grid { display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-top:12px; }
     .logx-chart-empty { min-height:140px; display:flex; align-items:center; justify-content:center; color:var(--logx-muted); background:#0b1420; border:1px solid #26384e; border-radius:8px; }
 
@@ -552,6 +595,7 @@ function installEventLogExplorerStyle() {
     .logx-filter-field { min-width:0; }
     .logx-filter-field-wide { min-width:260px; }
     .logx-filter-label { color:var(--logx-muted); font-size:12px; margin-bottom:6px; display:block; font-weight:700; }
+    .logx-sr-only { position:absolute !important; width:1px !important; height:1px !important; padding:0 !important; margin:-1px !important; overflow:hidden !important; clip:rect(0, 0, 0, 0) !important; white-space:nowrap !important; border:0 !important; }
     .logx-filter-summary { display:flex; gap:8px; flex-wrap:wrap; align-items:center; justify-content:flex-end; }
     .logx-search { width:100%; min-width:0; height:42px; color:var(--logx-ink); background:var(--logx-panel); border:1px solid #2c4260; border-radius:8px; padding:0 12px; outline:none; font-size:14px; }
     .logx-search::placeholder { color:#b7c4d4; opacity:1; }
@@ -629,6 +673,124 @@ function installEventLogExplorerStyle() {
     }
     .logx-empty { padding:36px 12px; color:var(--logx-muted); text-align:center; }
 
+
+    html[data-rf-theme="light"] .logx-root {
+      --logx-page:#edf4fb;
+      --logx-card:#ffffff;
+      --logx-panel:#f8fbff;
+      --logx-panel-2:#eaf2fa;
+      --logx-ink:#17243a;
+      --logx-ink-strong:#071525;
+      --logx-muted:#586b84;
+      --logx-muted-2:#8294ab;
+      --logx-border:#c8d8e8;
+      --logx-border-strong:#9fb7cf;
+      --logx-focus:#0ea5e9;
+      --logx-blue:#0284c7;
+      --logx-green:#059669;
+      --logx-orange:#b7791f;
+      --logx-red:#dc2626;
+      --logx-purple:#7c3aed;
+      --logx-chart:#ffffff;
+      --logx-button:#122033;
+      --logx-button-hover:#1d3552;
+    }
+
+    html[data-rf-theme="light"] body.rf-console {
+      background:var(--rf-page, #edf4fb) !important;
+      color:var(--rf-ink, #17243a) !important;
+    }
+
+    html[data-rf-theme="light"] .logx-card,
+    html[data-rf-theme="light"] .logx-chart-card,
+    html[data-rf-theme="light"] .logx-mini-chart,
+    html[data-rf-theme="light"] .logx-panel,
+    html[data-rf-theme="light"] .logx-metric,
+    html[data-rf-theme="light"] .logx-control-box {
+      background:var(--logx-card) !important;
+      border-color:var(--logx-border) !important;
+      color:var(--logx-ink) !important;
+      box-shadow:none !important;
+    }
+
+    html[data-rf-theme="light"] .logx-filter-card,
+    html[data-rf-theme="light"] .logx-toolbar {
+      background:var(--logx-panel-2) !important;
+      border-color:var(--logx-border) !important;
+      box-shadow:none !important;
+    }
+
+    html[data-rf-theme="light"] .logx-btn,
+    html[data-rf-theme="light"] .logx-page-btn {
+      background:var(--logx-button) !important;
+      border-color:var(--logx-border-strong) !important;
+      color:#ffffff !important;
+      text-shadow:none !important;
+    }
+
+    html[data-rf-theme="light"] .logx-btn:hover,
+    html[data-rf-theme="light"] .logx-page-btn:hover:not(:disabled) {
+      background:var(--logx-button-hover) !important;
+      border-color:var(--logx-border-strong) !important;
+    }
+
+    html[data-rf-theme="light"] .logx-chip,
+    html[data-rf-theme="light"] .logx-pill {
+      background:var(--logx-panel-2) !important;
+      border-color:var(--logx-border) !important;
+      color:var(--logx-ink) !important;
+    }
+
+    html[data-rf-theme="light"] .logx-pill-blue,
+    html[data-rf-theme="light"] .logx-pill-green,
+    html[data-rf-theme="light"] .logx-pill-orange,
+    html[data-rf-theme="light"] .logx-pill-red,
+    html[data-rf-theme="light"] .logx-pill-neutral {
+      background:var(--logx-panel-2) !important;
+    }
+
+    html[data-rf-theme="light"] .logx-chip-active,
+    html[data-rf-theme="light"] .logx-page-active {
+      background:var(--logx-blue) !important;
+      border-color:rgba(2,132,199,.55) !important;
+      color:#ffffff !important;
+    }
+
+    html[data-rf-theme="light"] .logx-chip-green.logx-chip-active,
+    html[data-rf-theme="light"] .logx-btn-green { background:var(--logx-green) !important; color:#ffffff !important; }
+    html[data-rf-theme="light"] .logx-chip-orange.logx-chip-active,
+    html[data-rf-theme="light"] .logx-btn-orange { background:var(--logx-orange) !important; color:#ffffff !important; }
+    html[data-rf-theme="light"] .logx-btn-red { background:var(--logx-red) !important; color:#ffffff !important; }
+
+    html[data-rf-theme="light"] .logx-big-svg,
+    html[data-rf-theme="light"] .logx-small-svg,
+    html[data-rf-theme="light"] .logx-svg,
+    html[data-rf-theme="light"] .logx-chart-empty {
+      background:var(--logx-chart) !important;
+      border-color:var(--logx-border) !important;
+      color:var(--logx-muted) !important;
+    }
+
+    html[data-rf-theme="light"] .logx-search,
+    html[data-rf-theme="light"] .logx-filter-input,
+    html[data-rf-theme="light"] .logx-filter-select {
+      background:#ffffff !important;
+      border-color:var(--logx-border) !important;
+      color:var(--logx-ink-strong) !important;
+    }
+
+    html[data-rf-theme="light"] .logx-event-table th {
+      background:#eaf2fa !important;
+      color:#071525 !important;
+    }
+
+    html[data-rf-theme="light"] .logx-event-table tbody tr,
+    html[data-rf-theme="light"] .logx-event-table tbody tr:nth-child(even) {
+      background:#ffffff !important;
+      color:#17243a !important;
+    }
+
+
     @media (max-width: 1400px) {
       .logx-toolbar { grid-template-columns:repeat(2, minmax(0, 1fr)); }
       .logx-filter-field-wide, .logx-filter-summary { grid-column:1 / -1; }
@@ -682,10 +844,49 @@ function installEventLogExplorerStyle() {
 // =========================
 document.addEventListener("DOMContentLoaded", () => {
   installEventLogExplorerStyle();
+  setupLogxThemeObserver();
   buildDataloggerTable();
   WebSocketTest();
   loadDataLog();
 });
+
+function setupLogxThemeObserver() {
+  if (window.__logxThemeObserverInstalled) return;
+  window.__logxThemeObserverInstalled = true;
+  const rerender = () => {
+    try {
+      if (Array.isArray(window.tableData)) renderOverview(getDisplayedRows());
+    } catch (e) {
+      console.warn("Theme refresh skipped:", e);
+    }
+  };
+  const observer = new MutationObserver(rerender);
+  observer.observe(document.documentElement, { attributes: true, attributeFilter: ["data-rf-theme"] });
+}
+
+function getLogxThemePalette() {
+  const isLight = document.documentElement.getAttribute("data-rf-theme") === "light";
+  if (isLight) {
+    return {
+      paper: "#ffffff",
+      plot: "#ffffff",
+      font: "#17243a",
+      muted: "#586b84",
+      grid: "#d7e4f0",
+      hoverBg: "#ffffff",
+      hoverBorder: "#c8d8e8"
+    };
+  }
+  return {
+    paper: "#0d1826",
+    plot: "#0b1420",
+    font: "#9fb0c3",
+    muted: "#8fa2b8",
+    grid: "#26384e",
+    hoverBg: "#101b2b",
+    hoverBorder: "#233650"
+  };
+}
 
 // =========================
 // WebSocket
@@ -762,6 +963,51 @@ function refreshStationDropdown() {
   // Kept for compatibility with older code paths.
 }
 
+function buildDeviceOptions(rows) {
+  const map = new Map();
+  for (const row of rows || []) {
+    const key = getDeviceKey(row);
+    if (!key || map.has(key)) continue;
+    map.set(key, {
+      key,
+      label: getDeviceLabel(row),
+      tx: Number(getDeviceIndex(row))
+    });
+  }
+
+  return Array.from(map.values()).sort((a, b) => {
+    const ax = Number.isFinite(a.tx) ? a.tx : Number.MAX_SAFE_INTEGER;
+    const bx = Number.isFinite(b.tx) ? b.tx : Number.MAX_SAFE_INTEGER;
+    if (ax !== bx) return ax - bx;
+    return a.label.localeCompare(b.label);
+  });
+}
+
+function fillDeviceSelectOptions(selectId, options, currentValue) {
+  const select = document.getElementById(selectId);
+  if (!select) return;
+
+  const validKeys = new Set((options || []).map(item => item.key));
+  const selected = currentValue && validKeys.has(currentValue) ? currentValue : "";
+
+  select.innerHTML = "";
+
+  const placeholder = document.createElement("option");
+  placeholder.value = "";
+  placeholder.textContent = "Select Device";
+  select.appendChild(placeholder);
+
+  (options || []).forEach(item => {
+    const option = document.createElement("option");
+    option.value = item.key;
+    option.textContent = item.label;
+    select.appendChild(option);
+  });
+
+  select.value = selected;
+  window.logDeviceFilter = selected;
+}
+
 function fillSelectOptions(selectId, values, allText, currentValue) {
   const select = document.getElementById(selectId);
   if (!select) return;
@@ -795,8 +1041,11 @@ function refreshLogFilterOptions() {
     rows.map(row => getStationName(row)).filter(value => value !== "")
   )).sort();
 
+  const devices = buildDeviceOptions(rows);
+
   fillSelectOptions("logxSiteFilter", sites, "All Site", window.logSiteFilter);
   fillSelectOptions("logxStationFilter", stations, "All Station", window.logStationFilter);
+  fillDeviceSelectOptions("logxDeviceFilter", devices, window.logDeviceFilter);
 }
 
 // =========================
@@ -808,6 +1057,56 @@ function buildDataloggerTable() {
 
   container.innerHTML = `
     <div class="logx-root">
+      <section class="logx-card logx-filter-card" id="logxFilterPanel">
+        <div class="logx-card-head">
+          <div>
+            <h2 class="logx-card-title">Event Log Filter</h2>
+            <p class="logx-card-subtitle">Select one device first. Charts, table, and CSV export will show only the selected device.</p>
+          </div>
+          <div class="logx-actions">
+            <button type="button" class="logx-btn" onclick="logxClearTextSearch()">Clear Search</button>
+            <button type="button" class="logx-btn logx-btn-green" onclick="exportAll()">Export CSV</button>
+            <button type="button" class="logx-btn logx-btn-orange" onclick="deleteFilteredRows()">Delete Filtered</button>
+            <button type="button" class="logx-btn logx-btn-red" onclick="deleteAllRows()">Delete All</button>
+          </div>
+        </div>
+
+        <div class="logx-toolbar" role="search" aria-label="Event log filters">
+          <div class="logx-filter-field logx-filter-field-wide">
+            <label class="logx-filter-label logx-sr-only" for="logxTextSearch">Search</label>
+            <input id="logxTextSearch" class="logx-search" type="search" placeholder="Search frequency or connection" autocomplete="off" aria-label="Search frequency or connection">
+          </div>
+
+          <div class="logx-filter-field">
+            <label class="logx-filter-label logx-sr-only" for="logxDateStart">From</label>
+            <input id="logxDateStart" class="logx-filter-input logx-filter-date" type="datetime-local" aria-label="From date and time">
+          </div>
+
+          <div class="logx-filter-field">
+            <label class="logx-filter-label logx-sr-only" for="logxDateEnd">To</label>
+            <input id="logxDateEnd" class="logx-filter-input logx-filter-date" type="datetime-local" aria-label="To date and time">
+          </div>
+
+          <div class="logx-filter-field">
+            <label class="logx-filter-label logx-sr-only" for="logxSiteFilter">Site</label>
+            <select id="logxSiteFilter" class="logx-filter-select" aria-label="Site"><option value="">All Site</option></select>
+          </div>
+
+          <div class="logx-filter-field">
+            <label class="logx-filter-label logx-sr-only" for="logxDeviceFilter">Device</label>
+            <select id="logxDeviceFilter" class="logx-filter-select" required aria-label="Device"><option value="">Select Device</option></select>
+          </div>
+
+          <div class="logx-filter-summary" aria-label="Table legend">
+            <span class="logx-pill">Device Required</span>
+            <span class="logx-pill logx-pill-blue">Forward</span>
+            <span class="logx-pill logx-pill-green">Reflected</span>
+            <span class="logx-pill logx-pill-orange">VSWR</span>
+            <span class="logx-pill logx-pill-red">Alarm</span>
+          </div>
+        </div>
+      </section>
+
       <section class="logx-card" id="logxOverview">
         <div class="logx-card-head">
           <div>
@@ -832,7 +1131,7 @@ function buildDataloggerTable() {
               </div>
             </div>
             <div class="logx-control-box" role="group" aria-labelledby="logxZoomTitle">
-              <div class="logx-control-title" id="logxZoomTitle">Zoom</div>
+              <div class="logx-control-title" id="logxZoomTitle">Time Range</div>
               <div class="logx-chip-row">
                 <button type="button" class="logx-chip" data-trend-type="zoom" data-trend-value="24h" aria-pressed="false" onclick="setTrendOption('zoom','24h')">24H</button>
                 <button type="button" class="logx-chip" data-trend-type="zoom" data-trend-value="7d" aria-pressed="false" onclick="setTrendOption('zoom','7d')">7D</button>
@@ -876,7 +1175,7 @@ function buildDataloggerTable() {
           <div class="logx-small-chart-grid">
             <div class="logx-chart-card">
               <div class="logx-chart-title">RSSI Trend</div>
-              <div class="logx-chart-sub">Uses the same aggregation and zoom as the main chart</div>
+              <div class="logx-chart-sub">Uses the same aggregation and time range as the main chart</div>
               <div id="logxRssiTrend"></div>
             </div>
             <div class="logx-chart-card">
@@ -892,47 +1191,7 @@ function buildDataloggerTable() {
         <div class="logx-card-head">
           <div>
             <h2 class="logx-card-title">Event Log Explorer</h2>
-            <p class="logx-card-subtitle">Filter saved RF events by date, site, station, frequency, and connection state.</p>
-          </div>
-          <div class="logx-actions">
-            <button type="button" class="logx-btn" onclick="logxClearTextSearch()">Clear Search</button>
-            <button type="button" class="logx-btn logx-btn-green" onclick="exportAll()">Export CSV</button>
-            <button type="button" class="logx-btn logx-btn-red" onclick="deleteAllRows()">Delete All</button>
-          </div>
-        </div>
-
-        <div class="logx-toolbar" role="search" aria-label="Event log filters">
-          <div class="logx-filter-field logx-filter-field-wide">
-            <label class="logx-filter-label" for="logxTextSearch">Search</label>
-            <input id="logxTextSearch" class="logx-search" type="search" placeholder="Frequency or connection" autocomplete="off">
-          </div>
-
-          <div class="logx-filter-field">
-            <label class="logx-filter-label" for="logxDateStart">From</label>
-            <input id="logxDateStart" class="logx-filter-input logx-filter-date" type="datetime-local">
-          </div>
-
-          <div class="logx-filter-field">
-            <label class="logx-filter-label" for="logxDateEnd">To</label>
-            <input id="logxDateEnd" class="logx-filter-input logx-filter-date" type="datetime-local">
-          </div>
-
-          <div class="logx-filter-field">
-            <label class="logx-filter-label" for="logxSiteFilter">Site</label>
-            <select id="logxSiteFilter" class="logx-filter-select"><option value="">All Site</option></select>
-          </div>
-
-          <div class="logx-filter-field">
-            <label class="logx-filter-label" for="logxStationFilter">Station</label>
-            <select id="logxStationFilter" class="logx-filter-select"><option value="">All Station</option></select>
-          </div>
-
-          <div class="logx-filter-summary" aria-label="Table legend">
-            <span class="logx-pill">All Records</span>
-            <span class="logx-pill logx-pill-blue">Forward</span>
-            <span class="logx-pill logx-pill-green">Reflected</span>
-            <span class="logx-pill logx-pill-orange">VSWR</span>
-            <span class="logx-pill logx-pill-red">Alarm</span>
+            <p class="logx-card-subtitle">Table follows the device and filters selected at the top of the page.</p>
           </div>
         </div>
 
@@ -1022,6 +1281,15 @@ function buildDataloggerTable() {
       renderTable();
     });
   }
+
+  const deviceFilter = document.getElementById("logxDeviceFilter");
+  if (deviceFilter) {
+    deviceFilter.addEventListener("change", () => {
+      window.logDeviceFilter = deviceFilter.value || "";
+      currentPage = 1;
+      renderTable();
+    });
+  }
 }
 
 // =========================
@@ -1060,10 +1328,16 @@ function getDisplayedRows() {
   const q = String(window.logTextFilter || "").trim().toLowerCase();
   const site = String(window.logSiteFilter || "").trim();
   const station = String(window.logStationFilter || "").trim();
+  const device = String(window.logDeviceFilter || "").trim();
   const startTs = dateTimeLocalToTimestamp(window.logDateStartFilter);
   const endTs = dateTimeLocalToTimestamp(window.logDateEndFilter);
 
+  // Production behavior: do not show every log by default.
+  // A device must be selected before charts, table, and CSV export use the data.
+  if (!device) return [];
+
   return base.filter((row, idx) => {
+    if (getDeviceKey(row) !== device) return false;
     if (q && !rowSearchText(row, idx).includes(q)) return false;
     if (site && getSiteName(row) !== site) return false;
     if (station && getStationName(row) !== station) return false;
@@ -1098,10 +1372,10 @@ function logxClearTextSearch() {
   window.logSiteFilter = "";
   window.logStationFilter = "";
 
-window.logTrendAggregate = "raw";
-window.logTrendZoom = "all";
-window.logTrendPowerUnit = "watt";
-window.logTrendPowerValue = "max";
+  window.logTrendAggregate = "raw";
+  window.logTrendZoom = "all";
+  window.logTrendPowerUnit = "watt";
+  window.logTrendPowerValue = "max";
 
   currentPage = 1;
   renderTable();
@@ -1520,96 +1794,83 @@ function makeDurationBarTrendSvg(points) {
 }
 
 
-function plotlyAvailable() {
-  return typeof window.Plotly !== "undefined" && window.Plotly && typeof window.Plotly.react === "function";
+function canvasjsAvailable() {
+  return typeof window.CanvasJS !== "undefined" && window.CanvasJS && typeof window.CanvasJS.Chart === "function";
 }
 
-function plotlyConfig() {
+function logxCanvasCommonOptions(height) {
+  const theme = getLogxThemePalette();
   return {
-    responsive: true,
-    displayModeBar: false,
-    scrollZoom: true
-  };
-}
-
-function plotlyCommonLayout(height) {
-  return {
+    animationEnabled: false,
+    zoomEnabled: false,
     height,
-    paper_bgcolor: "#0d1826",
-    plot_bgcolor: "#0b1420",
-    font: { color: "#9fb0c3", family: "Arial, Helvetica, sans-serif", size: 12 },
-    margin: { l: 58, r: 58, t: 16, b: 42 },
-    hovermode: "x unified",
-    hoverlabel: {
-      bgcolor: "#101b2b",
-      bordercolor: "#233650",
-      font: { color: "#e5edf7", size: 12 }
-    },
-    xaxis: {
-      showgrid: true,
-      gridcolor: "#26384e",
-      zeroline: false,
-      color: "#8fa2b8",
-      tickformat: "%d/%m %H:%M",
-      rangeslider: { visible: false }
-    },
-    yaxis: {
-      showgrid: true,
-      gridcolor: "#26384e",
-      zeroline: false,
-      color: "#8fa2b8"
-    },
+    backgroundColor: theme.plot,
     legend: {
-      orientation: "h",
-      x: 1,
-      xanchor: "right",
-      y: 1.18,
-      bgcolor: "rgba(0,0,0,0)"
+      horizontalAlign: "right",
+      verticalAlign: "top",
+      fontColor: theme.font,
+      fontSize: 12
+    },
+    toolTip: {
+      shared: true,
+      backgroundColor: theme.hoverBg,
+      borderColor: theme.hoverBorder,
+      fontColor: theme.font
+    },
+    axisX: {
+      valueFormatString: "DD/MM HH:mm",
+      labelFontColor: theme.muted,
+      labelFontSize: 11,
+      lineColor: theme.axis,
+      tickColor: theme.axis,
+      gridColor: theme.grid,
+      gridThickness: 1
+    },
+    axisY: {
+      labelFontColor: theme.muted,
+      titleFontColor: theme.muted,
+      labelFontSize: 11,
+      lineColor: theme.axis,
+      tickColor: theme.axis,
+      gridColor: theme.grid,
+      gridThickness: 1,
+      includeZero: false
     }
   };
 }
 
-function pointCustomData(points) {
-  return points.map(p => [
-    p.startText || p.label || "",
-    p.endText || "",
-    p.site || "",
-    p.station || "",
-    Number.isFinite(p.reflected) ? p.reflected : null,
-    Number.isFinite(p.forward) ? p.forward : null,
-    Number.isFinite(p.vswr) ? p.vswr : null,
-    Number.isFinite(p.rssi) ? p.rssi : null,
-    Number.isFinite(p.duration) ? p.duration : null,
-    Number.isFinite(p.threshold) ? p.threshold : null,
-    p.connection || "",
-    p.samples || 1
-  ]);
+function logxCanvasPoint(p, key) {
+  const d = new Date(p.ts);
+  const y = Number(p[key]);
+  return {
+    x: Number.isNaN(d.getTime()) ? new Date() : d,
+    y: Number.isFinite(y) ? y : null,
+    meta: p
+  };
 }
 
-function hoverTemplateFor(label, unit, valueName) {
-  return `<b>%{customdata[0]}</b><br>` +
-    `End: %{customdata[1]}<br>` +
-    `Site: %{customdata[2]}<br>` +
-    `Station: %{customdata[3]}<br>` +
-    `${label}: %{y:.3f} ${unit}<br>` +
-    `Forward: %{customdata[5]:.3f} ${unit}<br>` +
-    `Reflected: %{customdata[4]:.3f} ${unit}<br>` +
-    `VSWR: %{customdata[6]:.3f}<br>` +
-    `RSSI: %{customdata[7]:.1f} dBm<br>` +
-    `Threshold: %{customdata[9]:.3f} W<br>` +
-    `Duration: %{customdata[8]} sec<br>` +
-    `Connection: %{customdata[10]}<br>` +
-    `Samples: %{customdata[11]}` +
-    `<extra>${valueName}</extra>`;
+function logxCanvasTooltip(unit, valueLabel) {
+  return function (e) {
+    if (!e.entries || !e.entries.length) return "";
+    const p = e.entries[0].dataPoint.meta || {};
+    let html = "<strong>" + escapeHtml(p.startText || p.label || "") + "</strong><br/>";
+    if (p.endText) html += "End: " + escapeHtml(p.endText) + "<br/>";
+    if (p.site) html += "Site: " + escapeHtml(p.site) + "<br/>";
+    if (p.station) html += "Station: " + escapeHtml(p.station) + "<br/>";
+    e.entries.forEach(function (entry) {
+      const name = entry.dataSeries.name || valueLabel || "Value";
+      const axisUnit = name === "VSWR" ? "" : (name === "RSSI" ? " dBm" : (unit ? " " + unit : ""));
+      html += escapeHtml(name) + ": " + formatNumber(entry.dataPoint.y, name === "VSWR" ? 3 : 2, axisUnit) + "<br/>";
+    });
+    if (Number.isFinite(p.duration)) html += "Duration: " + escapeHtml(String(p.duration)) + " sec<br/>";
+    if (Number.isFinite(p.samples)) html += "Samples: " + escapeHtml(String(p.samples));
+    return html;
+  };
 }
 
 function renderMainTrendPlotly(points) {
   const el = document.getElementById("logxMainTrend");
   if (!el) return;
-  if (!plotlyAvailable()) {
-    el.innerHTML = makeMainTrendSvg(points);
-    return;
-  }
 
   const data = sampleObjects(points, 900);
   if (!data.length) {
@@ -1617,140 +1878,128 @@ function renderMainTrendPlotly(points) {
     return;
   }
 
-  const x = data.map(p => new Date(p.ts));
-  const customdata = pointCustomData(data);
+  if (!canvasjsAvailable()) {
+    el.innerHTML = makeMainTrendSvg(points);
+    return;
+  }
+
   const unit = window.logTrendPowerUnit === "dbm" ? "dBm" : "W";
   const modeText = window.logTrendPowerValue === "rms" ? "RMS" : "MAX-HOLD";
-
-  const traces = [
-    {
-      name: "Forward",
-      type: "scattergl",
-      mode: "lines+markers",
-      x,
-      y: data.map(p => p.forward),
-      customdata,
-      line: { color: "#2bb7f6", width: 2.5 },
-      marker: { color: "#2bb7f6", size: 5 },
-      hovertemplate: hoverTemplateFor("Forward", unit, "Forward")
+  const theme = getLogxThemePalette();
+  const chart = new CanvasJS.Chart("logxMainTrend", {
+    ...logxCanvasCommonOptions(330),
+    axisY: {
+      ...logxCanvasCommonOptions(330).axisY,
+      title: `${modeText} ${unit}`
     },
-    {
-      name: "Reflected",
-      type: "scattergl",
-      mode: "lines+markers",
-      x,
-      y: data.map(p => p.reflected),
-      customdata,
-      line: { color: "#43d39e", width: 2 },
-      marker: { color: "#43d39e", size: 5 },
-      hovertemplate: hoverTemplateFor("Reflected", unit, "Reflected")
+    axisY2: {
+      title: "VSWR",
+      titleFontColor: theme.muted,
+      labelFontColor: theme.muted,
+      labelFontSize: 11,
+      lineColor: theme.axis,
+      tickColor: theme.axis,
+      gridThickness: 0,
+      includeZero: false
     },
-    {
-      name: "VSWR",
-      type: "scattergl",
-      mode: "lines+markers",
-      x,
-      y: data.map(p => p.vswr),
-      customdata,
-      yaxis: "y2",
-      line: { color: "#f59e0b", width: 2 },
-      marker: { color: "#f59e0b", size: 5 },
-      hovertemplate: `<b>%{customdata[0]}</b><br>` +
-        `End: %{customdata[1]}<br>` +
-        `Site: %{customdata[2]}<br>` +
-        `Station: %{customdata[3]}<br>` +
-        `VSWR: %{y:.3f}<br>` +
-        `Forward: %{customdata[5]:.3f} ${unit}<br>` +
-        `Reflected: %{customdata[4]:.3f} ${unit}<br>` +
-        `RSSI: %{customdata[7]:.1f} dBm<br>` +
-        `Duration: %{customdata[8]} sec<br>` +
-        `Samples: %{customdata[11]}<extra>VSWR</extra>`
-    }
-  ];
+    toolTip: {
+      ...logxCanvasCommonOptions(330).toolTip,
+      contentFormatter: logxCanvasTooltip(unit, "Trend")
+    },
+    data: [
+      {
+        type: "line",
+        name: "Forward",
+        showInLegend: true,
+        color: "#2bb7f6",
+        lineThickness: 3,
+        markerSize: 4,
+        dataPoints: data.filter(p => Number.isFinite(p.forward)).map(p => logxCanvasPoint(p, "forward"))
+      },
+      {
+        type: "line",
+        name: "Reflected",
+        showInLegend: true,
+        color: "#43d39e",
+        lineThickness: 2,
+        markerSize: 4,
+        dataPoints: data.filter(p => Number.isFinite(p.reflected)).map(p => logxCanvasPoint(p, "reflected"))
+      },
+      {
+        type: "line",
+        name: "VSWR",
+        axisYType: "secondary",
+        showInLegend: true,
+        color: "#f59e0b",
+        lineThickness: 2,
+        markerSize: 4,
+        dataPoints: data.filter(p => Number.isFinite(p.vswr)).map(p => logxCanvasPoint(p, "vswr"))
+      }
+    ]
+  });
 
-  const layout = plotlyCommonLayout(330);
-  layout.yaxis.title = `${modeText} ${unit}`;
-  layout.yaxis2 = {
-    title: "VSWR",
-    overlaying: "y",
-    side: "right",
-    showgrid: false,
-    zeroline: false,
-    color: "#8fa2b8"
-  };
-
-  window.Plotly.react(el, traces, layout, plotlyConfig());
+  el.classList.add("logx-canvasjs-plot");
+  chart.render();
 }
 
 function renderRssiTrendPlotly(points) {
   const el = document.getElementById("logxRssiTrend");
   if (!el) return;
-  if (!plotlyAvailable()) {
-    el.innerHTML = makeSingleLineTrendSvg(points, "rssi", "#9b5cff", "RSSI", 0);
-    return;
-  }
-
   const data = sampleObjects(points.filter(p => Number.isFinite(p.rssi)), 900);
   if (!data.length) {
     el.innerHTML = `<div class="logx-chart-empty">No RSSI data</div>`;
     return;
   }
 
-  const customdata = pointCustomData(data);
-  const layout = plotlyCommonLayout(205);
-  layout.margin = { l: 58, r: 20, t: 12, b: 42 };
-  layout.yaxis.title = "RSSI dBm";
+  if (!canvasjsAvailable()) {
+    el.innerHTML = makeSingleLineTrendSvg(points, "rssi", "#9b5cff", "RSSI", 0);
+    return;
+  }
 
-  window.Plotly.react(el, [{
+  const opts = logxCanvasCommonOptions(205);
+  opts.axisY.title = "RSSI dBm";
+  opts.toolTip.contentFormatter = logxCanvasTooltip("dBm", "RSSI");
+  opts.data = [{
+    type: "line",
     name: "RSSI",
-    type: "scattergl",
-    mode: "lines+markers",
-    x: data.map(p => new Date(p.ts)),
-    y: data.map(p => p.rssi),
-    customdata,
-    line: { color: "#9b5cff", width: 2.5 },
-    marker: { color: "#9b5cff", size: 5 },
-    hovertemplate: `<b>%{customdata[0]}</b><br>` +
-      `Site: %{customdata[2]}<br>` +
-      `Station: %{customdata[3]}<br>` +
-      `RSSI: %{y:.1f} dBm<br>` +
-      `Duration: %{customdata[8]} sec<br>` +
-      `Samples: %{customdata[11]}<extra>RSSI</extra>`
-  }], layout, plotlyConfig());
+    showInLegend: false,
+    color: "#9b5cff",
+    lineThickness: 3,
+    markerSize: 4,
+    dataPoints: data.map(p => logxCanvasPoint(p, "rssi"))
+  }];
+
+  el.classList.add("logx-canvasjs-plot");
+  new CanvasJS.Chart("logxRssiTrend", opts).render();
 }
 
 function renderDurationTrendPlotly(points) {
   const el = document.getElementById("logxDurationTrend");
   if (!el) return;
-  if (!plotlyAvailable()) {
-    el.innerHTML = makeDurationBarTrendSvg(points);
-    return;
-  }
-
   const data = sampleObjects(points.filter(p => Number.isFinite(p.duration)), 900);
   if (!data.length) {
     el.innerHTML = `<div class="logx-chart-empty">No duration data</div>`;
     return;
   }
 
-  const customdata = pointCustomData(data);
-  const layout = plotlyCommonLayout(205);
-  layout.margin = { l: 58, r: 20, t: 12, b: 42 };
-  layout.yaxis.title = "Duration sec";
+  if (!canvasjsAvailable()) {
+    el.innerHTML = makeDurationBarTrendSvg(points);
+    return;
+  }
 
-  window.Plotly.react(el, [{
+  const opts = logxCanvasCommonOptions(205);
+  opts.axisY.title = "Duration sec";
+  opts.toolTip.contentFormatter = logxCanvasTooltip("sec", "Duration");
+  opts.data = [{
+    type: "column",
     name: "Duration",
-    type: "bar",
-    x: data.map(p => new Date(p.ts)),
-    y: data.map(p => p.duration),
-    customdata,
-    marker: { color: "#6d74b9", opacity: 0.9 },
-    hovertemplate: `<b>%{customdata[0]}</b><br>` +
-      `Site: %{customdata[2]}<br>` +
-      `Station: %{customdata[3]}<br>` +
-      `Duration: %{y} sec<br>` +
-      `Samples: %{customdata[11]}<extra>Duration</extra>`
-  }], layout, plotlyConfig());
+    showInLegend: false,
+    color: "#6d74b9",
+    dataPoints: data.map(p => logxCanvasPoint(p, "duration"))
+  }];
+
+  el.classList.add("logx-canvasjs-plot");
+  new CanvasJS.Chart("logxDurationTrend", opts).render();
 }
 
 function renderOverview(rows) {
@@ -1866,7 +2115,10 @@ function renderEventList(rows) {
   if (currentPage < 1) currentPage = 1;
 
   if (!rows.length) {
-    tbody.innerHTML = `<tr><td colspan="19" class="logx-empty">No event log data</td></tr>`;
+    const message = hasSelectedDevice()
+      ? "No event log data for the selected device/filter."
+      : "Select a device to display event log data.";
+    tbody.innerHTML = `<tr><td colspan="19" class="logx-empty">${message}</td></tr>`;
     renderPagination(0, totalPages);
     return;
   }
@@ -1921,7 +2173,7 @@ function renderPagination(totalRows, totalPages) {
 
   if (info) {
     if (!totalRows) {
-      info.textContent = "Showing 0 records";
+      info.textContent = hasSelectedDevice() ? "Showing 0 records" : "Select a device to show records";
     } else {
       const start = (currentPage - 1) * LOGX_UI.rowsPerPage + 1;
       const end = Math.min(currentPage * LOGX_UI.rowsPerPage, totalRows);
@@ -1991,6 +2243,66 @@ function renderPagination(totalRows, totalPages) {
 // =========================
 // Delete all datalogger records
 // =========================
+function getFilteredDeleteIds(rows) {
+  const ids = new Set();
+  for (const row of rows || []) {
+    const id = Number(pickFirst(row.databaseId, row.id));
+    if (Number.isFinite(id) && id > 0) ids.add(Math.trunc(id));
+  }
+  return Array.from(ids);
+}
+
+function getSelectedDeviceLabel() {
+  const select = document.getElementById("logxDeviceFilter");
+  if (!select || select.selectedIndex < 0) return "selected device";
+  return select.options[select.selectedIndex]?.textContent || "selected device";
+}
+
+async function deleteFilteredRows() {
+  if (!hasSelectedDevice()) {
+    alert("Please select a device before deleting filtered log data.");
+    return;
+  }
+
+  const rows = getDisplayedRows();
+  const ids = getFilteredDeleteIds(rows);
+  if (!ids.length) {
+    alert("No filtered log rows to delete.");
+    return;
+  }
+
+  const deviceLabel = getSelectedDeviceLabel();
+  const message = "Delete " + ids.length + " filtered log row(s)?\n\n" +
+    "Device: " + deviceLabel + "\n" +
+    "This deletes only the rows currently matched by Device/Search/Date/Site filters. It will NOT delete all datalogger rows.";
+
+  if (!confirm(message)) return;
+  if (!confirm("Final confirmation: delete ONLY the filtered/query result rows?")) return;
+
+  try {
+    const resp = await fetch("/delete_all_data_log.php", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        ids,
+        confirm: "DELETE_FILTERED_DATALOGGER"
+      })
+    });
+
+    const data = await resp.json();
+    if (!data || data.success !== true) {
+      throw new Error(data?.message || "Delete filtered rows failed");
+    }
+
+    alert("Deleted " + (data.deleted || 0) + " filtered row(s).");
+    currentPage = 1;
+    await loadDataLog();
+  } catch (e) {
+    console.error("deleteFilteredRows error:", e);
+    alert("Delete filtered rows failed: " + (e?.message || String(e)));
+  }
+}
+
 async function deleteAllRows() {
   if (!confirm("Delete ALL datalogger records?\n\nThis will permanently remove every log row from the database.")) return;
   if (!confirm("Final confirmation: delete ALL event log data permanently?")) return;
@@ -2047,8 +2359,9 @@ function eventLogExportRows(data) {
 }
 
 function exportAll() {
+  if (!hasSelectedDevice()) return alert("Please select a device before exporting.");
   const data = getDisplayedRows();
-  if (!data?.length) return alert("No data to export.");
+  if (!data?.length) return alert("No data to export for the selected device/filter.");
 
   const header = [
     "No.", "Start Time", "End Time", "Site", "Station", "Frequency MHz",

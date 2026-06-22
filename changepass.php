@@ -6,7 +6,8 @@
 <head>
 	<link rel="stylesheet" type="text/css" href="style.css" title="style" />
 	<link rel="stylesheet" type="text/css" href="rf-console.css?v=<?php echo time(); ?>" />
-<title>Change Password</title>
+<title>iView RF Power Monitor - Change Password</title>
+  <script type="text/javascript" src="rf-theme.js?v=<?php echo time(); ?>"></script>
 </head>
 <body class="rf-console rf-console-auth rf-console-change-password">
 
@@ -29,9 +30,10 @@
 	      	<input class="form-control" type="password" placeholder="" name="renewpass" id="renewpass" required/>
 			<label for="renewpass">Retype new password</label>
 		</div>
-      
-	
-		  <button class="button button2" type="submit" name="Submit" value="Change Password">Change Password</button>
+      <div class="rf-auth-actions">
+		    <button class="button button2" type="submit" name="Submit" value="Change Password">Change Password</button>
+        <a href="index.php" class="rf-btn rf-btn-secondary">Back to Dashboard</a>
+      </div>
 	    </form>
 	  </div>
 </div>

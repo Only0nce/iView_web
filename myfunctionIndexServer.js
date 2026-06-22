@@ -24,6 +24,7 @@ window.fwdArrMap = window.fwdArrMap || {};
 window.rwdArrMap = window.rwdArrMap || {};
 window.vswrArrMap = window.vswrArrMap || {};
 window.rssiArrMap = window.rssiArrMap || {};   // ✅ เพิ่ม rssi
+window.canvasTrendChartMap = window.canvasTrendChartMap || {};
 
 
 // --- Safe DOM helpers (กัน null ทุกครั้ง) ---
@@ -62,6 +63,205 @@ function colorFromSeverity(sev) {
   if (sev === 'alert') return '#FF0000';  // แดง
   if (sev === 'warn')  return '#FFA500';  // ส้ม
   return '#00FF00';                       // เขียว
+}
+
+
+// ===== Home dashboard visual helpers (UI only) =====
+function setDatasetState(id, state) {
+  const el = $(id);
+  if (el) el.dataset.state = state;
+}
+
+function getVswrState(value) {
+  const v = Number(value);
+  if (!Number.isFinite(v)) return "idle";
+  if (v >= 2.0) return "alert";
+  if (v >= 1.5) return "warn";
+  return "ok";
+}
+
+function getRssiState(value) {
+  const v = Number(value);
+  if (!Number.isFinite(v)) return "idle";
+  if (v <= -115) return "alert";
+  if (v <= -95) return "warn";
+  return "ok";
+}
+
+function getPowerState(value) {
+  const v = Number(value);
+  if (!Number.isFinite(v)) return "idle";
+  if (v <= 0) return "warn";
+  return "ok";
+}
+
+function formatTimeFromPayload(obj) {
+  const raw = obj.timestamp || obj.timeList || "";
+  if (raw && String(raw).length >= 5) return String(raw).slice(-8);
+  const now = new Date();
+  return now.toTimeString().slice(0, 8);
+}
+
+function pad2(v) {
+  return String(v).padStart(2, '0');
+}
+
+function localDatePart(dateObj) {
+  const d = dateObj instanceof Date && !Number.isNaN(dateObj.getTime()) ? dateObj : new Date();
+  return d.getFullYear() + '-' + pad2(d.getMonth() + 1) + '-' + pad2(d.getDate());
+}
+
+function normalizeDatePart(rawDate) {
+  const fallback = localDatePart(new Date());
+  const value = String(rawDate || '').trim();
+  if (!value) return fallback;
+
+  const isoMatch = value.match(/^(\d{4})-(\d{2})-(\d{2})/);
+  if (isoMatch) return isoMatch[1] + '-' + isoMatch[2] + '-' + isoMatch[3];
+
+  const slashMatch = value.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})/);
+  if (slashMatch) {
+    const day = pad2(slashMatch[1]);
+    const month = pad2(slashMatch[2]);
+    const year = slashMatch[3];
+    return year + '-' + month + '-' + day;
+  }
+
+  const parsed = new Date(value);
+  if (!Number.isNaN(parsed.getTime())) return localDatePart(parsed);
+  return fallback;
+}
+
+function normalizeTimePart(rawTime) {
+  const now = new Date();
+  const fallback = pad2(now.getHours()) + ':' + pad2(now.getMinutes()) + ':' + pad2(now.getSeconds());
+  const value = String(rawTime || '').trim();
+  if (!value) return fallback;
+
+  const timeMatch = value.match(/(\d{1,2}:\d{2}:\d{2}(?:\.\d+)?)/);
+  if (timeMatch) return timeMatch[1];
+
+  const parsed = new Date(value);
+  if (!Number.isNaN(parsed.getTime())) {
+    return pad2(parsed.getHours()) + ':' + pad2(parsed.getMinutes()) + ':' + pad2(parsed.getSeconds());
+  }
+  return fallback;
+}
+
+function normalizePlotTimestamp(rawDate, rawTime) {
+  const timeValue = String(rawTime || '').trim();
+  if (timeValue) {
+    const parsedTime = new Date(timeValue);
+    if (!Number.isNaN(parsedTime.getTime())) return parsedTime.toISOString();
+  }
+
+  const dateValue = String(rawDate || '').trim();
+  if (dateValue && dateValue.includes('T')) {
+    const parsedDate = new Date(dateValue);
+    if (!Number.isNaN(parsedDate.getTime())) return parsedDate.toISOString();
+  }
+
+  return normalizeDatePart(dateValue) + 'T' + normalizeTimePart(timeValue);
+}
+
+function normalizePlotTimeValue(value) {
+  if (value instanceof Date && !Number.isNaN(value.getTime())) return value.toISOString();
+  const raw = String(value || '').trim();
+  if (!raw) return null;
+
+  const parsed = new Date(raw);
+  if (!Number.isNaN(parsed.getTime())) return parsed.toISOString();
+
+  if (/^T\d{1,2}:\d{2}:\d{2}/.test(raw)) {
+    return localDatePart(new Date()) + raw;
+  }
+
+  if (/^\d{1,2}:\d{2}:\d{2}/.test(raw)) {
+    return localDatePart(new Date()) + 'T' + raw;
+  }
+
+  return null;
+}
+
+function setPill(id, state, text) {
+  const el = $(id);
+  if (!el) return;
+  el.dataset.state = state;
+  el.innerHTML = text;
+}
+
+function updateHomeOverviewPanel(id, obj, data) {
+  const rssiState = getRssiState(data.rssiDb);
+  const vswrState = getVswrState(data.swr);
+  const powerState = getPowerState(data.fwd);
+  const overallState = !data.connectionStatus ? "offline" :
+    (rssiState === "alert" || vswrState === "alert" ? "alert" :
+    (rssiState === "warn" || vswrState === "warn" || powerState === "warn" ? "warn" : "ok"));
+
+  const overallText = overallState === "ok" ? "OK" :
+    (overallState === "offline" ? "OFFLINE" : overallState.toUpperCase());
+
+  setPill("overviewSeverity" + id, overallState, overallText);
+  setPill("rssiState" + id, rssiState, rssiState === "ok" ? "OK" : (rssiState === "idle" ? "--" : (rssiState === "alert" ? "ALERT" : "WEAK")));
+  setPill("vswrState" + id, vswrState, vswrState === "ok" ? "OK" : (vswrState === "idle" ? "--" : vswrState.toUpperCase()));
+  setPill("reflectedState" + id, vswrState === "alert" ? "alert" : "ok", vswrState === "alert" ? "ALERT" : "OK");
+  setPill("rxStatusState" + id, data.connectionStatus ? (overallState === "ok" ? "ok" : "warn") : "offline", data.connectionStatus ? (overallState === "ok" ? "OK" : "WEAK") : "OFFLINE");
+
+  setHTML("rxStatusValue" + id, data.connectionStatus ? (overallState === "ok" ? "ACTIVE" : "CO_WARN") : "OFFLINE");
+  setHTML("lastUpdate" + id, formatTimeFromPayload(obj));
+
+  setDatasetState("overviewSeverity" + id, overallState);
+  setDatasetState("rssiState" + id, rssiState);
+  setDatasetState("vswrState" + id, vswrState);
+  setDatasetState("rxStatusValue" + id, data.connectionStatus ? (overallState === "ok" ? "ok" : "warn") : "offline");
+  setDatasetState("deviceDashboard" + id, data.connectionStatus ? "online" : "offline");
+  setTrendOfflineState(id, data.visible && !data.connectionStatus);
+
+  const dash = $("deviceDashboard" + id);
+  if (dash) dash.style.display = data.visible ? "block" : "";
+  syncDashboardDensity();
+}
+
+
+function setTrendOfflineState(id, isOffline) {
+  const trendCard = $("card_plot" + id);
+  const overlay = $("trendOfflineOverlay" + id);
+  const offline = !!isOffline;
+
+  if (trendCard) trendCard.classList.toggle("is-offline", offline);
+  if (overlay) overlay.setAttribute("aria-hidden", offline ? "false" : "true");
+}
+
+
+function updateRoleSummaryPanel(obj) {
+  const roleName = (obj.roleName ?? "--").toString();
+  const allDevice = Number(obj.all_device ?? 0);
+  const connect = Number(obj.connect ?? 0);
+  const disconnect = Number(obj.disconnect ?? 0);
+
+  setHTML("roleNameDisplay", roleName || "--");
+  setHTML("roleDeviceSummary", "All: " + allDevice + " | Connect: " + connect + " | Disconnect: " + disconnect);
+  syncDashboardDensity(allDevice);
+}
+
+
+function isDashboardDeviceVisible(row) {
+  if (!row) return false;
+  const visibleChild = row.querySelector('.rf-device-overview[style*="block"], .rf-trend-card[style*="block"], .rf-radio-control[style*="block"]');
+  return !!visibleChild;
+}
+
+function syncDashboardDensity(forceCount) {
+  const rows = Array.from(document.querySelectorAll('.rf-device-row'));
+  const visibleCount = Number.isFinite(Number(forceCount)) && Number(forceCount) > 0
+    ? Number(forceCount)
+    : rows.filter(isDashboardDeviceVisible).length;
+
+  // Always keep the index page in 2 columns x 8 rows layout without compact shrinking.
+  // rf-dashboard-wall is intentionally removed because it is the old compressed wall mode.
+  document.body.classList.remove('rf-dashboard-wall');
+  document.body.classList.add('rf-dashboard-2x8');
+  document.body.style.setProperty('--rf-visible-devices', String(visibleCount));
 }
 
 
@@ -175,6 +375,7 @@ function processMsg(message) {
     const card = $("card_uart" + ttyId);
     if (card) card.style.display = "block";
     setHTML("sqlLevel" + ttyId, "SQL:" + obj.SETMSqllv);
+    setHTML("sqlMirrorValue" + ttyId, obj.SETMSqllv);
     current_sql = obj.SETMSqllv;
   }
 
@@ -206,6 +407,10 @@ function processMsg(message) {
     }
   }
 
+  else if (obj.menuID == "view_update_Page") {
+    updateRoleSummaryPanel(obj);
+  }
+
   /* ---------- วางแทนบล็อคเดิมทั้งก้อนนี้ ---------- */
   else if (obj.menuID == "view_transmitter_list") {
     // ---- ไม่มี return กลางทาง ----
@@ -217,8 +422,10 @@ function processMsg(message) {
   
       // คำนวณค่า
       let swrmax = 2;
-      let stationName = obj.stationName + " " + (obj.frequency/1e6).toFixed(4) + " MHz";
-      if (obj.frequency == 0) stationName = obj.stationName;
+      const rawStationName = String(obj.stationName ?? "").trim();
+      const frequencyMHz = Number(obj.frequency || 0) / 1e6;
+      const frequencyText = Number(obj.frequency || 0) > 0 ? frequencyMHz.toFixed(4) + " MHz" : "";
+      let stationName = frequencyText ? (rawStationName + " " + frequencyText).trim() : rawStationName;
   
       const fwd    = Number((obj.fwdPowerWatt*1.0).toFixed(2));
       let   fwdmax = Number((obj.maxFwdPowerWatt*1.0).toFixed(2));
@@ -254,10 +461,34 @@ function processMsg(message) {
   
       // กัน null แบบไม่ return
       const get = (x) => document.getElementById(x);
+
+      // UI-only mirrors for the SVG-style index dashboard
+      updateHomeOverviewPanel(id, obj, {
+        fwd: fwd,
+        rwd: rwd,
+        swr: swr,
+        rssiDb: rssiDb,
+        connectionStatus: connectionStatus,
+        visible: visible
+      });
   
-      // อัปเดตชื่อการ์ด
+      // อัปเดตชื่อการ์ด: แยกชื่ออุปกรณ์และความถี่คนละบรรทัด + hover แสดงชื่อเต็ม
       const titleEl = get(ids.title);
-      if (titleEl) titleEl.innerHTML = stationName;
+      const deviceNameEl = get("deviceName" + id);
+      const deviceFrequencyEl = get("deviceFrequency" + id);
+      if (titleEl) {
+        const safeTitle = stationName || "RF Device " + id;
+        titleEl.setAttribute("aria-label", safeTitle);
+        titleEl.removeAttribute("title");
+        titleEl.removeAttribute("data-full-title");
+
+        if (deviceNameEl || deviceFrequencyEl) {
+          if (deviceNameEl) deviceNameEl.textContent = rawStationName || "RF Device " + id;
+          if (deviceFrequencyEl) deviceFrequencyEl.textContent = frequencyText || "-- MHz";
+        } else {
+          titleEl.textContent = safeTitle;
+        }
+      }
   
       // normalize max
       if (fwd > fwdmax) fwdmax = fwd;
@@ -268,7 +499,12 @@ function processMsg(message) {
       const cardEl = get(ids.currentCard);
       const plotEl = get(ids.plotCard);
       if (cardEl) cardEl.style.display = visible ? "block" : "none";
-      if (plotEl) plotEl.style.display = visible ? "block" : "none";
+      if (plotEl) {
+        const wasVisible = plotEl.dataset.rfVisible === "1";
+        plotEl.style.display = visible ? "block" : "none";
+        plotEl.dataset.rfVisible = visible ? "1" : "0";
+        if (visible && !wasVisible) scheduleIndexPlotRedraw(id);
+      }
   
       // การเชื่อมต่อ: โชว์/ซ่อนป้ายน็อตคอนเนค
       const dis1 = get(ids.cardDisconnect);
@@ -332,17 +568,20 @@ function processMsg(message) {
           if (fwdValEl)  fwdValEl.innerHTML = String(fwd_dB);
           if (rwdValEl)  rwdValEl.innerHTML = String(rwd_dB);
           if (fwdUnitEl) fwdUnitEl.innerHTML = "Forward Power (dBm)";
-          if (rwdUnitEl) rwdUnitEl.innerHTML = "RSSI (dBm)";
+          if (rwdUnitEl) rwdUnitEl.innerHTML = "RSSI";
+          setHTML("rwdMetricUnit" + id, "dBm");
         } else {
           if (fwdValEl)  fwdValEl.innerHTML = String(fwd);
           if (rwdValEl)  rwdValEl.innerHTML = String(rwd);
           if (fwdUnitEl) fwdUnitEl.innerHTML = "Forward Power (W)";
-          if (rwdUnitEl) rwdUnitEl.innerHTML = "RSSI (dBm)";
+          if (rwdUnitEl) rwdUnitEl.innerHTML = "RSSI";
+          setHTML("rwdMetricUnit" + id, "W");
         }
         if (swrValEl) swrValEl.innerHTML = String(swr);
   
         // เก็บ series + วาดกราฟ (ไม่ return ถ้า plot div หาย)
-        const date = (obj.dateList || obj.date || "") + "T" + (obj.timestamp || obj.timeList || "");
+        // Normalize timestamp because Plotly date axes cannot render values like "T17:26:57".
+        const date = normalizePlotTimestamp(obj.dateList || obj.date || "", obj.timestamp || obj.timeList || "");
         window.timeArrMap[id] = window.timeArrMap[id] || [];
         window.fwdArrMap[id]  = window.fwdArrMap[id]  || [];
         window.rwdArrMap[id]  = window.rwdArrMap[id]  || [];
@@ -370,7 +609,11 @@ function processMsg(message) {
       const cardEl2 = document.getElementById(ids.currentCard);
       const plotEl2 = document.getElementById(ids.plotCard);
       if (cardEl2) cardEl2.style.display = visible ? "block" : "none";
-      if (plotEl2) plotEl2.style.display = visible ? "block" : "none";
+      if (plotEl2) {
+        plotEl2.style.display = visible ? "block" : "none";
+        plotEl2.dataset.rfVisible = visible ? "1" : "0";
+        if (visible) scheduleIndexPlotResize(document.getElementById(ids.plotDiv));
+      }
     } catch (e) {
       // จับ error ไม่ให้ฟังก์ชันหลุด (ยังคงวนต่อไปได้)
       console.warn("view_transmitter_list error:", e);
@@ -411,6 +654,11 @@ function setUnit(unit) {
     setStyle("unitWattActive", "backgroundColor", "#009688FF");
     setStyle("unitDBActive", "left", "calc(100% - 160px)");
     setStyle("unitDBActive", "backgroundColor", "#00968840");
+  }
+
+  // UI-only unit labels for reflected metric. Live values continue to use the existing data flow.
+  for (let i = 1; i <= 16; i++) {
+    setHTML("rwdMetricUnit" + i, dBUnit ? "dBm" : "W");
   }
 }
 
@@ -887,116 +1135,310 @@ var CountUp = /** @class */ (function () {
   return CountUp;
 }());
 
+
+function getIndexPlotTheme() {
+  const isLight = document.documentElement.getAttribute('data-rf-theme') === 'light';
+  if (isLight) {
+    return {
+      paper: '#dfeaf5',
+      plot: '#dfeaf5',
+      text: '#111827',
+      muted: '#243447',
+      grid: '#8fa8bf',
+      line: '#111827',
+      forwardColor: '#0284c7',
+      reflectedColor: '#059669',
+      vswrColor: '#d97706',
+      markerBorder: '#ffffff'
+    };
+  }
+  return {
+    paper: '#0b1420',
+    plot: '#0b1420',
+    text: '#eaf2ff',
+    muted: '#94a7bf',
+    grid: '#29435e',
+    line: '#eaf2ff',
+    forwardColor: '#38bdf8',
+    reflectedColor: '#22c55e',
+    vswrColor: '#f59e0b',
+    markerBorder: '#0b1420'
+  };
+}
+
+function renderEmptyTrend(targetId) {
+  const el = document.getElementById(targetId);
+  if (!el) return;
+  const isLight = document.documentElement.getAttribute('data-rf-theme') === 'light';
+  el.classList.remove('rf-plot-rendered');
+  el.innerHTML = '<div class="rf-trend-empty-state">' +
+    '<span class="rf-trend-empty-title">No trend data</span>' +
+    '<small>Waiting for live RF samples</small>' +
+    '</div>';
+  el.style.background = isLight ? '#dfeaf5' : '#0b1420';
+}
+
+function getIndexPlotSize(targetEl) {
+  if (!targetEl) return { width: 720, height: 300 };
+  const trendCard = targetEl.closest('.rf-trend-card') || targetEl.parentElement;
+  const head = trendCard ? trendCard.querySelector('.rf-trend-head') : null;
+  const rect = targetEl.getBoundingClientRect ? targetEl.getBoundingClientRect() : { width: 0, height: 0 };
+  const parentRect = trendCard && trendCard.getBoundingClientRect ? trendCard.getBoundingClientRect() : { width: 0, height: 0 };
+  const headHeight = head ? (head.getBoundingClientRect().height || 0) : 0;
+  const width = Math.max(360, Math.floor(rect.width || targetEl.clientWidth || parentRect.width || 720));
+  const height = Math.max(240, Math.floor(rect.height || targetEl.clientHeight || (parentRect.height ? parentRect.height - headHeight - 16 : 300)));
+  return { width, height };
+}
+
+function resizeIndexPlot(targetEl) {
+  if (!targetEl) return;
+  const id = String(targetEl.id || '').replace('myPlot', '');
+  const chart = window.canvasTrendChartMap && window.canvasTrendChartMap[id];
+  if (chart && typeof chart.render === 'function') {
+    try { chart.render(); } catch (e) {}
+  }
+}
+
+
+function scheduleIndexPlotResize(targetEl) {
+  if (!targetEl) return;
+  requestAnimationFrame(function () { resizeIndexPlot(targetEl); });
+  setTimeout(function () { resizeIndexPlot(targetEl); }, 80);
+  setTimeout(function () { resizeIndexPlot(targetEl); }, 260);
+}
+
+function redrawIndexPlotById(id) {
+  const key = String(id);
+  const targetEl = document.getElementById('myPlot' + key);
+  if (!targetEl) return;
+  if (timeArrMap[key] && timeArrMap[key].length && typeof drawMyPlot === 'function') {
+    drawMyPlot(fwdArrMap[key] || [], rwdArrMap[key] || [], vswrArrMap[key] || [], timeArrMap[key] || [], key, dBUnit, rssiArrMap[key] || []);
+  } else {
+    renderEmptyTrend('myPlot' + key);
+  }
+  scheduleIndexPlotResize(targetEl);
+}
+
+function scheduleIndexPlotRedraw(id) {
+  requestAnimationFrame(function () { redrawIndexPlotById(id); });
+  setTimeout(function () { redrawIndexPlotById(id); }, 100);
+  setTimeout(function () { redrawIndexPlotById(id); }, 320);
+}
+
+function refreshIndexPlotsForTheme() {
+  try {
+    for (let id = 1; id <= 16; id++) {
+      const plotCard = document.getElementById('card_plot' + id);
+      const isVisible = plotCard && plotCard.style.display !== 'none';
+      if (isVisible) redrawIndexPlotById(id);
+    }
+  } catch (e) {
+    console.warn('Plot theme refresh skipped:', e);
+  }
+}
+
+function setupIndexPlotThemeObserver() {
+  if (window.__indexPlotThemeObserverInstalled) return;
+  window.__indexPlotThemeObserverInstalled = true;
+  const refreshSoon = function () {
+    refreshIndexPlotsForTheme();
+    setTimeout(refreshIndexPlotsForTheme, 80);
+    setTimeout(refreshIndexPlotsForTheme, 260);
+  };
+  const observer = new MutationObserver(refreshSoon);
+  observer.observe(document.documentElement, { attributes: true, attributeFilter: ['data-rf-theme'] });
+  window.addEventListener('rf-theme-change', refreshSoon);
+}
+
+(function initIndexPlotThemeObserver() {
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', setupIndexPlotThemeObserver);
+  } else {
+    setupIndexPlotThemeObserver();
+  }
+})();
+
+function toCanvasPoint(xValue, yValue) {
+  const x = normalizePlotTimeValue(xValue);
+  const xDate = x ? new Date(x) : new Date();
+  const y = Number(yValue);
+  return {
+    x: Number.isNaN(xDate.getTime()) ? new Date() : xDate,
+    y: Number.isFinite(y) ? y : null
+  };
+}
+
 function drawMyPlot(fwd, rwd, vswr, time, id, dBUnit) {
-  if (time.length === 0) return;
   const targetId = `myPlot${id}`;
-  if (!$(targetId)) return; // ถ้า div ยังไม่มา ให้ข้าม
+  const targetEl = document.getElementById(targetId);
+  if (!targetEl) return;
+
+  if (typeof CanvasJS === 'undefined') {
+    targetEl.innerHTML = '<div class="rf-trend-empty-state">' +
+      '<span class="rf-trend-empty-title">CanvasJS not loaded</span>' +
+      '<small>Check local canvasjs.min.js</small>' +
+      '</div>';
+    return;
+  }
+
+  if (!Array.isArray(time) || time.length === 0) {
+    renderEmptyTrend(targetId);
+    return;
+  }
 
   let powerUnit = dBUnit ? "dBm" : "W";
-  let hoverSuffix = dBUnit ? " dBm" : " W";
+  const normalizedTimes = time.map(normalizePlotTimeValue);
+  let latest = new Date(normalizedTimes[normalizedTimes.length - 1] || Date.now());
+  if (Number.isNaN(latest.getTime())) latest = new Date();
+  const earliest = new Date(latest.getTime() - 10 * 60 * 1000);
 
-  let latest = new Date(time[time.length - 1]);
-  let earliest = new Date(latest.getTime() - 10 * 60 * 1000);
+  let forwardPoints = [];
+  let reflectedPoints = [];
+  let vswrPoints = [];
 
-  let filteredTimes = [];
-  let filteredFwd = [];
-  let filteredRwd = [];
-  let filteredVswr = [];
-
-  for (let i = 0; i < time.length; i++) {
-    let t = new Date(time[i]);
-    if (t >= earliest) {
-      filteredTimes.push(time[i]);
-      filteredFwd.push(fwd[i]);
-      filteredRwd.push(rwd[i]);
-      filteredVswr.push(vswr[i]);
+  for (let i = 0; i < normalizedTimes.length; i++) {
+    if (!normalizedTimes[i]) continue;
+    const t = new Date(normalizedTimes[i]);
+    if (!Number.isNaN(t.getTime()) && t >= earliest) {
+      forwardPoints.push(toCanvasPoint(normalizedTimes[i], fwd[i]));
+      reflectedPoints.push(toCanvasPoint(normalizedTimes[i], rwd[i]));
+      vswrPoints.push(toCanvasPoint(normalizedTimes[i], vswr[i]));
     }
   }
 
-  var trace1 = {
-    x: filteredTimes,
-    y: filteredFwd,
-    type: 'scatter',
-    name: 'Forward',
-    hovertemplate:
-      '<b>Time:</b> %{x|%H:%M:%S}<br>' +
-      '<b>Forward Power:</b> %{y}' + hoverSuffix + '<br>' +
-      '<extra></extra>',
-    marker: {
-      color: "rgb(68, 252, 68)",
-      line: { color: "rgb(255, 254, 254)", width: 2 }
+  if (forwardPoints.length === 0) {
+    const startIndex = Math.max(0, normalizedTimes.length - 60);
+    for (let i = startIndex; i < normalizedTimes.length; i++) {
+      if (!normalizedTimes[i]) continue;
+      forwardPoints.push(toCanvasPoint(normalizedTimes[i], fwd[i]));
+      reflectedPoints.push(toCanvasPoint(normalizedTimes[i], rwd[i]));
+      vswrPoints.push(toCanvasPoint(normalizedTimes[i], vswr[i]));
     }
-  };
+  }
 
-  var trace2 = {
-    x: filteredTimes,
-    y: filteredRwd,
-    type: 'scatter',
-    name: 'Reflected',
-    hovertemplate:
-      '<b>Time:</b> %{x|%H:%M:%S}<br>' +
-      '<b>Reflected Power:</b> %{y}' + hoverSuffix + '<br>' +
-      '<extra></extra>',
-    marker: {
-      color: "rgb(226, 223, 39)",
-      line: { color: "rgb(255, 254, 254)", width: 2 }
-    }
-  };
+  if (forwardPoints.length === 0) {
+    renderEmptyTrend(targetId);
+    return;
+  }
 
-  var trace3 = {
-    x: filteredTimes,
-    y: filteredVswr,
-    type: 'scatter',
-    name: 'VSWR',
-    yaxis: 'y2',
-    hovertemplate:
-      '<b>Time:</b> %{x|%H:%M:%S}<br>' +
-      '<b>VSWR:</b> %{y}<br>' +
-      '<extra></extra>',
-    marker: {
-      color: "rgb(54, 124, 253)",
-      line: { color: "rgb(255, 254, 254)", width: 2 }
-    }
-  };
+  const plotTheme = getIndexPlotTheme();
+  const isLight = document.documentElement.getAttribute('data-rf-theme') === 'light';
+  const tooltipBg = isLight ? '#ffffff' : '#0b1420';
+  const tooltipBorder = isLight ? '#9fb6cc' : '#29435e';
 
-  var data = [trace1, trace2, trace3];
+  targetEl.classList.add('rf-plot-rendered', 'rf-canvasjs-plot');
+  targetEl.style.visibility = 'visible';
+  targetEl.style.opacity = '1';
+  targetEl.innerHTML = '';
 
-  var layout = {
-    legend: { orientation: "h", x: 0.5, y: 1.15, xanchor: 'center' },
-    margin: { l: 45, r: 45, t: 10, b: 40 },
-    paper_bgcolor: '#21323E',
-    plot_bgcolor: '#21323E',
-    font: { color: '#FFFFFF' },
-    xaxis: {
-      title: { text: 'Time (m)', font: { color: '#FFFFFF' } },
-      color: '#FFFFFF',
-      showline: true,
-      linecolor: '#FFFFFF',
-      linewidth: 2,
-      tickformat: "%H:%M:%S",
-      type: 'date'
+  const chart = new CanvasJS.Chart(targetId, {
+    animationEnabled: false,
+    zoomEnabled: false,
+    backgroundColor: plotTheme.plot,
+    culture: 'en',
+    title: { text: '' },
+    legend: {
+      horizontalAlign: 'center',
+      verticalAlign: 'top',
+      fontColor: plotTheme.text,
+      fontSize: 12,
+      cursor: 'pointer'
     },
-    yaxis: {
-      title: { text: 'Power (' + powerUnit + ')', font: { color: '#FFFFFF' } },
-      color: '#FFFFFF',
-      showline: true,
-      linecolor: '#FFFFFF',
-      linewidth: 2,
-      zeroline: false,
+    toolTip: {
+      shared: true,
+      backgroundColor: tooltipBg,
+      borderColor: tooltipBorder,
+      fontColor: plotTheme.text,
+      contentFormatter: function (e) {
+        const date = e.entries && e.entries.length ? e.entries[0].dataPoint.x : new Date();
+        const timeText = date instanceof Date ? date.toTimeString().slice(0, 8) : '';
+        let html = '<strong>' + timeText + '</strong><br/>';
+        e.entries.forEach(function (entry) {
+          const unit = entry.dataSeries.options.axisYType === 'secondary' ? '' : ' ' + powerUnit;
+          html += entry.dataSeries.name + ': ' + entry.dataPoint.y + unit + '<br/>';
+        });
+        return html;
+      }
     },
-    yaxis2: {
-      title: { text: 'VSWR', font: { color: '#FFFFFF' } },
-      color: '#FFFFFF',
-      overlaying: 'y',
-      side: 'right',
-      showline: true,
-      linecolor: '#FFFFFF',
-      linewidth: 2,
-      zeroline: false,
-    }
-  };
+    axisX: {
+      valueFormatString: 'HH:mm:ss',
+      labelFontColor: plotTheme.text,
+      labelFontSize: 10,
+      lineColor: plotTheme.line,
+      tickColor: plotTheme.line,
+      gridColor: plotTheme.grid,
+      gridThickness: 1,
+      margin: 8
+    },
+    axisY: {
+      title: 'Power (' + powerUnit + ')',
+      titleFontColor: plotTheme.text,
+      labelFontColor: plotTheme.text,
+      labelFontSize: 10,
+      lineColor: plotTheme.line,
+      tickColor: plotTheme.line,
+      gridColor: plotTheme.grid,
+      gridThickness: 1,
+      includeZero: false
+    },
+    axisY2: {
+      title: 'VSWR',
+      titleFontColor: plotTheme.text,
+      labelFontColor: plotTheme.text,
+      labelFontSize: 10,
+      lineColor: plotTheme.line,
+      tickColor: plotTheme.line,
+      gridThickness: 0,
+      includeZero: false
+    },
+    data: [
+      {
+        type: 'line',
+        name: 'Forward',
+        showInLegend: true,
+        color: plotTheme.forwardColor,
+        lineThickness: 3,
+        markerSize: 5,
+        markerColor: plotTheme.forwardColor,
+        markerBorderColor: plotTheme.markerBorder,
+        markerBorderThickness: 1,
+        dataPoints: forwardPoints
+      },
+      {
+        type: 'line',
+        name: 'Reflected',
+        showInLegend: true,
+        color: plotTheme.reflectedColor,
+        lineThickness: 3,
+        markerSize: 5,
+        markerColor: plotTheme.reflectedColor,
+        markerBorderColor: plotTheme.markerBorder,
+        markerBorderThickness: 1,
+        dataPoints: reflectedPoints
+      },
+      {
+        type: 'line',
+        name: 'VSWR',
+        axisYType: 'secondary',
+        showInLegend: true,
+        color: plotTheme.vswrColor,
+        lineThickness: 3,
+        markerSize: 5,
+        markerColor: plotTheme.vswrColor,
+        markerBorderColor: plotTheme.markerBorder,
+        markerBorderThickness: 1,
+        dataPoints: vswrPoints
+      }
+    ]
+  });
 
-  Plotly.react(targetId, data, layout, { responsive: true });
+  window.canvasTrendChartMap[String(id)] = chart;
+  try {
+    chart.render();
+  } catch (e) {
+    console.warn('CanvasJS render skipped:', e);
+  }
+  scheduleIndexPlotResize(targetEl);
 }
 
 
