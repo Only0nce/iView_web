@@ -114,3 +114,6 @@ image/*
 
 # Impeccable local config, in case .impeccable is intentionally tracked later
 .impeccable/config.local.json
+
+*.md
+*.patch
