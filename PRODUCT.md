@@ -10,7 +10,7 @@ Engineers and operators use this interface to monitor RF power sensor data, revi
 
 ## Product Purpose
 
-This product provides a browser-based control and monitoring surface for RF power sensor systems. It brings together live power readings, datalogger history, alarms, calibration, network settings, role configuration, Wi-Fi settings, and system actions so technical users can keep equipment observable and configurable from one place.
+This product provides a browser-based control and monitoring surface for RF power sensor systems. It brings together live power readings, datalogger history, alarms, calibration, network settings, site configuration, Wi-Fi settings, and system actions so technical users can keep equipment observable and configurable from one place.
 
 The primary visual reference for future UI work is `datalogger.php` with `myfunctionDatalogger.js`, especially its event log explorer, filter bar, metric cards, trend charts, table styling, pagination, and status badges.
 

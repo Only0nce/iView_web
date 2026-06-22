@@ -409,14 +409,14 @@ function installEventLogExplorerStyle() {
   const style = document.createElement("style");
   style.id = "event-log-explorer-style";
   style.textContent = `
-    html { background:#08111e; }
-    body {
+    html { background:var(--rf-page, #08111e); }
+    body.rf-console {
       min-height:100vh !important;
       height:auto !important;
-      background:#08111e !important;
+      background:var(--rf-page, #08111e) !important;
       background-image:none !important;
       animation:none !important;
-      color:#e5edf7 !important;
+      color:var(--rf-ink, #e5edf7) !important;
     }
     #header {
       width:min(96vw, 2800px);
@@ -427,7 +427,7 @@ function installEventLogExplorerStyle() {
       max-width:100% !important;
     }
     #logo_text h1 a .logo_colour {
-      color:#f4f8fc !important;
+      color:var(--rf-ink-strong, #f4f8fc) !important;
     }
     ul#menu li a {
       min-height:36px;
@@ -477,6 +477,9 @@ function installEventLogExplorerStyle() {
       --logx-orange:#ffb020;
       --logx-red:#ff6b6b;
       --logx-purple:#9b5cff;
+      --logx-chart:#0b1420;
+      --logx-button:#1b2a3b;
+      --logx-button-hover:#20354d;
       width:100%;
       color:var(--logx-ink);
       font-family:system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
@@ -670,6 +673,124 @@ function installEventLogExplorerStyle() {
     }
     .logx-empty { padding:36px 12px; color:var(--logx-muted); text-align:center; }
 
+
+    html[data-rf-theme="light"] .logx-root {
+      --logx-page:#edf4fb;
+      --logx-card:#ffffff;
+      --logx-panel:#f8fbff;
+      --logx-panel-2:#eaf2fa;
+      --logx-ink:#17243a;
+      --logx-ink-strong:#071525;
+      --logx-muted:#586b84;
+      --logx-muted-2:#8294ab;
+      --logx-border:#c8d8e8;
+      --logx-border-strong:#9fb7cf;
+      --logx-focus:#0ea5e9;
+      --logx-blue:#0284c7;
+      --logx-green:#059669;
+      --logx-orange:#b7791f;
+      --logx-red:#dc2626;
+      --logx-purple:#7c3aed;
+      --logx-chart:#ffffff;
+      --logx-button:#122033;
+      --logx-button-hover:#1d3552;
+    }
+
+    html[data-rf-theme="light"] body.rf-console {
+      background:var(--rf-page, #edf4fb) !important;
+      color:var(--rf-ink, #17243a) !important;
+    }
+
+    html[data-rf-theme="light"] .logx-card,
+    html[data-rf-theme="light"] .logx-chart-card,
+    html[data-rf-theme="light"] .logx-mini-chart,
+    html[data-rf-theme="light"] .logx-panel,
+    html[data-rf-theme="light"] .logx-metric,
+    html[data-rf-theme="light"] .logx-control-box {
+      background:var(--logx-card) !important;
+      border-color:var(--logx-border) !important;
+      color:var(--logx-ink) !important;
+      box-shadow:none !important;
+    }
+
+    html[data-rf-theme="light"] .logx-filter-card,
+    html[data-rf-theme="light"] .logx-toolbar {
+      background:var(--logx-panel-2) !important;
+      border-color:var(--logx-border) !important;
+      box-shadow:none !important;
+    }
+
+    html[data-rf-theme="light"] .logx-btn,
+    html[data-rf-theme="light"] .logx-page-btn {
+      background:var(--logx-button) !important;
+      border-color:var(--logx-border-strong) !important;
+      color:#ffffff !important;
+      text-shadow:none !important;
+    }
+
+    html[data-rf-theme="light"] .logx-btn:hover,
+    html[data-rf-theme="light"] .logx-page-btn:hover:not(:disabled) {
+      background:var(--logx-button-hover) !important;
+      border-color:var(--logx-border-strong) !important;
+    }
+
+    html[data-rf-theme="light"] .logx-chip,
+    html[data-rf-theme="light"] .logx-pill {
+      background:var(--logx-panel-2) !important;
+      border-color:var(--logx-border) !important;
+      color:var(--logx-ink) !important;
+    }
+
+    html[data-rf-theme="light"] .logx-pill-blue,
+    html[data-rf-theme="light"] .logx-pill-green,
+    html[data-rf-theme="light"] .logx-pill-orange,
+    html[data-rf-theme="light"] .logx-pill-red,
+    html[data-rf-theme="light"] .logx-pill-neutral {
+      background:var(--logx-panel-2) !important;
+    }
+
+    html[data-rf-theme="light"] .logx-chip-active,
+    html[data-rf-theme="light"] .logx-page-active {
+      background:var(--logx-blue) !important;
+      border-color:rgba(2,132,199,.55) !important;
+      color:#ffffff !important;
+    }
+
+    html[data-rf-theme="light"] .logx-chip-green.logx-chip-active,
+    html[data-rf-theme="light"] .logx-btn-green { background:var(--logx-green) !important; color:#ffffff !important; }
+    html[data-rf-theme="light"] .logx-chip-orange.logx-chip-active,
+    html[data-rf-theme="light"] .logx-btn-orange { background:var(--logx-orange) !important; color:#ffffff !important; }
+    html[data-rf-theme="light"] .logx-btn-red { background:var(--logx-red) !important; color:#ffffff !important; }
+
+    html[data-rf-theme="light"] .logx-big-svg,
+    html[data-rf-theme="light"] .logx-small-svg,
+    html[data-rf-theme="light"] .logx-svg,
+    html[data-rf-theme="light"] .logx-chart-empty {
+      background:var(--logx-chart) !important;
+      border-color:var(--logx-border) !important;
+      color:var(--logx-muted) !important;
+    }
+
+    html[data-rf-theme="light"] .logx-search,
+    html[data-rf-theme="light"] .logx-filter-input,
+    html[data-rf-theme="light"] .logx-filter-select {
+      background:#ffffff !important;
+      border-color:var(--logx-border) !important;
+      color:var(--logx-ink-strong) !important;
+    }
+
+    html[data-rf-theme="light"] .logx-event-table th {
+      background:#eaf2fa !important;
+      color:#071525 !important;
+    }
+
+    html[data-rf-theme="light"] .logx-event-table tbody tr,
+    html[data-rf-theme="light"] .logx-event-table tbody tr:nth-child(even) {
+      background:#ffffff !important;
+      color:#17243a !important;
+    }
+
+
     @media (max-width: 1400px) {
       .logx-toolbar { grid-template-columns:repeat(2, minmax(0, 1fr)); }
       .logx-filter-field-wide, .logx-filter-summary { grid-column:1 / -1; }
@@ -723,10 +844,49 @@ function installEventLogExplorerStyle() {
 // =========================
 document.addEventListener("DOMContentLoaded", () => {
   installEventLogExplorerStyle();
+  setupLogxThemeObserver();
   buildDataloggerTable();
   WebSocketTest();
   loadDataLog();
 });
+
+function setupLogxThemeObserver() {
+  if (window.__logxThemeObserverInstalled) return;
+  window.__logxThemeObserverInstalled = true;
+  const rerender = () => {
+    try {
+      if (Array.isArray(window.tableData)) renderOverview(getDisplayedRows());
+    } catch (e) {
+      console.warn("Theme refresh skipped:", e);
+    }
+  };
+  const observer = new MutationObserver(rerender);
+  observer.observe(document.documentElement, { attributes: true, attributeFilter: ["data-rf-theme"] });
+}
+
+function getLogxThemePalette() {
+  const isLight = document.documentElement.getAttribute("data-rf-theme") === "light";
+  if (isLight) {
+    return {
+      paper: "#ffffff",
+      plot: "#ffffff",
+      font: "#17243a",
+      muted: "#586b84",
+      grid: "#d7e4f0",
+      hoverBg: "#ffffff",
+      hoverBorder: "#c8d8e8"
+    };
+  }
+  return {
+    paper: "#0d1826",
+    plot: "#0b1420",
+    font: "#9fb0c3",
+    muted: "#8fa2b8",
+    grid: "#26384e",
+    hoverBg: "#101b2b",
+    hoverBorder: "#233650"
+  };
+}
 
 // =========================
 // WebSocket
@@ -1654,34 +1814,35 @@ function plotlyConfig() {
 }
 
 function plotlyCommonLayout(height) {
+  const theme = getLogxThemePalette();
   return {
     height,
-    paper_bgcolor: "#0d1826",
-    plot_bgcolor: "#0b1420",
-    font: { color: "#9fb0c3", family: "Arial, Helvetica, sans-serif", size: 12 },
+    paper_bgcolor: theme.paper,
+    plot_bgcolor: theme.plot,
+    font: { color: theme.font, family: "Arial, Helvetica, sans-serif", size: 12 },
     margin: { l: 58, r: 58, t: 16, b: 42 },
     dragmode: false,
     hovermode: false,
     hoverlabel: {
-      bgcolor: "#101b2b",
-      bordercolor: "#233650",
-      font: { color: "#e5edf7", size: 12 }
+      bgcolor: theme.hoverBg,
+      bordercolor: theme.hoverBorder,
+      font: { color: theme.font, size: 12 }
     },
     xaxis: {
       showgrid: true,
-      gridcolor: "#26384e",
+      gridcolor: theme.grid,
       zeroline: false,
       fixedrange: true,
-      color: "#8fa2b8",
+      color: theme.muted,
       tickformat: "%d/%m %H:%M",
       rangeslider: { visible: false }
     },
     yaxis: {
       showgrid: true,
-      gridcolor: "#26384e",
+      gridcolor: theme.grid,
       zeroline: false,
       fixedrange: true,
-      color: "#8fa2b8"
+      color: theme.muted
     },
     legend: {
       orientation: "h",

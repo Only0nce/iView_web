@@ -56,7 +56,7 @@ include('ListAudioGain.php')
 		<li><a href="cal.php?id=1">CAL</a></li>
 		<li><a href="thrulan.php?id=0">Power Sensor</a></li>
 		<li><a href="snmp_update.php">Rx SNMP Info</a></li>
-		<li class="selected"><a href="role.php?id=0">ROLE</a></li>
+		<li class="selected"><a href="role.php?id=0">SITE</a></li>
 		<li><a href="network.php">NETWORK</a></li>
 		<li><a href="wifi.php">WiFi</a></li>
 		<li><a href="update.php">System</a></li>
@@ -105,15 +105,15 @@ include('ListAudioGain.php')
 
 	
 <div class="container">
-<h3 class="truelanLabel" id="newtruelan" name="newtruelan" >New Role</h3>
+<h3 class="truelanLabel" id="newtruelan" name="newtruelan" >New Site</h3>
 </div>
 <div class="container6">
 		<div class="card" id="card0" name="card0" style="display: block; background-color: rgba(0, 0, 0, 0.0)">
 			<?php	
 				
-				echo '<div class="cardTxTab" id="cardTxId0" name="cardTxId0" onclick="setCurrentID(0)" style="display: block; background-color:rgba(0,0,0,0.3)">';
-				echo '<img class="cardTxTabImage" src="img/newRole.png" alt="Flowers in Chania">';
-				echo '<span class="cardTxTabText3" id="cardNameId0" name="cardNameId0"> New </span>';
+				echo '<div class="cardTxTab cardTxTabAdd" id="cardTxId0" name="cardTxId0" onclick="setCurrentID(0)" style="display: block;">';
+				echo '<span class="cardTxTabIcon cardTxTabIconAdd" aria-hidden="true">+</span>';
+				echo '<span class="cardTxTabText3" id="cardNameId0" name="cardNameId0"> Add New </span>';
 				echo '</div>';
 			?>
 		</div>
@@ -122,8 +122,8 @@ include('ListAudioGain.php')
 
 	<div class="container8">
 		<div class="card" id="card" name="card" style="display: block; background-color: rgba(0, 0, 0, 0.0)">
-			<div class="selected_list"> <span>Role Name</span>
-			<input class="form-control" type="text" id="roleName" name="roleName"  placeholder="Role Name" value=''/>			
+			<div class="selected_list"> <span>Site Name</span>
+			<input class="form-control" type="text" id="roleName" name="roleName"  placeholder="Site Name" value=''/>			
 		</div>
 		</div>
 	</div>
@@ -132,7 +132,7 @@ include('ListAudioGain.php')
 			<div class="cardRole" id="cardRoleId1" name="cardRoleId1" style="display: block; background-color: rgba(0, 0, 0, 0.1)">
 					<div class="cardRoleTextID"> <span>1</span></div>
 			  <select id="chId1" name="chId1" class="selectedTrueLan" ><option selected value='0'>Disable</option></select>
-				<img class="cardRoleTabImage" src="img/radioIcon.png" alt="Flowers in Chania">
+				<img class="cardRoleTabImage" src="img/Thrulan.png" alt="Flowers in Chania">
 				<div class="cardRoleCheckbox" style="display: none">
 				<section style="visibility:hidden;">
 						<label for="rs232Id1" class="rs232Id1">
@@ -145,31 +145,31 @@ include('ListAudioGain.php')
 			<div class="cardRole" id="cardRoleId3" name="cardRoleId3" style="display: block; background-color: rgba(0, 0, 0, 0.1)">
 					<div class="cardRoleTextID"> <span>3</span></div>
 			  <select id="chId3" name="chId3" class="selectedTrueLan" ><option selected value='0'>Disable</option></select>
-				<img class="cardRoleTabImage" src="img/radioIcon.png" alt="Flowers in Chania"></div>
+				<img class="cardRoleTabImage" src="img/Thrulan.png" alt="Flowers in Chania"></div>
 			<div class="cardRole" id="cardRoleId5" name="cardRoleId5" style="display: block; background-color: rgba(0, 0, 0, 0.1)">
 					<div class="cardRoleTextID"> <span>5</span></div>
 			  <select id="chId5" name="chId5" class="selectedTrueLan" ><option selected value='0'>Disable</option></select>
-				<img class="cardRoleTabImage" src="img/radioIcon.png" alt="Flowers in Chania"></div>
+				<img class="cardRoleTabImage" src="img/Thrulan.png" alt="Flowers in Chania"></div>
 			<div class="cardRole" id="cardRoleId7" name="cardRoleId7" style="display: block; background-color: rgba(0, 0, 0, 0.1)">
 					<div class="cardRoleTextID"> <span>7</span></div>
 			  <select id="chId7" name="chId7" class="selectedTrueLan" ><option selected value='0'>Disable</option></select>
-				<img class="cardRoleTabImage" src="img/radioIcon.png" alt="Flowers in Chania"></div>
+				<img class="cardRoleTabImage" src="img/Thrulan.png" alt="Flowers in Chania"></div>
 			<div class="cardRole" id="cardRoleId9" name="cardRoleId9" style="display: block; background-color: rgba(0, 0, 0, 0.1)">
 					<div class="cardRoleTextID"> <span>9</span></div>
 			  <select id="chId9" name="chId9" class="selectedTrueLan" ><option selected value='0'>Disable</option></select>
-				<img class="cardRoleTabImage" src="img/radioIcon.png" alt="Flowers in Chania"></div>
+				<img class="cardRoleTabImage" src="img/Thrulan.png" alt="Flowers in Chania"></div>
 			<div class="cardRole" id="cardRoleId11" name="cardRoleId11" style="display: block; background-color: rgba(0, 0, 0, 0.1)">
 					<div class="cardRoleTextID"> <span>11</span></div>
 			  <select id="chId11" name="chId11" class="selectedTrueLan" ><option selected value='0'>Disable</option></select>
-				<img class="cardRoleTabImage" src="img/radioIcon.png" alt="Flowers in Chania"></div>
+				<img class="cardRoleTabImage" src="img/Thrulan.png" alt="Flowers in Chania"></div>
 			<div class="cardRole" id="cardRoleId13" name="cardRoleId13" style="display: block; background-color: rgba(0, 0, 0, 0.1)">
 					<div class="cardRoleTextID"> <span>13</span></div>
 			  <select id="chId13" name="chId13" class="selectedTrueLan" ><option selected value='0'>Disable</option></select>
-				<img class="cardRoleTabImage" src="img/radioIcon.png" alt="Flowers in Chania"></div>
+				<img class="cardRoleTabImage" src="img/Thrulan.png" alt="Flowers in Chania"></div>
 			<div class="cardRole" id="cardRoleId15" name="cardRoleId15" style="display: block; background-color: rgba(0, 0, 0, 0.1)">
 					<div class="cardRoleTextID"> <span>15</span></div>
 			  <select id="chId15" name="chId15" class="selectedTrueLan" ><option selected value='0'>Disable</option></select>
-				<img class="cardRoleTabImage" src="img/radioIcon.png" alt="Flowers in Chania"></div>
+				<img class="cardRoleTabImage" src="img/Thrulan.png" alt="Flowers in Chania"></div>
 			<div class="cardRole" id="cardButton" style="display: block; background-color: rgba(0, 0, 0, 0.0)">
 						<button class="button button2" type="button" id="removerolebutton" style="margin-top: 10px; display: none;" onClick="removeRole();">REMOVE</button>
 			</div>
@@ -178,7 +178,7 @@ include('ListAudioGain.php')
 			<div class="cardRole" id="cardRoleId2" name="cardRoleId2" style="display: block; background-color: rgba(0, 0, 0, 0.1)">
 					<div class="cardRoleTextID"> <span>2</span></div>
 			  <select id="chId2" name="chId2" class="selectedTrueLan" ><option selected value='0'>Disable</option></select>
-				<img class="cardRoleTabImage" src="img/radioIcon.png" alt="Flowers in Chania"></div>
+				<img class="cardRoleTabImage" src="img/Thrulan.png" alt="Flowers in Chania"></div>
 				<div class="cardRoleCheckbox" style="display: none">
 				<section style="visibility:hidden;">
 						<label for="rs232Id2" class="rs232Id2">
@@ -190,31 +190,31 @@ include('ListAudioGain.php')
 			<div class="cardRole" id="cardRoleId4" name="cardRoleId4" style="display: block; background-color: rgba(0, 0, 0, 0.1)">
 					<div class="cardRoleTextID"> <span>4</span></div>
 			  <select id="chId4" name="chId4" class="selectedTrueLan" ><option selected value='0'>Disable</option></select>
-				<img class="cardRoleTabImage" src="img/radioIcon.png" alt="Flowers in Chania"></div>
+				<img class="cardRoleTabImage" src="img/Thrulan.png" alt="Flowers in Chania"></div>
 			<div class="cardRole" id="cardRoleId6" name="cardRoleId6" style="display: block; background-color: rgba(0, 0, 0, 0.1)">
 					<div class="cardRoleTextID"> <span>6</span></div>
 			  <select id="chId6" name="chId6" class="selectedTrueLan" ><option selected value='0'>Disable</option></select>
-				<img class="cardRoleTabImage" src="img/radioIcon.png" alt="Flowers in Chania"></div>
+				<img class="cardRoleTabImage" src="img/Thrulan.png" alt="Flowers in Chania"></div>
 			<div class="cardRole" id="cardRoleId8" name="cardRoleId8" style="display: block; background-color: rgba(0, 0, 0, 0.1)">
 					<div class="cardRoleTextID"> <span>8</span></div>
 			  <select id="chId8" name="chId8" class="selectedTrueLan" ><option selected value='0'>Disable</option></select>
-				<img class="cardRoleTabImage" src="img/radioIcon.png" alt="Flowers in Chania"></div>
+				<img class="cardRoleTabImage" src="img/Thrulan.png" alt="Flowers in Chania"></div>
 			<div class="cardRole" id="cardRoleId10" name="cardRoleId10" style="display: block; background-color: rgba(0, 0, 0, 0.1)">
 					<div class="cardRoleTextID"> <span>10</span></div>
 			  <select id="chId10" name="chId11" class="selectedTrueLan" ><option selected value='0'>Disable</option></select>
-				<img class="cardRoleTabImage" src="img/radioIcon.png" alt="Flowers in Chania"></div>
+				<img class="cardRoleTabImage" src="img/Thrulan.png" alt="Flowers in Chania"></div>
 			<div class="cardRole" id="cardRoleId12" name="cardRoleId12" style="display: block; background-color: rgba(0, 0, 0, 0.1)">
 					<div class="cardRoleTextID"> <span>12</span></div>
 			  <select id="chId12" name="chId12" class="selectedTrueLan" ><option selected value='0'>Disable</option></select>
-				<img class="cardRoleTabImage" src="img/radioIcon.png" alt="Flowers in Chania"></div>
+				<img class="cardRoleTabImage" src="img/Thrulan.png" alt="Flowers in Chania"></div>
 			<div class="cardRole" id="cardRoleId14" name="cardRoleId14" style="display: block; background-color: rgba(0, 0, 0, 0.1)">
 					<div class="cardRoleTextID"> <span>14</span></div>
 			  <select id="chId14" name="chId14" class="selectedTrueLan" ><option selected value='0'>Disable</option></select>
-				<img class="cardRoleTabImage" src="img/radioIcon.png" alt="Flowers in Chania"></div>
+				<img class="cardRoleTabImage" src="img/Thrulan.png" alt="Flowers in Chania"></div>
 			<div class="cardRole" id="cardRoleId16" name="cardRoleId16" style="display: block; background-color: rgba(0, 0, 0, 0.1)">
 					<div class="cardRoleTextID"> <span>16</span></div>
 			  <select id="chId16" name="chId16" class="selectedTrueLan" ><option selected value='0'>Disable</option></select>
-				<img class="cardRoleTabImage" src="img/radioIcon.png" alt="Flowers in Chania"></div>
+				<img class="cardRoleTabImage" src="img/Thrulan.png" alt="Flowers in Chania"></div>
 			<div class="cardRole" id="cardButton" style="display: block; background-color: rgba(0, 0, 0, 0.0)">
 						<button class="button button2" type="button" id="saverolebutton" style="margin-top: 10px;" onClick="newRole();">NEW</button>
 						<button class="button button2" type="button" id="selectrolebutton" style="margin-top: 10px; display: none;" onClick="selectedRole();">SELECT</button>

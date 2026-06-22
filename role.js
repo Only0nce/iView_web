@@ -167,7 +167,7 @@ function newRole() {
 
   const jsonMessage = JSON.stringify(roleObj);
 
-  const sure = confirm(`${isUpdate ? "Update" : "Add"} Role, Please confirm!`);
+  const sure = confirm(`${isUpdate ? "Update" : "Add"} Site, Please confirm!`);
   if (sure) {
     if (ws?.readyState === 1) {
       ws.send(jsonMessage);
@@ -234,15 +234,15 @@ function setCurrentID(newID) {
 
   if (newID != 0) {
     // console.log("getrole if");
-    document.getElementById("newtruelan").innerHTML = 'Edit Role';
+    document.getElementById("newtruelan").innerHTML = 'Edit Site';
     document.getElementById("saverolebutton").innerHTML = 'UPDATE';
     const c0 = document.getElementById("cardTxId0");
     if (c0) c0.style.backgroundColor = "rgba(0, 0, 0, 0.1)";
     document.getElementById("removerolebutton").style.display = "block";
-    document.getElementById("selectrolebutton").style.display = "block";
+    document.getElementById("selectrolebutton").style.display = "inline-flex";
   } else {
     // console.log("getrole else");
-    document.getElementById("newtruelan").innerHTML = 'New Role';
+    document.getElementById("newtruelan").innerHTML = 'New Site';
     document.getElementById("saverolebutton").innerHTML = 'NEW';
     document.getElementById("roleName").value = '';
     const c0 = document.getElementById("cardTxId0");
@@ -264,7 +264,7 @@ function setCurrentID(newID) {
 }
 
 function removeRole() {
-  if (confirm("Remove Role, Please confirm!") === true) {
+  if (confirm("Remove Site, Please confirm!") === true) {
     var msg = { menuID: "removeRole", id: currentID };
     if (ws?.readyState === 1) {
       ws.send(JSON.stringify(msg));
@@ -284,7 +284,7 @@ function removeRole() {
 
 
 function selectedRole() {
-  if (confirm("Selected Role, Please confirm!") === true) {
+  if (confirm("Selected Site, Please confirm!") === true) {
     var msg = { menuID: "selectedRole", id: currentID };
     if (ws?.readyState === 1) {
       ws.send(JSON.stringify(msg));
@@ -341,7 +341,8 @@ function processMsg(message) {
         document.getElementById("rs232Id1").checked = (obj.rs232Id1 == 1 || obj.rs232Id1 === true);
         document.getElementById("rs232Id2").checked = (obj.rs232Id2 == 1 || obj.rs232Id2 === true);
         if (obj.currentActive) {
-          document.getElementById("selectrolebutton").style.display = "none";
+          const selectBtn = document.getElementById("selectrolebutton");
+          if (selectBtn) selectBtn.style.display = "inline-flex";
           document.getElementById(cardTxName).style.backgroundColor = "rgba(0, 255, 0, 0.6)";
         }
       } else {
@@ -359,7 +360,7 @@ function processMsg(message) {
       card0.appendChild(
         Object.assign(document.createElement('div'), { className : 'cardTxTab', id: cardTxName })
       ).appendChild(
-        Object.assign(document.createElement('img'), { className : 'cardTxTabImage', src: "img/role.png", alt: "Flowers in Chania" })
+        Object.assign(document.createElement('img'), { className : 'cardTxTabImage', src: "img/site.png", alt: "Flowers in Chania" })
       );
 
       const cardTxId = document.getElementById(cardTxName);

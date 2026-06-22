@@ -76,8 +76,8 @@ function renderAllSnmpCards() {
 
         const img = document.createElement("img");
         img.className = "cardTxTabImage";
-        img.src = "img/radioIcon.png";
-        img.alt = "radio";
+        img.src = "img/iView.png";
+        img.alt = "SNMP profile";
 
         const span = document.createElement("span");
         span.className = "cardTxTabText3";

@@ -2297,3 +2297,61 @@ svg {
       height: 350px; /* ความสูงของทั้ง block */
     margin-bottom: 20px;
 }
+
+/* --------------------------------------------------------------------------
+   RF Console theme bridge
+   Legacy style.css originally contains fixed dark/bright colors. When a page
+   uses body.rf-console, defer visual colors to rf-console.css theme tokens.
+   -------------------------------------------------------------------------- */
+body.rf-console {
+  background: var(--rf-page, #07111f) !important;
+  color: var(--rf-ink, #eaf2ff) !important;
+  background-image: none !important;
+}
+
+body.rf-console #main,
+body.rf-console #header,
+body.rf-console #site_content,
+body.rf-console #logo,
+body.rf-console #menubar {
+  background: transparent !important;
+  background-image: none !important;
+  color: var(--rf-ink, #eaf2ff) !important;
+}
+
+body.rf-console .card,
+body.rf-console .container,
+body.rf-console .container1,
+body.rf-console .container6,
+body.rf-console .container7,
+body.rf-console .container8,
+body.rf-console .container9,
+body.rf-console .container10,
+body.rf-console .sidebar,
+body.rf-console .sidebar2,
+body.rf-console #network_content,
+body.rf-console .form {
+  background: var(--rf-card, #0e1a2c) !important;
+  color: var(--rf-ink, #eaf2ff) !important;
+  border-color: var(--rf-border, #29435e) !important;
+}
+
+body.rf-console input:not([type="checkbox"]):not([type="radio"]):not([type="file"]),
+body.rf-console select,
+body.rf-console textarea,
+body.rf-console .form-control {
+  background: var(--rf-panel, #091524) !important;
+  color: var(--rf-ink-strong, #f8fbff) !important;
+  border-color: var(--rf-border, #29435e) !important;
+}
+
+body.rf-console .button,
+body.rf-console .button2,
+body.rf-console button.button,
+body.rf-console button.button2,
+body.rf-console input.button,
+body.rf-console input.button2 {
+  background: var(--rf-primary, #38bdf8) !important;
+  color: #ffffff !important;
+  border-color: var(--rf-border-strong, #3a5a7c) !important;
+}
