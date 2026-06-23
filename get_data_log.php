@@ -39,7 +39,7 @@ $strSQL = "
         endLog
     FROM datalogger
     ORDER BY id DESC
-    LIMIT 300
+    LIMIT 600
 ";
 
 $objQuery = $conn->query($strSQL);
@@ -70,10 +70,35 @@ function splitDatePart($datetime, $index) {
 }
 
 $data = [];
+$seenEventKeys = [];
+$maxUniqueRows = 300;
 
 while ($row = $objQuery->fetch_assoc()) {
     $startLog = $row['startLog'] ?? '';
     $endLog = $row['endLog'] ?? '';
+
+    // UI/API de-duplication guard.
+    // This does not replace a database unique key, but it prevents the web page
+    // from displaying duplicated datalogger events that already exist in DB.
+    $eventKey = implode('|', [
+        $row['txIndex'] ?? '',
+        $row['site'] ?? '',
+        $row['stationName'] ?? '',
+        $row['frequency'] ?? '',
+        $row['duration'] ?? '',
+        $startLog,
+        $endLog,
+        $row['connectionStatus'] ?? '',
+        $row['fwdPowerWatt'] ?? '',
+        $row['rwdPowerWatt'] ?? '',
+        $row['vswr'] ?? '',
+        $row['rssi'] ?? ''
+    ]);
+
+    if (isset($seenEventKeys[$eventKey])) {
+        continue;
+    }
+    $seenEventKeys[$eventKey] = true;
 
     $data[] = [
         'databaseId' => nullableInt($row['id']),
@@ -113,6 +138,10 @@ while ($row = $objQuery->fetch_assoc()) {
         'vswrList' => nullableFloat($row['vswr']),
         'rssiList' => nullableFloat($row['rssi'])
     ];
+
+    if (count($data) >= $maxUniqueRows) {
+        break;
+    }
 }
 
 $conn->close();

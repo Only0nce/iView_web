@@ -43,6 +43,12 @@ window.logDateEndFilter = "";
 window.logSiteFilter = "";
 window.logStationFilter = "";
 window.logDeviceFilter = "";
+window.transmitterThresholdMap = new Map();
+window.transmitterThresholdStationMap = new Map();
+window.transmitterThresholdStationOnlyMap = new Map();
+window.transmitterThresholdList = [];
+window.defaultTransmitterThreshold = null;
+window.logxDebugThreshold = true;
 
   window.logTrendAggregate = "raw";
   window.logTrendZoom = "all";
@@ -399,6 +405,140 @@ function connectionKind(connection) {
   return String(connection || "").toLowerCase().includes("disconnect") ? "red" : "blue";
 }
 
+function normalizeStationKey(value) {
+  return String(value ?? "").trim().toLowerCase();
+}
+
+function normalizeFrequencyKey(value) {
+  const raw = valueForDisplay(value);
+  const n = Number(raw);
+  if (Number.isFinite(n)) {
+    const mhz = n > 100000 ? n / 1000000 : n;
+    return mhz.toFixed(3);
+  }
+  return String(raw ?? "").trim();
+}
+
+function stationFrequencyThresholdKey(stationName, frequency) {
+  const station = normalizeStationKey(stationName);
+  const freq = normalizeFrequencyKey(frequency);
+  if (!station || !freq) return "";
+  return `station:${station}|freq:${freq}`;
+}
+
+function buildThresholdConfigFromListTransmitter(obj) {
+  const txIndex = Number(obj.index);
+  return {
+    txIndex: Number.isFinite(txIndex) && txIndex > 0 ? txIndex : null,
+    alertRssi: Number(obj.alertRssi),
+    warningRssi: Number(obj.warningRssi),
+    alertVSWR: Number(obj.alertVSWR),
+    warningVSWR: Number(obj.warningVSWR),
+    alertFwdPowerWatt: Number(obj.alertFwdPowerWatt),
+    warningFwdPowerWatt: Number(obj.warningFwdPowerWatt),
+    stationName: obj.stationName || "",
+    frequency: obj.frequency || ""
+  };
+}
+
+function registerTransmitterThreshold(cfg) {
+  if (!cfg) return;
+
+  window.defaultTransmitterThreshold = cfg;
+
+  if (cfg.txIndex) {
+    window.transmitterThresholdMap.set("tx:" + cfg.txIndex, cfg);
+  }
+
+  const stationKey = normalizeStationKey(cfg.stationName);
+  if (stationKey) {
+    window.transmitterThresholdStationOnlyMap.set("station:" + stationKey, cfg);
+  }
+
+  const sfKey = stationFrequencyThresholdKey(cfg.stationName, cfg.frequency);
+  if (sfKey) {
+    window.transmitterThresholdStationMap.set(sfKey, cfg);
+  }
+
+  const sameIndex = window.transmitterThresholdList.findIndex(item => {
+    if (cfg.txIndex && item.txIndex === cfg.txIndex) return true;
+    const a = stationFrequencyThresholdKey(item.stationName, item.frequency);
+    const b = stationFrequencyThresholdKey(cfg.stationName, cfg.frequency);
+    return a && b && a === b;
+  });
+
+  if (sameIndex >= 0) window.transmitterThresholdList[sameIndex] = cfg;
+  else window.transmitterThresholdList.push(cfg);
+}
+
+function getThresholdConfigForRow(row) {
+  const tx = getDeviceIndex(row);
+  if (tx) {
+    const byTx = window.transmitterThresholdMap.get("tx:" + tx);
+    if (byTx) return byTx;
+  }
+
+  const byStationFreq = window.transmitterThresholdStationMap.get(
+    stationFrequencyThresholdKey(getStationName(row), getFrequencyMHz(row))
+  );
+  if (byStationFreq) return byStationFreq;
+
+  const station = normalizeStationKey(getStationName(row));
+  if (station) {
+    const byStation = window.transmitterThresholdStationOnlyMap.get("station:" + station);
+    if (byStation) return byStation;
+  }
+
+  // If this page has only one transmitter config, apply it to all historical rows.
+  if (window.transmitterThresholdList.length === 1) {
+    return window.transmitterThresholdList[0];
+  }
+
+  return window.defaultTransmitterThreshold || null;
+}
+
+function thresholdFromConfig(cfg, keys, fallback) {
+  for (const key of keys) {
+    const value = numericValueFromText(cfg?.[key]);
+    if (Number.isFinite(value)) return value;
+  }
+  return fallback;
+}
+
+function getVswrSeverityClass(row) {
+  const vswr = numericValueFromText(getVswrMax(row));
+  if (!Number.isFinite(vswr)) return "";
+
+  const cfg = getThresholdConfigForRow(row);
+  const warning = thresholdFromConfig(cfg, ["warningVSWR", "vswrWarning"], 1.5);
+  const alert = thresholdFromConfig(cfg, ["alertVSWR", "vswrAlert", "maxVSWR", "maxVswr"], 2.0);
+
+  if (vswr >= alert) return "logx-value-alert";
+  if (vswr >= warning) return "logx-value-warning";
+  return "logx-value-normal";
+}
+
+function getRssiSeverityClass(row) {
+  const rssi = numericValueFromText(getRssiDbm(row));
+  if (!Number.isFinite(rssi)) return "";
+
+  const cfg = getThresholdConfigForRow(row);
+  const warning = thresholdFromConfig(cfg, ["warningRssi", "rssiWarning"], -105);
+  const alert = thresholdFromConfig(cfg, ["alertRssi", "rssiAlert"], -115);
+
+  // RSSI dBm is worse when it is more negative.
+  if (rssi <= alert) return "logx-value-alert";
+  if (rssi <= warning) return "logx-value-warning";
+  return "logx-value-normal";
+}
+
+function severityInlineStyle(className) {
+  if (className === "logx-value-alert") return "color:#ff5c5c;font-weight:900;";
+  if (className === "logx-value-warning") return "color:#ffb020;font-weight:900;";
+  if (className === "logx-value-normal") return "color:#43d39e;font-weight:800;";
+  return "";
+}
+
 // =========================
 // UI CSS / layout
 // =========================
@@ -638,6 +778,12 @@ function installEventLogExplorerStyle() {
     .logx-rwd-text { color:#15935a; font-weight:600; }
     .logx-cond-text { color:#c67a00; font-weight:600; }
     .logx-muted-text { color:#4f6174; font-weight:600; }
+    .logx-value-normal { color:#43d39e !important; font-weight:800 !important; }
+    .logx-value-warning { color:#ffb020 !important; font-weight:900 !important; }
+    .logx-value-alert { color:#ff5c5c !important; font-weight:900 !important; }
+    .logx-event-table td.logx-value-normal { color:#43d39e !important; font-weight:800 !important; }
+    .logx-event-table td.logx-value-warning { color:#ffb020 !important; font-weight:900 !important; }
+    .logx-event-table td.logx-value-alert { color:#ff5c5c !important; font-weight:900 !important; }
     .logx-event-table td:nth-child(4),
     .logx-event-table td:nth-child(5) {
       color:#1f2d3d;
@@ -660,7 +806,20 @@ function installEventLogExplorerStyle() {
     }
     .logx-page-btn:hover:not(:disabled) { background:#18324a; border-color:#4a6c8d; }
     .logx-page-btn:disabled { opacity:.45; cursor:not-allowed; }
-    .logx-page-active { background:#0f8bc4 !important; color:#ffffff !important; border-color:#1fb6ff !important; }
+    .logx-page-active {
+      background:#06101f !important;
+      color:#eaf6ff !important;
+      border-color:#38bdf8 !important;
+      box-shadow:inset 0 0 0 1px rgba(56,189,248,.45), 0 0 0 3px rgba(56,189,248,.12) !important;
+    }
+    .logx-page-btn[aria-current="page"],
+    .logx-page-btn[data-current-page="true"] {
+      background:#06101f !important;
+      color:#eaf6ff !important;
+      border-color:#7dd3fc !important;
+      box-shadow:inset 0 0 0 1px rgba(125,211,252,.7), 0 0 0 3px rgba(56,189,248,.18) !important;
+      transform:translateY(-1px);
+    }
     .logx-page-first { background:#7b1b72; border-color:#8f2a86; color:#ffffff; }
     .logx-page-ellipsis {
       min-width:24px;
@@ -749,11 +908,20 @@ function installEventLogExplorerStyle() {
       background:var(--logx-panel-2) !important;
     }
 
-    html[data-rf-theme="light"] .logx-chip-active,
-    html[data-rf-theme="light"] .logx-page-active {
+    html[data-rf-theme="light"] .logx-chip-active {
       background:var(--logx-blue) !important;
       border-color:rgba(2,132,199,.55) !important;
       color:#ffffff !important;
+    }
+
+    html[data-rf-theme="light"] .logx-page-active,
+    html[data-rf-theme="light"] .logx-page-btn[aria-current="page"],
+    html[data-rf-theme="light"] .logx-page-btn[data-current-page="true"] {
+      background:#0f2742 !important;
+      border-color:#0284c7 !important;
+      color:#ffffff !important;
+      box-shadow:inset 0 0 0 1px rgba(2,132,199,.45), 0 0 0 3px rgba(2,132,199,.18) !important;
+      transform:translateY(-1px);
     }
 
     html[data-rf-theme="light"] .logx-chip-green.logx-chip-active,
@@ -789,6 +957,10 @@ function installEventLogExplorerStyle() {
       background:#ffffff !important;
       color:#17243a !important;
     }
+
+    html[data-rf-theme="light"] .logx-value-normal { color:#047857 !important; }
+    html[data-rf-theme="light"] .logx-value-warning { color:#b45309 !important; }
+    html[data-rf-theme="light"] .logx-value-alert { color:#dc2626 !important; }
 
 
     @media (max-width: 1400px) {
@@ -896,7 +1068,10 @@ function WebSocketTest() {
   try {
     ws = new WebSocket(wsUri);
     ws.onopen = () => {
-      if (ws.readyState === 1) ws.send('{"menuID":"getMonitorPage"}');
+      if (ws.readyState === 1) {
+        ws.send('{"menuID":"getMonitorPage"}');
+        ws.send('{"menuID":"getThruLan"}');
+      }
     };
     ws.onmessage = (evt) => processMsg(evt.data);
     ws.onerror = (e) => console.error("WebSocket error:", e);
@@ -915,15 +1090,64 @@ function processMsg(message) {
     return;
   }
 
+  if (obj.menuID === "listTransmitter") {
+    const cfg = buildThresholdConfigFromListTransmitter(obj);
+    registerTransmitterThreshold(cfg);
+    console.log("[THRESHOLD MAP]", cfg);
+    renderTable();
+    return;
+  }
+
   if (obj.menuID === "view_transmitter_list" && obj.insertDataLogger == 1) {
     // Reload from DB so the row uses the saved datalogger.site and endLog values.
     loadDataLog();
+    // Ask C++ for the latest transmitter thresholds again after a log update.
+    if (ws && ws.readyState === 1) ws.send('{"menuID":"getThruLan"}');
   }
 }
 
 // =========================
 // Load backend
 // =========================
+function getDataloggerEventKey(row) {
+  return [
+    getDeviceIndex(row),
+    getDateTime(row),
+    getEndTime(row),
+    getSiteName(row),
+    getStationName(row),
+    getFrequencyMHz(row),
+    getDuration(row),
+    getConnectionText(row),
+    getForwardMaxW(row),
+    getReflectedMaxW(row),
+    getVswrMax(row),
+    getRssiDbm(row)
+  ].map(v => String(v ?? "").trim()).join("|");
+}
+
+function dedupeDataloggerRows(rows) {
+  const seen = new Set();
+  const out = [];
+  let skipped = 0;
+
+  for (const row of rows || []) {
+    const key = getDataloggerEventKey(row);
+    if (seen.has(key)) {
+      skipped++;
+      continue;
+    }
+    seen.add(key);
+    out.push(row);
+  }
+
+  if (skipped > 0) {
+    console.warn(`[datalogger] skipped ${skipped} duplicate row(s) from get_data_log.php response`);
+  }
+
+  return out;
+}
+
 async function loadDataLog() {
   try {
     const resp = await fetch("/get_data_log.php", { cache: "no-store" });
@@ -934,7 +1158,8 @@ async function loadDataLog() {
     // Keep the exact row order returned by get_data_log.php.
     // The backend already orders by id DESC, so the web UI must not re-sort
     // or alter table data unexpectedly.
-    window.tableData = Array.isArray(data) ? data : [];
+    const rawRows = Array.isArray(data) ? data : [];
+    window.tableData = dedupeDataloggerRows(rawRows);
 
     rebuildStationSetFromTable();
     refreshStationDropdown();
@@ -2106,6 +2331,216 @@ function badgeHtml(text, kind) {
   return `<span class="logx-pill logx-pill-${kind}">${escapeHtml(text)}</span>`;
 }
 
+function severityColor(className) {
+  if (className === "logx-value-alert") return "#ff5c5c";
+  if (className === "logx-value-warning") return "#ffb020";
+  if (className === "logx-value-normal") return "#43d39e";
+  return "";
+}
+
+function applySeverityToCell(cell, className) {
+  if (!cell) return;
+
+  cell.classList.remove("logx-value-normal", "logx-value-warning", "logx-value-alert");
+  if (className) cell.classList.add(className);
+
+  const color = severityColor(className);
+  if (color) {
+    cell.style.setProperty("color", color, "important");
+    cell.style.setProperty("font-weight", className === "logx-value-normal" ? "800" : "900", "important");
+  }
+}
+
+function getThresholdConfigForRenderedCells(cells) {
+  if (!cells || cells.length < 16) return window.defaultTransmitterThreshold || null;
+
+  const station = cells[4]?.textContent || "";
+  const frequency = cells[5]?.textContent || "";
+
+  const byStationFreq = window.transmitterThresholdStationMap.get(
+    stationFrequencyThresholdKey(station, frequency)
+  );
+  if (byStationFreq) return byStationFreq;
+
+  const stationKey = normalizeStationKey(station);
+  if (stationKey) {
+    const byStation = window.transmitterThresholdStationOnlyMap.get("station:" + stationKey);
+    if (byStation) return byStation;
+  }
+
+  if (window.transmitterThresholdList.length === 1) return window.transmitterThresholdList[0];
+  return window.defaultTransmitterThreshold || null;
+}
+
+function vswrSeverityInfo(value, cfg) {
+  const vswr = numericValueFromText(value);
+  const warning = thresholdFromConfig(cfg, ["warningVSWR", "vswrWarning"], 1.5);
+  const alert = thresholdFromConfig(cfg, ["alertVSWR", "vswrAlert", "maxVSWR", "maxVswr"], 2.0);
+
+  if (!Number.isFinite(vswr)) {
+    return {
+      className: "",
+      level: "invalid",
+      value: value,
+      numericValue: vswr,
+      warning,
+      alert,
+      reason: "VSWR is not a valid number"
+    };
+  }
+
+  if (vswr >= alert) {
+    return {
+      className: "logx-value-alert",
+      level: "alert",
+      value,
+      numericValue: vswr,
+      warning,
+      alert,
+      reason: `VSWR ${vswr} >= alertVSWR ${alert}`
+    };
+  }
+
+  if (vswr >= warning) {
+    return {
+      className: "logx-value-warning",
+      level: "warning",
+      value,
+      numericValue: vswr,
+      warning,
+      alert,
+      reason: `VSWR ${vswr} >= warningVSWR ${warning} and < alertVSWR ${alert}`
+    };
+  }
+
+  return {
+    className: "logx-value-normal",
+    level: "normal",
+    value,
+    numericValue: vswr,
+    warning,
+    alert,
+    reason: `VSWR ${vswr} < warningVSWR ${warning}`
+  };
+}
+
+function rssiSeverityInfo(value, cfg) {
+  const rssi = numericValueFromText(value);
+  const warning = thresholdFromConfig(cfg, ["warningRssi", "rssiWarning"], -105);
+  const alert = thresholdFromConfig(cfg, ["alertRssi", "rssiAlert"], -115);
+
+  if (!Number.isFinite(rssi)) {
+    return {
+      className: "",
+      level: "invalid",
+      value,
+      numericValue: rssi,
+      warning,
+      alert,
+      reason: "RSSI is not a valid number"
+    };
+  }
+
+  if (rssi <= alert) {
+    return {
+      className: "logx-value-alert",
+      level: "alert",
+      value,
+      numericValue: rssi,
+      warning,
+      alert,
+      reason: `RSSI ${rssi} <= alertRssi ${alert}`
+    };
+  }
+
+  if (rssi <= warning) {
+    return {
+      className: "logx-value-warning",
+      level: "warning",
+      value,
+      numericValue: rssi,
+      warning,
+      alert,
+      reason: `RSSI ${rssi} <= warningRssi ${warning} and > alertRssi ${alert}`
+    };
+  }
+
+  return {
+    className: "logx-value-normal",
+    level: "normal",
+    value,
+    numericValue: rssi,
+    warning,
+    alert,
+    reason: `RSSI ${rssi} > warningRssi ${warning}`
+  };
+}
+
+function vswrClassFromValue(value, cfg) {
+  return vswrSeverityInfo(value, cfg).className;
+}
+
+function rssiClassFromValue(value, cfg) {
+  return rssiSeverityInfo(value, cfg).className;
+}
+
+function debugThresholdDecision(details) {
+  if (!window.logxDebugThreshold) return;
+
+  const tag = `[THRESHOLD DEBUG] row ${details.displayRow}`;
+  console.groupCollapsed(tag);
+  console.log("row source", details.row || null);
+  console.log("station", details.station);
+  console.log("frequency", details.frequency);
+  console.log("config", details.config || null);
+  console.log("VSWR decision", details.vswr);
+  console.log("RSSI decision", details.rssi);
+  console.log("VSWR cell style", details.vswrCellStyle);
+  console.log("RSSI cell style", details.rssiCellStyle);
+  console.groupEnd();
+}
+
+function applyThresholdColorsToRenderedTable(rows) {
+  const body = document.getElementById("logxEventBody");
+  if (!body) return;
+
+  const tableRows = Array.from(body.querySelectorAll("tr"));
+  const startIdx = (currentPage - 1) * LOGX_UI.rowsPerPage;
+
+  tableRows.forEach((tr, idx) => {
+    const cells = tr.children;
+    if (!cells || cells.length < 16) return;
+
+    const row = rows && rows[startIdx + idx] ? rows[startIdx + idx] : null;
+    const cfg = row ? (getThresholdConfigForRow(row) || getThresholdConfigForRenderedCells(cells))
+                    : getThresholdConfigForRenderedCells(cells);
+
+    // Current table layout:
+    // VSWR = column 15 in human count, zero-based index 14.
+    // RSSI = column 16 in human count, zero-based index 15.
+    const vswrCell = cells[14];
+    const rssiCell = cells[15];
+
+    const vswrInfo = vswrSeverityInfo(vswrCell?.textContent, cfg);
+    const rssiInfo = rssiSeverityInfo(rssiCell?.textContent, cfg);
+
+    applySeverityToCell(vswrCell, vswrInfo.className);
+    applySeverityToCell(rssiCell, rssiInfo.className);
+
+    debugThresholdDecision({
+      displayRow: startIdx + idx + 1,
+      row,
+      station: cells[4]?.textContent || "",
+      frequency: cells[5]?.textContent || "",
+      config: cfg,
+      vswr: vswrInfo,
+      rssi: rssiInfo,
+      vswrCellStyle: vswrCell?.getAttribute("style") || "",
+      rssiCellStyle: rssiCell?.getAttribute("style") || ""
+    });
+  });
+}
+
 function renderEventList(rows) {
   const tbody = document.getElementById("logxEventBody");
   if (!tbody) return;
@@ -2131,6 +2566,10 @@ function renderEventList(rows) {
     const status = getStatus(row);
     const connection = getConnectionText(row);
     const rowState = status === "Alarm" ? "logx-row-alarm" : status === "Warning" ? "logx-row-warning" : "";
+    const vswrClass = getVswrSeverityClass(row);
+    const rssiClass = getRssiSeverityClass(row);
+    const vswrStyle = severityInlineStyle(vswrClass);
+    const rssiStyle = severityInlineStyle(rssiClass);
 
     return `
       <tr class="${rowState}" data-log-key="${escapeHtml(getRowKey(row, absoluteIndex))}">
@@ -2148,8 +2587,8 @@ function renderEventList(rows) {
         <td class="logx-num logx-rwd-text">${escapeHtml(getReflectedMaxDbm(row))}</td>
         <td class="logx-num logx-rwd-text">${escapeHtml(getAvgReflectedRmsW(row))}</td>
         <td class="logx-num logx-rwd-text">${escapeHtml(getAvgReflectedRmsDbm(row))}</td>
-        <td class="logx-num logx-cond-text">${escapeHtml(getVswrMax(row))}</td>
-        <td class="logx-num logx-muted-text">${escapeHtml(getRssiDbm(row))}</td>
+        <td class="logx-num logx-cond-text ${vswrClass}" style="${vswrStyle}">${escapeHtml(getVswrMax(row))}</td>
+        <td class="logx-num logx-muted-text ${rssiClass}" style="${rssiStyle}">${escapeHtml(getRssiDbm(row))}</td>
         <td class="logx-num">${escapeHtml(getThreshold(row))}</td>
         <td class="logx-num">${escapeHtml(getDuration(row))}</td>
         <td>${connection ? badgeHtml(connection, connectionKind(connection)) : ""}</td>
@@ -2157,6 +2596,7 @@ function renderEventList(rows) {
   }).join("");
 
   renderPagination(rows.length, totalPages);
+  applyThresholdColorsToRenderedTable(rows);
 }
 
 function paginationLabel(text, totalPages) {
@@ -2165,6 +2605,27 @@ function paginationLabel(text, totalPages) {
   if (text === "Next") return "Go to next page";
   if (text === "Last") return `Go to last page, page ${totalPages}`;
   return `Go to page ${text}`;
+}
+
+function forceActivePageButtonStyle(btn) {
+  if (!btn) return;
+
+  btn.dataset.currentPage = "true";
+
+  const htmlTheme = document.documentElement.getAttribute("data-rf-theme") || "";
+  const bodyTheme = document.body?.getAttribute("data-rf-theme") || "";
+  const isLight = htmlTheme === "light" || bodyTheme === "light" || document.documentElement.classList.contains("light");
+
+  const background = isLight ? "#0f2742" : "#06101f";
+  const border = isLight ? "#0284c7" : "#7dd3fc";
+  const glow = isLight ? "rgba(2,132,199,.18)" : "rgba(56,189,248,.18)";
+  const inset = isLight ? "rgba(2,132,199,.45)" : "rgba(125,211,252,.70)";
+
+  btn.style.setProperty("background", background, "important");
+  btn.style.setProperty("color", "#ffffff", "important");
+  btn.style.setProperty("border-color", border, "important");
+  btn.style.setProperty("box-shadow", `inset 0 0 0 1px ${inset}, 0 0 0 3px ${glow}`, "important");
+  btn.style.setProperty("transform", "translateY(-1px)", "important");
 }
 
 function renderPagination(totalRows, totalPages) {
@@ -2190,7 +2651,10 @@ function renderPagination(totalRows, totalPages) {
     btn.className = `logx-page-btn ${active ? "logx-page-active" : ""} ${extraClass}`.trim();
     btn.textContent = text;
     btn.disabled = disabled;
-    if (active) btn.setAttribute("aria-current", "page");
+    if (active) {
+      btn.setAttribute("aria-current", "page");
+      forceActivePageButtonStyle(btn);
+    }
     btn.setAttribute("aria-label", active ? `Page ${text}, current page` : paginationLabel(text, totalPages));
     btn.onclick = handler;
     return btn;
