@@ -7171,3 +7171,495 @@ html[data-rf-theme="dark"] body.rf-console-log .logx-canvasjs-plot,
 html[data-rf-theme="dark"] body.rf-console-log .logx-canvasjs-plot .canvasjs-chart-container {
   background: #0b1420 !important;
 }
+
+/* --------------------------------------------------------------------------
+   Role/Site page: selected site highlight from view_update_Page.roleName.
+   UI-only; preserves cardTxId*, cardNameId*, WebSocket menuIDs and payloads.
+   -------------------------------------------------------------------------- */
+body.rf-console-role .role-page-header {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  gap: 14px !important;
+  flex-wrap: wrap !important;
+}
+
+body.rf-console-role .role-page-header .truelanLabel {
+  margin: 0 !important;
+}
+
+body.rf-console-role .rf-role-active-summary {
+  display: grid !important;
+  min-width: min(100%, 280px) !important;
+  padding: 10px 14px !important;
+  border: 1px solid rgba(67, 211, 158, .40) !important;
+  border-radius: 14px !important;
+  background: rgba(67, 211, 158, .12) !important;
+  color: var(--rf-ink-strong) !important;
+  box-shadow: 0 10px 24px rgba(0, 0, 0, .16) !important;
+}
+
+body.rf-console-role .rf-role-active-summary span {
+  color: var(--rf-muted) !important;
+  font-size: 10px !important;
+  font-weight: 900 !important;
+  letter-spacing: .08em !important;
+  line-height: 1.15 !important;
+  text-transform: uppercase !important;
+}
+
+body.rf-console-role .rf-role-active-summary strong {
+  overflow: hidden !important;
+  color: var(--rf-ink-strong) !important;
+  font-size: 18px !important;
+  font-weight: 950 !important;
+  line-height: 1.2 !important;
+  text-overflow: ellipsis !important;
+  white-space: nowrap !important;
+}
+
+body.rf-console-role .rf-role-active-summary small {
+  color: var(--rf-muted) !important;
+  font-size: 12px !important;
+  font-weight: 700 !important;
+  line-height: 1.3 !important;
+}
+
+body.rf-console-role .cardTxTab {
+  position: relative !important;
+}
+
+body.rf-console-role .cardTxTab.is-active-site {
+  background: linear-gradient(135deg, rgba(16, 185, 129, .30), rgba(43, 183, 246, .14)) !important;
+  border-color: rgba(67, 211, 158, .86) !important;
+  box-shadow: 0 0 0 1px rgba(67, 211, 158, .26), 0 12px 26px rgba(16, 185, 129, .16) !important;
+}
+
+body.rf-console-role .cardTxTab.is-active-site::before {
+  content: "";
+  position: absolute;
+  inset: 8px auto 8px 8px;
+  width: 4px;
+  border-radius: 999px;
+  background: var(--rf-success, #43d39e);
+  box-shadow: 0 0 16px rgba(67, 211, 158, .70);
+}
+
+body.rf-console-role .cardTxTab.is-active-site:hover {
+  background: linear-gradient(135deg, rgba(16, 185, 129, .36), rgba(43, 183, 246, .20)) !important;
+  border-color: rgba(67, 211, 158, .98) !important;
+}
+
+body.rf-console-role .cardTxTab.is-editing-site {
+  outline: 2px solid rgba(43, 183, 246, .78) !important;
+  outline-offset: 2px !important;
+}
+
+body.rf-console-role .cardTxTab.is-active-site.is-editing-site {
+  outline-color: rgba(67, 211, 158, .95) !important;
+}
+
+body.rf-console-role .cardTxActiveBadge {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  flex: 0 0 auto !important;
+  margin-left: auto !important;
+  padding: 5px 9px !important;
+  border: 1px solid rgba(67, 211, 158, .58) !important;
+  border-radius: 999px !important;
+  background: rgba(67, 211, 158, .18) !important;
+  color: var(--rf-success, #43d39e) !important;
+  font-size: 10px !important;
+  font-weight: 950 !important;
+  letter-spacing: .08em !important;
+  line-height: 1 !important;
+  text-transform: uppercase !important;
+  white-space: nowrap !important;
+}
+
+html[data-rf-theme="light"] body.rf-console-role .rf-role-active-summary {
+  background: rgba(5, 150, 105, .10) !important;
+  border-color: rgba(5, 150, 105, .30) !important;
+  box-shadow: 0 10px 22px rgba(15, 23, 42, .08) !important;
+}
+
+html[data-rf-theme="light"] body.rf-console-role .cardTxTab.is-active-site {
+  background: linear-gradient(135deg, rgba(5, 150, 105, .16), rgba(14, 165, 233, .10)) !important;
+  border-color: rgba(5, 150, 105, .56) !important;
+  box-shadow: 0 0 0 1px rgba(5, 150, 105, .14), 0 12px 24px rgba(15, 23, 42, .09) !important;
+}
+
+html[data-rf-theme="light"] body.rf-console-role .cardTxTab.is-active-site:hover {
+  background: linear-gradient(135deg, rgba(5, 150, 105, .20), rgba(14, 165, 233, .14)) !important;
+  border-color: rgba(5, 150, 105, .70) !important;
+}
+
+html[data-rf-theme="light"] body.rf-console-role .cardTxActiveBadge {
+  background: rgba(5, 150, 105, .12) !important;
+  border-color: rgba(5, 150, 105, .34) !important;
+  color: #047857 !important;
+}
+
+@media (max-width: 760px) {
+  body.rf-console-role .role-page-header {
+    align-items: stretch !important;
+  }
+
+  body.rf-console-role .rf-role-active-summary {
+    width: 100% !important;
+  }
+
+  body.rf-console-role .cardTxActiveBadge {
+    margin-left: 0 !important;
+  }
+}
+
+/* --------------------------------------------------------------------------
+   Role/Site page light-mode contrast boost.
+   Makes selected site, cards, labels, inputs and selects easier to read in day mode.
+   -------------------------------------------------------------------------- */
+html[data-rf-theme="light"] body.rf-console-role {
+  --rf-role-light-bg: #f4f8fc;
+  --rf-role-light-surface: #ffffff;
+  --rf-role-light-panel: #f8fbff;
+  --rf-role-light-panel-strong: #eef6ff;
+  --rf-role-light-text: #0f172a;
+  --rf-role-light-muted: #475569;
+  --rf-role-light-border: #b8c8da;
+  --rf-role-light-border-strong: #8aa4bf;
+  --rf-role-light-primary: #0369a1;
+  --rf-role-light-success: #047857;
+}
+
+html[data-rf-theme="light"] body.rf-console-role #site_content,
+html[data-rf-theme="light"] body.rf-console-role .container,
+html[data-rf-theme="light"] body.rf-console-role .container6,
+html[data-rf-theme="light"] body.rf-console-role .container8,
+html[data-rf-theme="light"] body.rf-console-role .container9 {
+  background: var(--rf-role-light-surface) !important;
+  border-color: var(--rf-role-light-border) !important;
+  color: var(--rf-role-light-text) !important;
+}
+
+html[data-rf-theme="light"] body.rf-console-role .truelanLabel,
+html[data-rf-theme="light"] body.rf-console-role .selected_list span,
+html[data-rf-theme="light"] body.rf-console-role .cardRoleTextID,
+html[data-rf-theme="light"] body.rf-console-role .cardTxTabText3 {
+  color: var(--rf-role-light-text) !important;
+}
+
+html[data-rf-theme="light"] body.rf-console-role .selected_list span {
+  font-weight: 850 !important;
+}
+
+html[data-rf-theme="light"] body.rf-console-role .container8 > .card,
+html[data-rf-theme="light"] body.rf-console-role .container9 > .card,
+html[data-rf-theme="light"] body.rf-console-role .role-device-panel {
+  background: var(--rf-role-light-surface) !important;
+  border-color: var(--rf-role-light-border) !important;
+  box-shadow: 0 10px 28px rgba(15, 23, 42, .07) !important;
+}
+
+html[data-rf-theme="light"] body.rf-console-role .cardRole {
+  background: var(--rf-role-light-panel) !important;
+  border-color: var(--rf-role-light-border) !important;
+  color: var(--rf-role-light-text) !important;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .72) !important;
+}
+
+html[data-rf-theme="light"] body.rf-console-role .cardRole:hover {
+  background: var(--rf-role-light-panel-strong) !important;
+  border-color: var(--rf-role-light-border-strong) !important;
+}
+
+html[data-rf-theme="light"] body.rf-console-role .selectedTrueLan,
+html[data-rf-theme="light"] body.rf-console-role input,
+html[data-rf-theme="light"] body.rf-console-role select,
+html[data-rf-theme="light"] body.rf-console-role textarea,
+html[data-rf-theme="light"] body.rf-console-role .form-control {
+  background: #ffffff !important;
+  border-color: #9fb3ca !important;
+  color: var(--rf-role-light-text) !important;
+  box-shadow: inset 0 1px 0 rgba(15, 23, 42, .03) !important;
+}
+
+html[data-rf-theme="light"] body.rf-console-role input::placeholder,
+html[data-rf-theme="light"] body.rf-console-role textarea::placeholder,
+html[data-rf-theme="light"] body.rf-console-role .form-control::placeholder {
+  color: #64748b !important;
+  opacity: 1 !important;
+}
+
+html[data-rf-theme="light"] body.rf-console-role .selectedTrueLan:focus,
+html[data-rf-theme="light"] body.rf-console-role input:focus,
+html[data-rf-theme="light"] body.rf-console-role select:focus,
+html[data-rf-theme="light"] body.rf-console-role textarea:focus,
+html[data-rf-theme="light"] body.rf-console-role .form-control:focus {
+  border-color: #0284c7 !important;
+  box-shadow: 0 0 0 3px rgba(2, 132, 199, .18) !important;
+}
+
+html[data-rf-theme="light"] body.rf-console-role .cardTxTab {
+  background: #f8fbff !important;
+  border-color: var(--rf-role-light-border) !important;
+  color: var(--rf-role-light-text) !important;
+  box-shadow: 0 8px 18px rgba(15, 23, 42, .055) !important;
+}
+
+html[data-rf-theme="light"] body.rf-console-role .cardTxTab:hover {
+  background: #edf6ff !important;
+  border-color: #6d8fb2 !important;
+}
+
+html[data-rf-theme="light"] body.rf-console-role .cardTxTabAdd {
+  background: #e0f2fe !important;
+  border-color: #0284c7 !important;
+  color: #075985 !important;
+}
+
+html[data-rf-theme="light"] body.rf-console-role .cardTxTabAdd .cardTxTabText3 {
+  color: #075985 !important;
+  font-weight: 950 !important;
+}
+
+html[data-rf-theme="light"] body.rf-console-role .cardTxTabIconAdd {
+  background: #38bdf8 !important;
+  color: #052f4f !important;
+}
+
+html[data-rf-theme="light"] body.rf-console-role .rf-role-active-summary {
+  background: #d1fae5 !important;
+  border-color: #059669 !important;
+  color: #064e3b !important;
+  box-shadow: 0 10px 24px rgba(5, 150, 105, .14) !important;
+}
+
+html[data-rf-theme="light"] body.rf-console-role .rf-role-active-summary span,
+html[data-rf-theme="light"] body.rf-console-role .rf-role-active-summary small {
+  color: #065f46 !important;
+}
+
+html[data-rf-theme="light"] body.rf-console-role .rf-role-active-summary strong {
+  color: #064e3b !important;
+}
+
+html[data-rf-theme="light"] body.rf-console-role .cardTxTab.is-active-site {
+  background: linear-gradient(135deg, #bbf7d0 0%, #d1fae5 52%, #e0f2fe 100%) !important;
+  border-color: #059669 !important;
+  color: #064e3b !important;
+  box-shadow: 0 0 0 2px rgba(5, 150, 105, .22), 0 12px 26px rgba(5, 150, 105, .16) !important;
+}
+
+html[data-rf-theme="light"] body.rf-console-role .cardTxTab.is-active-site .cardTxTabText3 {
+  color: #052e16 !important;
+  font-weight: 950 !important;
+}
+
+html[data-rf-theme="light"] body.rf-console-role .cardTxTab.is-active-site::before {
+  background: #047857 !important;
+  box-shadow: 0 0 18px rgba(4, 120, 87, .55) !important;
+}
+
+html[data-rf-theme="light"] body.rf-console-role .cardTxTab.is-active-site:hover {
+  background: linear-gradient(135deg, #86efac 0%, #bbf7d0 54%, #bae6fd 100%) !important;
+  border-color: #047857 !important;
+}
+
+html[data-rf-theme="light"] body.rf-console-role .cardTxTab.is-editing-site {
+  outline: 3px solid rgba(2, 132, 199, .60) !important;
+  outline-offset: 2px !important;
+}
+
+html[data-rf-theme="light"] body.rf-console-role .cardTxTab.is-active-site.is-editing-site {
+  outline-color: rgba(4, 120, 87, .75) !important;
+}
+
+html[data-rf-theme="light"] body.rf-console-role .cardTxActiveBadge {
+  background: #047857 !important;
+  border-color: #047857 !important;
+  color: #ffffff !important;
+  box-shadow: 0 4px 12px rgba(4, 120, 87, .20) !important;
+}
+
+html[data-rf-theme="light"] body.rf-console-role .role-action-panel {
+  background: transparent !important;
+}
+
+/* --------------------------------------------------------------------------
+   WiFi page light-mode contrast boost.
+   Fixes dark status/banner backgrounds with dark text in day mode.
+   UI-only; preserves WiFi WebSocket commands and frontend behavior.
+   -------------------------------------------------------------------------- */
+html[data-rf-theme="light"] body.rf-console-wifi {
+  --rf-wifi-light-bg: #f4f8fc;
+  --rf-wifi-light-surface: #ffffff;
+  --rf-wifi-light-panel: #f8fbff;
+  --rf-wifi-light-panel-strong: #eef6ff;
+  --rf-wifi-light-text: #0f172a;
+  --rf-wifi-light-muted: #475569;
+  --rf-wifi-light-border: #b8c8da;
+  --rf-wifi-light-border-strong: #8aa4bf;
+  --rf-wifi-light-primary: #0369a1;
+  --rf-wifi-light-success: #047857;
+  --rf-wifi-light-warning: #92400e;
+  --rf-wifi-light-danger: #991b1b;
+}
+
+html[data-rf-theme="light"] body.rf-console-wifi #site_content,
+html[data-rf-theme="light"] body.rf-console-wifi #wifi_content {
+  background: transparent !important;
+  color: var(--rf-wifi-light-text) !important;
+}
+
+html[data-rf-theme="light"] body.rf-console-wifi .wifi-title-wrap h3,
+html[data-rf-theme="light"] body.rf-console-wifi .wifi-panel-title-row h4,
+html[data-rf-theme="light"] body.rf-console-wifi .wifi-modal-header h4,
+html[data-rf-theme="light"] body.rf-console-wifi .wifi-current-ssid,
+html[data-rf-theme="light"] body.rf-console-wifi .wifi-info-box strong,
+html[data-rf-theme="light"] body.rf-console-wifi .wifi-network-name,
+html[data-rf-theme="light"] body.rf-console-wifi .wifi-method-title,
+html[data-rf-theme="light"] body.rf-console-wifi .wifi-empty-state h5 {
+  color: var(--rf-wifi-light-text) !important;
+}
+
+html[data-rf-theme="light"] body.rf-console-wifi .wifi-panel-kicker,
+html[data-rf-theme="light"] body.rf-console-wifi .wifi-label,
+html[data-rf-theme="light"] body.rf-console-wifi .wifi-note,
+html[data-rf-theme="light"] body.rf-console-wifi .wifi-subtitle,
+html[data-rf-theme="light"] body.rf-console-wifi .wifi-network-meta,
+html[data-rf-theme="light"] body.rf-console-wifi .wifi-method-sub,
+html[data-rf-theme="light"] body.rf-console-wifi .wifi-empty-state p {
+  color: var(--rf-wifi-light-muted) !important;
+}
+
+html[data-rf-theme="light"] body.rf-console-wifi .wifi-panel,
+html[data-rf-theme="light"] body.rf-console-wifi .wifi-info-box,
+html[data-rf-theme="light"] body.rf-console-wifi .wifi-network-item,
+html[data-rf-theme="light"] body.rf-console-wifi .wifi-empty-state,
+html[data-rf-theme="light"] body.rf-console-wifi .wifi-method-card,
+html[data-rf-theme="light"] body.rf-console-wifi .wifi-summary-top,
+html[data-rf-theme="light"] body.rf-console-wifi .wifi-modal-body {
+  background: var(--rf-wifi-light-surface) !important;
+  border-color: var(--rf-wifi-light-border) !important;
+  color: var(--rf-wifi-light-text) !important;
+  box-shadow: 0 10px 28px rgba(15, 23, 42, .06) !important;
+}
+
+html[data-rf-theme="light"] body.rf-console-wifi .wifi-info-box,
+html[data-rf-theme="light"] body.rf-console-wifi .wifi-network-item,
+html[data-rf-theme="light"] body.rf-console-wifi .wifi-empty-state,
+html[data-rf-theme="light"] body.rf-console-wifi .wifi-method-card {
+  background: var(--rf-wifi-light-panel) !important;
+}
+
+html[data-rf-theme="light"] body.rf-console-wifi .wifi-network-item:hover,
+html[data-rf-theme="light"] body.rf-console-wifi .wifi-method-card:hover {
+  background: var(--rf-wifi-light-panel-strong) !important;
+  border-color: var(--rf-wifi-light-border-strong) !important;
+}
+
+html[data-rf-theme="light"] body.rf-console-wifi input:not([type="checkbox"]):not([type="radio"]),
+html[data-rf-theme="light"] body.rf-console-wifi select,
+html[data-rf-theme="light"] body.rf-console-wifi textarea,
+html[data-rf-theme="light"] body.rf-console-wifi .form-control,
+html[data-rf-theme="light"] body.rf-console-wifi .wifi-input,
+html[data-rf-theme="light"] body.rf-console-wifi .wifi-select {
+  background: #ffffff !important;
+  border-color: #9fb3ca !important;
+  color: var(--rf-wifi-light-text) !important;
+  box-shadow: inset 0 1px 0 rgba(15, 23, 42, .03) !important;
+}
+
+html[data-rf-theme="light"] body.rf-console-wifi input::placeholder,
+html[data-rf-theme="light"] body.rf-console-wifi textarea::placeholder,
+html[data-rf-theme="light"] body.rf-console-wifi .form-control::placeholder {
+  color: #64748b !important;
+  opacity: 1 !important;
+}
+
+html[data-rf-theme="light"] body.rf-console-wifi input:not([type="checkbox"]):not([type="radio"]):focus,
+html[data-rf-theme="light"] body.rf-console-wifi select:focus,
+html[data-rf-theme="light"] body.rf-console-wifi textarea:focus,
+html[data-rf-theme="light"] body.rf-console-wifi .form-control:focus {
+  border-color: #0284c7 !important;
+  box-shadow: 0 0 0 3px rgba(2, 132, 199, .18) !important;
+}
+
+html[data-rf-theme="light"] body.rf-console-wifi .wifi-banner {
+  background: #e0f2fe !important;
+  border-color: #0284c7 !important;
+  color: #0c4a6e !important;
+  font-weight: 850 !important;
+  box-shadow: 0 8px 20px rgba(2, 132, 199, .12) !important;
+}
+
+html[data-rf-theme="light"] body.rf-console-wifi .wifi-banner-info {
+  background: #dbeafe !important;
+  border-color: #2563eb !important;
+  color: #1e3a8a !important;
+}
+
+html[data-rf-theme="light"] body.rf-console-wifi .wifi-banner-success {
+  background: #dcfce7 !important;
+  border-color: #16a34a !important;
+  color: #14532d !important;
+}
+
+html[data-rf-theme="light"] body.rf-console-wifi .wifi-banner-warning {
+  background: #fef3c7 !important;
+  border-color: #d97706 !important;
+  color: #78350f !important;
+}
+
+html[data-rf-theme="light"] body.rf-console-wifi .wifi-banner-danger {
+  background: #fee2e2 !important;
+  border-color: #dc2626 !important;
+  color: #7f1d1d !important;
+}
+
+html[data-rf-theme="light"] body.rf-console-wifi .wifi-badge-on,
+html[data-rf-theme="light"] body.rf-console-wifi .wifi-tag-success {
+  background: #dcfce7 !important;
+  border-color: #16a34a !important;
+  color: #14532d !important;
+}
+
+html[data-rf-theme="light"] body.rf-console-wifi .wifi-badge-off {
+  background: #f1f5f9 !important;
+  border-color: #94a3b8 !important;
+  color: #334155 !important;
+}
+
+html[data-rf-theme="light"] body.rf-console-wifi .wifi-badge-hotspot-on,
+html[data-rf-theme="light"] body.rf-console-wifi .wifi-tag-primary {
+  background: #dbeafe !important;
+  border-color: #2563eb !important;
+  color: #1e3a8a !important;
+}
+
+html[data-rf-theme="light"] body.rf-console-wifi .wifi-tag,
+html[data-rf-theme="light"] body.rf-console-wifi .wifi-tag-muted {
+  background: #eef2f7 !important;
+  border-color: #b8c8da !important;
+  color: #334155 !important;
+}
+
+html[data-rf-theme="light"] body.rf-console-wifi .button,
+html[data-rf-theme="light"] body.rf-console-wifi .button2,
+html[data-rf-theme="light"] body.rf-console-wifi .wifi-inline-btn,
+html[data-rf-theme="light"] body.rf-console-wifi .wifi-modal-btn,
+html[data-rf-theme="light"] body.rf-console-wifi .wifi-action-btn {
+  background: #0369a1 !important;
+  border-color: #075985 !important;
+  color: #ffffff !important;
+}
+
+html[data-rf-theme="light"] body.rf-console-wifi .button:hover,
+html[data-rf-theme="light"] body.rf-console-wifi .button2:hover,
+html[data-rf-theme="light"] body.rf-console-wifi .wifi-inline-btn:hover,
+html[data-rf-theme="light"] body.rf-console-wifi .wifi-modal-btn:hover,
+html[data-rf-theme="light"] body.rf-console-wifi .wifi-action-btn:hover {
+  background: #075985 !important;
+  border-color: #0c4a6e !important;
+}

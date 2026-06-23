@@ -104,8 +104,13 @@ include('ListAudioGain.php')
 	?>
 
 	
-<div class="container">
+<div class="container role-page-header">
 <h3 class="truelanLabel" id="newtruelan" name="newtruelan" >New Site</h3>
+<div class="rf-role-active-summary" aria-live="polite" aria-label="Selected site summary">
+  <span>Selected Site</span>
+  <strong id="activeRoleNameDisplay">--</strong>
+  <small id="activeRoleDeviceSummary">All: -- | Connect: -- | Disconnect: --</small>
+</div>
 </div>
 <div class="container6">
 		<div class="card role-device-panel" id="card0" name="card0" style="display: block; background-color: rgba(0, 0, 0, 0.0)">

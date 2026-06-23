@@ -51,6 +51,63 @@ function WebSocketTest() {
 
 
 }
+
+function isVisibleOff(visible) {
+    return visible === false || visible === 0 || visible === "0";
+}
+
+function setInputValueSafely(id, value) {
+    const el = document.getElementById(id);
+    if (el) {
+        el.value = value;
+    }
+}
+
+function setCheckedSafely(id, checked) {
+    const el = document.getElementById(id);
+    if (el) {
+        el.checked = checked;
+    }
+}
+
+function clearTransmitterForm() {
+    setInputValueSafely("deviceName", "");
+    setInputValueSafely("peakPower", "");
+    setInputValueSafely("deviceFrequency", "");
+    setInputValueSafely("ipaddress", "");
+
+    setInputValueSafely("alertRssi", "");
+    setInputValueSafely("warningRssi", "");
+    setInputValueSafely("alertVSWR", "");
+    setInputValueSafely("warningVSWR", "");
+    setInputValueSafely("alertFwdPowerWatt", "");
+    setInputValueSafely("warningFwdPowerWatt", "");
+    setInputValueSafely("receive_ipaddress", "");
+
+    setCheckedSafely("rxEnabled", false);
+
+    if (typeof updateRxEnabledStateLabel === "function") {
+        updateRxEnabledStateLabel(false);
+    }
+
+    if (typeof selectOidSafely === "function") {
+        selectOidSafely(0, "ui");
+    }
+
+    const warningRssiEl = document.getElementById("warningRssi");
+    const alertRssiEl = document.getElementById("alertRssi");
+    const ipEl = document.getElementById("receive_ipaddress");
+    const dropdownBtn = document.getElementById("dropdown-oid-btn");
+
+    if (typeof setDisabled === "function") {
+        setDisabled(warningRssiEl, true);
+        setDisabled(alertRssiEl, true);
+        setDisabled(ipEl, true);
+        setDisabled(dropdownBtn, true);
+    }
+}
+
+
 function loadHighVoltage() {
     document.getElementById("highPowerVolt").value = current_fwd_voltage
 }
@@ -407,138 +464,154 @@ function processMsg(message) {
     }
     else if (obj.menuID == 'listTransmitter') {
         // console.log("listTransmitter::", obj);
-        var index = obj.index
-        var cardTxName = "cardTxId" + index
-        var cardLabel = obj.stationName
-        var cardNameId = "cardNameId" + index
-        var peakPower = obj.maxFwdPowerWatt
-        var deviceFrequency = obj.frequency
-        var ipaddress = obj.ipAddress
-        var visible = obj.visible
-
-        var oid = obj.oid
-        var receive_enable = obj.receive_enable
-        var receive_ipaddress = obj.receive_ipaddress
-        var alertRssi = obj.alertRssi
-        var warningRssi = obj.warningRssi
-        var alertVSWR = obj.alertVSWR
-        var warningVSWR = obj.warningVSWR
-        var alertFwdPowerWatt = obj.alertFwdPowerWatt
-        var warningFwdPowerWatt = obj.warningFwdPowerWatt
-
-        // console.log("obj.oid", oid)
-
-        // const a = document.querySelector(`#dropdown-oid a[data-id="${oid}"]`);
-
-        // if (a) {
-        //     console.log("id =", a.dataset.id);       // "3"
-        //     console.log("name =", a.dataset.name);   // "Only"
-        // }
-
-        // document.querySelectorAll('#dropdown-oid a').forEach(a => {
-        //     console.log("querySelectorAll::", a.dataset.id, a.dataset.name);
-        // });
-
+    
+        var index = obj.index;
+        var cardTxName = "cardTxId" + index;
+        var cardLabel = obj.stationName;
+        var cardNameId = "cardNameId" + index;
+        var peakPower = obj.maxFwdPowerWatt;
+        var deviceFrequency = obj.frequency;
+        var ipaddress = obj.ipAddress;
+        var visible = obj.visible;
+    
+        var oid = obj.oid;
+        var receive_enable = obj.receive_enable;
+        var receive_ipaddress = obj.receive_ipaddress;
+        var alertRssi = obj.alertRssi;
+        var warningRssi = obj.warningRssi;
+        var alertVSWR = obj.alertVSWR;
+        var warningVSWR = obj.warningVSWR;
+        var alertFwdPowerWatt = obj.alertFwdPowerWatt;
+        var warningFwdPowerWatt = obj.warningFwdPowerWatt;
+    
         var elementExists = document.getElementById(cardTxName);
-        // console.log("Processing transmitter index:", index, "Element exists:", !!elementExists);
+    
+        /*
+         * Important:
+         * If backend sends visible = false / 0 / "0",
+         * remove the card from DOM completely.
+         * Do not only hide it, because hidden cards can still keep old selected state.
+         */
+        if (isVisibleOff(visible)) {
+            if (elementExists) {
+                elementExists.remove();
+            }
+    
+            /*
+             * If removed transmitter is currently selected,
+             * clear selected state and clear form data.
+             */
+            if (currentID == index) {
+                currentID = 0;
+                clearTransmitterForm();
+            }
+    
+            return;
+        }
+    
+        /*
+         * Case 1:
+         * Card already exists, update its data.
+         */
         if (typeof (elementExists) != 'undefined' && elementExists != null) {
             // console.log("Updating existing card for transmitter index:", index);
-            // Exists.
+    
             if (currentID == index) {
-                document.getElementById(cardTxName).style.backgroundColor = "rgba(0, 255, 0, 0.6)"
-                document.getElementById("deviceName").value = cardLabel;
-                document.getElementById("peakPower").value = peakPower;
-                document.getElementById("deviceFrequency").value = deviceFrequency;
-                document.getElementById("ipaddress").value = ipaddress;
-
-                document.getElementById("alertRssi").value = alertRssi;
-                document.getElementById("alertRssi").value = alertRssi;
-                document.getElementById("warningRssi").value = warningRssi;
-                document.getElementById("alertVSWR").value = alertVSWR;
-                document.getElementById("warningVSWR").value = warningVSWR;
-                document.getElementById("alertFwdPowerWatt").value = alertFwdPowerWatt;
-                document.getElementById("warningFwdPowerWatt").value = warningFwdPowerWatt;
-                document.getElementById("receive_ipaddress").value = receive_ipaddress;
-                document.getElementById("rxEnabled").checked = receive_enable == 1 ? true : false;
-                updateRxEnabledStateLabel(receive_enable == 1);
-                //document.getElementById("dropdown-oid-btn").textContent = a.dataset.name == "" ? "" : a.dataset.name;
-                // console.log("Received OID for transmitter:", { oid, receive_enable, receive_ipaddress });
-                // listTransmitter.oid คือเลข OID แบบลำดับใน UI
-                selectOidSafely(oid, "ui");
-
-                const disabled = receive_enable === 0; // 0=ปิดการใช้งาน, 1=เปิดใช้งาน
-
-                // element ที่ต้องควบคุม
+                elementExists.style.backgroundColor = "rgba(0, 255, 0, 0.6)";
+    
+                setInputValueSafely("deviceName", cardLabel);
+                setInputValueSafely("peakPower", peakPower);
+                setInputValueSafely("deviceFrequency", deviceFrequency);
+                setInputValueSafely("ipaddress", ipaddress);
+    
+                setInputValueSafely("alertRssi", alertRssi);
+                setInputValueSafely("warningRssi", warningRssi);
+                setInputValueSafely("alertVSWR", alertVSWR);
+                setInputValueSafely("warningVSWR", warningVSWR);
+                setInputValueSafely("alertFwdPowerWatt", alertFwdPowerWatt);
+                setInputValueSafely("warningFwdPowerWatt", warningFwdPowerWatt);
+                setInputValueSafely("receive_ipaddress", receive_ipaddress);
+    
+                setCheckedSafely("rxEnabled", receive_enable == 1 ? true : false);
+    
+                if (typeof updateRxEnabledStateLabel === "function") {
+                    updateRxEnabledStateLabel(receive_enable == 1);
+                }
+    
+                /*
+                 * listTransmitter.oid คือเลข OID แบบลำดับใน UI
+                 */
+                if (typeof selectOidSafely === "function") {
+                    selectOidSafely(oid, "ui");
+                }
+    
+                const disabled = receive_enable == 0;
+    
                 const warningRssiEl = document.getElementById("warningRssi");
                 const alertRssiEl = document.getElementById("alertRssi");
                 const ipEl = document.getElementById("receive_ipaddress");
                 const dropdownBtn = document.getElementById("dropdown-oid-btn");
-
-                setDisabled(warningRssiEl, disabled);
-                setDisabled(alertRssiEl, disabled);
-                setDisabled(ipEl, disabled);
-                setDisabled(dropdownBtn, disabled);
-
+    
+                if (typeof setDisabled === "function") {
+                    setDisabled(warningRssiEl, disabled);
+                    setDisabled(alertRssiEl, disabled);
+                    setDisabled(ipEl, disabled);
+                    setDisabled(dropdownBtn, disabled);
+                }
             }
             else {
-                document.getElementById(cardTxName).style.backgroundColor = "rgba(0, 0, 0, 0.1)"
+                elementExists.style.backgroundColor = "rgba(0, 0, 0, 0.1)";
             }
-            document.getElementById(cardNameId).innerHTML = cardLabel;
-
-            if (visible == false) {
-                elementExists.style.display = "none"
+    
+            const cardNameEl = document.getElementById(cardNameId);
+            if (cardNameEl) {
+                cardNameEl.innerHTML = cardLabel;
             }
-            else {
-                elementExists.style.display = "block"
-            }
+    
+            elementExists.style.display = "block";
         }
+    
+        /*
+         * Case 2:
+         * Card does not exist, create new card.
+         */
         else {
-
             const card0 = document.getElementById("card0");
-
-            card0.appendChild(
-                Object.assign(
-                    document.createElement('div'),
-                    {
-                        classList: 'cardTxTab',
-                        id: cardTxName
-                    }
-                )
-            ).appendChild(
-                Object.assign(
-                    document.createElement('img'),
-                    {
-                        classList: 'cardTxTabImage',
-                        src: "/img/Thrulan.png",
-                        alt: "Flowers in Chania"
-                    }
-                )
-            )
-
-            const cardTxId = document.getElementById(cardTxName);
+    
+            if (!card0) {
+                console.warn("card0 container not found");
+                return;
+            }
+    
+            const cardTxId = document.createElement('div');
+            cardTxId.className = 'cardTxTab';
+            cardTxId.id = cardTxName;
             cardTxId.setAttribute("onclick", "setCurrentID(" + index + ");");
-
-            cardTxId.appendChild(
-                Object.assign(
-                    document.createElement('span'),
-                    {
-                        classList: 'cardTxTabText3',
-                        id: cardNameId,
-                        innerHTML: cardLabel
-                    }
-                )
-            )
-
-            if (visible == false) {
-                cardTxId.style.display = "none"
+    
+            const img = document.createElement('img');
+            img.className = 'cardTxTabImage';
+            img.src = "/img/Thrulan.png";
+            img.alt = "Transmitter";
+    
+            const label = document.createElement('span');
+            label.className = 'cardTxTabText3';
+            label.id = cardNameId;
+            label.innerHTML = cardLabel;
+    
+            cardTxId.appendChild(img);
+            cardTxId.appendChild(label);
+    
+            cardTxId.style.display = "block";
+    
+            if (currentID == index) {
+                cardTxId.style.backgroundColor = "rgba(0, 255, 0, 0.6)";
             }
             else {
-                cardTxId.style.display = "block"
+                cardTxId.style.backgroundColor = "rgba(0, 0, 0, 0.1)";
             }
+    
+            card0.appendChild(cardTxId);
         }
-
-
-
     }
     else if (obj.menuID == "view_transmitter_list") {
 

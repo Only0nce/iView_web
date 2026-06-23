@@ -14,6 +14,8 @@ var current_fwd_voltage = 0.00;
 var currentID = 0;
 var transmitterID = 0;
 var dBUnit = false;
+var activeRoleName = "";
+var activeRoleSummary = { all: 0, connect: 0, disconnect: 0 };
 
 const MAX_CH = 16;
 function forEachChId(fn) {
@@ -25,6 +27,96 @@ function forEachChId(fn) {
 
 function isVisibleFlag(value) {
   return !(value === false || value === 0 || value === "0");
+}
+
+
+function normalizeSiteName(value) {
+  return String(value ?? "")
+    .trim()
+    .replace(/\s+/g, " ")
+    .toLowerCase();
+}
+
+function getSiteCardName(cardEl) {
+  if (!cardEl) return "";
+  const nameEl = cardEl.querySelector(".cardTxTabText3");
+  return nameEl ? nameEl.textContent : "";
+}
+
+function syncActiveSiteBadge(cardEl, isActive) {
+  if (!cardEl) return;
+
+  let badge = cardEl.querySelector(".cardTxActiveBadge");
+  if (isActive) {
+    if (!badge) {
+      badge = document.createElement("span");
+      badge.className = "cardTxActiveBadge";
+      badge.setAttribute("aria-hidden", "true");
+      cardEl.appendChild(badge);
+    }
+    badge.textContent = "SELECTED";
+  } else if (badge) {
+    badge.remove();
+  }
+}
+
+function syncSiteCardHighlight(cardEl, roleName, activeFromList) {
+  if (!cardEl) return;
+
+  const cardId = cardEl.id || "";
+  const isAddNewCard = cardId === "cardTxId0";
+  const normalizedRoleName = normalizeSiteName(roleName);
+  const isActiveFromSummary = !!activeRoleName && normalizedRoleName === activeRoleName;
+  const isActive = !isAddNewCard && (!!activeFromList || isActiveFromSummary);
+  const isEditing = !isAddNewCard && Number(currentID) !== 0 && cardId === ("cardTxId" + currentID);
+
+  cardEl.dataset.roleName = roleName || "";
+  cardEl.dataset.currentActive = activeFromList ? "1" : "0";
+  cardEl.classList.toggle("is-active-site", isActive);
+  cardEl.classList.toggle("is-editing-site", isEditing);
+  cardEl.setAttribute("aria-current", isActive ? "true" : "false");
+  cardEl.title = isActive
+    ? "Selected Site: " + (roleName || "--")
+    : "Site: " + (roleName || "--");
+
+  syncActiveSiteBadge(cardEl, isActive);
+}
+
+function refreshActiveSiteHighlights() {
+  document.querySelectorAll('.cardTxTab[id^="cardTxId"]').forEach((cardEl) => {
+    if (cardEl.id === "cardTxId0") {
+      cardEl.classList.remove("is-active-site", "is-editing-site");
+      syncActiveSiteBadge(cardEl, false);
+      return;
+    }
+
+    const roleName = cardEl.dataset.roleName || getSiteCardName(cardEl);
+    syncSiteCardHighlight(cardEl, roleName, cardEl.dataset.currentActive === "1");
+  });
+}
+
+function updateActiveSiteFromSummary(obj) {
+  const roleName = String(obj.roleName ?? "").trim();
+  activeRoleName = normalizeSiteName(roleName);
+  activeRoleSummary = {
+    all: Number(obj.all_device ?? 0),
+    connect: Number(obj.connect ?? 0),
+    disconnect: Number(obj.disconnect ?? 0)
+  };
+
+  const nameEl = document.getElementById("activeRoleNameDisplay");
+  if (nameEl) {
+    nameEl.textContent = roleName || "--";
+  }
+
+  const summaryEl = document.getElementById("activeRoleDeviceSummary");
+  if (summaryEl) {
+    summaryEl.textContent = "All: " + activeRoleSummary.all
+      + " | Connect: " + activeRoleSummary.connect
+      + " | Disconnect: " + activeRoleSummary.disconnect;
+  }
+
+  refreshActiveSiteHighlights();
 }
 
 function syncTransmitterOption(index, stationName, visible) {
@@ -68,8 +160,12 @@ function WebSocketTest() {
 
     ws.onopen = function() {
       const card0 = document.getElementById("cardTxId0");
-      if (card0) card0.style.backgroundColor = "rgba(0, 255, 0, 0.6)";
+      if (card0) {
+        card0.style.backgroundColor = "rgba(0, 255, 0, 0.6)";
+        card0.classList.remove("is-active-site", "is-editing-site");
+      }
       ws.send('{"menuID":"getRole"}');
+      ws.send('{"menuID":"getMonitorPage"}');
       ws.send('{"menuID":"getThruLan"}');
     };
 
@@ -260,6 +356,8 @@ function setCurrentID(newID) {
     if (rs2) rs2.checked = false;
   }
 
+  refreshActiveSiteHighlights();
+
   // console.log("newID", currentID);
 }
 
@@ -301,6 +399,47 @@ function selectedRole() {
   setCurrentID(0);
 }
 
+function isVisibleOff(visible) {
+  return (
+    visible === false ||
+    visible === 0 ||
+    visible === "0" ||
+    visible === "false" ||
+    visible === null ||
+    typeof visible === "undefined"
+  );
+}
+
+function setValueSafely(id, value) {
+  const el = document.getElementById(id);
+  if (el) {
+    el.value = value;
+  }
+}
+
+function setCheckedSafely(id, checked) {
+  const el = document.getElementById(id);
+  if (el) {
+    el.checked = checked;
+  }
+}
+
+function clearRoleForm() {
+  setValueSafely("roleName", "");
+
+  for (let i = 1; i <= MAX_CH; i++) {
+    setValueSafely("chId" + i, 0);
+  }
+
+  setCheckedSafely("rs232Id1", false);
+  setCheckedSafely("rs232Id2", false);
+
+  const selectBtn = document.getElementById("selectrolebutton");
+  if (selectBtn) {
+    selectBtn.style.display = "none";
+  }
+}
+
 // ==========================
 // WS message handler
 // ==========================
@@ -311,18 +450,44 @@ function processMsg(message) {
   if (obj.menuID == 'listRole') {
     var index = obj.index;
     var roleName = obj.name;
-    var visible = obj.visible === 0 ? false : true;
+    var visible = !isVisibleOff(obj.visible);
+  
     var cardTxName = "cardTxId" + index;
     var cardNameId = "cardNameId" + index;
     var elementExists = document.getElementById(cardTxName);
-
-    // console.log("index:",index," visible:",visible)
-    if (typeof(elementExists) != 'undefined' && elementExists != null) {
-      // Exists.
+  
+    /*
+     * If backend says this role is invisible,
+     * remove the role card from DOM completely.
+     * Do not only set display:none, because hidden role cards may keep old selected state.
+     */
+    if (!visible) {
+      if (elementExists) {
+        elementExists.remove();
+      }
+  
       if (currentID == index) {
-        document.getElementById(cardTxName).style.backgroundColor = "rgba(0, 255, 0, 0.6)";
+        currentID = 0;
+        clearRoleForm();
+      }
+  
+      return;
+    }
+  
+    /*
+     * Case 1:
+     * Existing role card.
+     */
+    if (typeof(elementExists) != 'undefined' && elementExists != null) {
+      elementExists.dataset.roleName = roleName || "";
+      elementExists.dataset.currentActive = obj.currentActive ? "1" : "0";
 
-        // ตั้งค่า chId1..chId16 จาก payload obj.chId1..obj.chId16
+      if (currentID == index) {
+        elementExists.style.backgroundColor = "rgba(0, 255, 0, 0.6)";
+  
+        /*
+         * Set chId1..chId16 from payload obj.chId1..obj.chId16
+         */
         for (let i = 1; i <= MAX_CH; i++) {
           const el = document.getElementById("chId" + i);
           if (el) {
@@ -334,44 +499,73 @@ function processMsg(message) {
             }
           }
         }
-
-        document.getElementById("roleName").value = roleName;
-        document.getElementById(cardNameId).textContent = roleName;
-        // console.log("roleName",roleName)
-        document.getElementById("rs232Id1").checked = (obj.rs232Id1 == 1 || obj.rs232Id1 === true);
-        document.getElementById("rs232Id2").checked = (obj.rs232Id2 == 1 || obj.rs232Id2 === true);
+  
+        setValueSafely("roleName", roleName);
+  
+        const cardNameEl = document.getElementById(cardNameId);
+        if (cardNameEl) {
+          cardNameEl.textContent = roleName;
+        }
+  
+        setCheckedSafely("rs232Id1", obj.rs232Id1 == 1 || obj.rs232Id1 === true);
+        setCheckedSafely("rs232Id2", obj.rs232Id2 == 1 || obj.rs232Id2 === true);
+  
         if (obj.currentActive) {
           const selectBtn = document.getElementById("selectrolebutton");
-          if (selectBtn) selectBtn.style.display = "inline-flex";
-          document.getElementById(cardTxName).style.backgroundColor = "rgba(0, 255, 0, 0.6)";
+          if (selectBtn) {
+            selectBtn.style.display = "inline-flex";
+          }
+  
+          elementExists.style.backgroundColor = "rgba(0, 255, 0, 0.6)";
         }
       } else {
-        document.getElementById(cardTxName).style.backgroundColor = "rgba(0, 0, 0, 0.1)";
+        elementExists.style.backgroundColor = "rgba(0, 0, 0, 0.1)";
+  
         if (obj.currentActive) {
-          document.getElementById(cardTxName).style.backgroundColor = "rgba(0, 255, 0, 0.3)";
+          elementExists.style.backgroundColor = "rgba(0, 255, 0, 0.3)";
         }
       }
-      // console.log("elementExists.style.display = (visible === false) == ",(visible === false))
-      elementExists.style.display = (visible === false) ? "none" : "block";
-    } else {
+  
+      syncSiteCardHighlight(elementExists, roleName, obj.currentActive);
+      elementExists.style.display = "block";
+    }
+  
+    /*
+     * Case 2:
+     * New role card.
+     */
+    else {
       const card0 = document.getElementById("card0");
       if (!card0) return;
+  
+      const cardTxId = document.createElement('div');
+      cardTxId.className = 'cardTxTab';
+      cardTxId.id = cardTxName;
+      cardTxId.setAttribute("onclick", "setCurrentID(" + index + ");");
+  
+      const img = document.createElement('img');
+      img.className = 'cardTxTabImage';
+      img.src = "img/site.png";
+      img.alt = "Role";
+  
+      const span = document.createElement('span');
+      span.className = 'cardTxTabText3';
+      span.id = cardNameId;
+      span.textContent = roleName;
 
-      card0.appendChild(
-        Object.assign(document.createElement('div'), { className : 'cardTxTab', id: cardTxName })
-      ).appendChild(
-        Object.assign(document.createElement('img'), { className : 'cardTxTabImage', src: "img/site.png", alt: "Flowers in Chania" })
-      );
-
-      const cardTxId = document.getElementById(cardTxName);
-      cardTxId.setAttribute("onclick", "setCurrentID("+index+");");
-
-      cardTxId.appendChild(
-        Object.assign(document.createElement('span'), { className : 'cardTxTabText3', id: cardNameId, innerHTML: roleName })
-      );
-
-      cardTxId.style.display = (visible === false) ? "none" : "block";
-      cardTxId.style.backgroundColor = obj.currentActive ? "rgba(0, 255, 0, 0.3)" : "rgba(0, 0, 0, 0.1)";
+      cardTxId.dataset.roleName = roleName || "";
+      cardTxId.dataset.currentActive = obj.currentActive ? "1" : "0";
+  
+      cardTxId.appendChild(img);
+      cardTxId.appendChild(span);
+  
+      cardTxId.style.display = "block";
+      cardTxId.style.backgroundColor = obj.currentActive
+        ? "rgba(0, 255, 0, 0.3)"
+        : "rgba(0, 0, 0, 0.1)";
+      syncSiteCardHighlight(cardTxId, roleName, obj.currentActive);
+  
+      card0.appendChild(cardTxId);
     }
   }
   else if (obj.menuID == 'listTransmitter') {
@@ -381,6 +575,9 @@ function processMsg(message) {
     const cardLabel = obj.stationName;
     const visible = isVisibleFlag(obj.visible);
     syncTransmitterOption(index, cardLabel, visible);
+  }
+  else if (obj.menuID == "view_update_Page") {
+    updateActiveSiteFromSummary(obj);
   }
   else if (obj.menuID == "view_transmitter_list") {
     // reserved
