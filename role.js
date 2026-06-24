@@ -16,6 +16,9 @@ var transmitterID = 0;
 var dBUnit = false;
 var activeRoleName = "";
 var activeRoleSummary = { all: 0, connect: 0, disconnect: 0 };
+var activeRoleRefreshTimer = null;
+var siteDeleteTxHideGuardUntil = 0;
+var siteDeleteTxHideGuardReason = "";
 
 const MAX_CH = 16;
 function forEachChId(fn) {
@@ -95,18 +98,20 @@ function refreshActiveSiteHighlights() {
   });
 }
 
-function updateActiveSiteFromSummary(obj) {
-  const roleName = String(obj.roleName ?? "").trim();
-  activeRoleName = normalizeSiteName(roleName);
+function setActiveSiteSummaryDom(roleName, summary, reason) {
+  const safeRoleName = String(roleName ?? "").trim();
+  const normalizedRoleName = normalizeSiteName(safeRoleName);
+
+  activeRoleName = normalizedRoleName;
   activeRoleSummary = {
-    all: Number(obj.all_device ?? 0),
-    connect: Number(obj.connect ?? 0),
-    disconnect: Number(obj.disconnect ?? 0)
+    all: Number(summary?.all ?? 0),
+    connect: Number(summary?.connect ?? 0),
+    disconnect: Number(summary?.disconnect ?? 0)
   };
 
   const nameEl = document.getElementById("activeRoleNameDisplay");
   if (nameEl) {
-    nameEl.textContent = roleName || "--";
+    nameEl.textContent = safeRoleName || "<unknown>";
   }
 
   const summaryEl = document.getElementById("activeRoleDeviceSummary");
@@ -116,7 +121,58 @@ function updateActiveSiteFromSummary(obj) {
       + " | Disconnect: " + activeRoleSummary.disconnect;
   }
 
+  console.log("[ACTIVE SITE] DOM update", {
+    reason,
+    roleName: safeRoleName || "<unknown>",
+    activeRoleName,
+    summary: activeRoleSummary
+  });
+
   refreshActiveSiteHighlights();
+}
+
+function clearActiveSiteSummary(reason = "clear") {
+  console.warn("[ACTIVE SITE] clear", reason);
+
+  activeRoleName = "";
+  activeRoleSummary = { all: 0, connect: 0, disconnect: 0 };
+
+  const nameEl = document.getElementById("activeRoleNameDisplay");
+  if (nameEl) {
+    nameEl.textContent = "<unknown>";
+  }
+
+  const summaryEl = document.getElementById("activeRoleDeviceSummary");
+  if (summaryEl) {
+    summaryEl.textContent = "All: 0 | Connect: 0 | Disconnect: 0";
+  }
+
+  document.querySelectorAll('.cardTxTab[id^="cardTxId"]').forEach((cardEl) => {
+    cardEl.dataset.currentActive = "0";
+    cardEl.classList.remove("is-active-site");
+    cardEl.setAttribute("aria-current", "false");
+    syncActiveSiteBadge(cardEl, false);
+  });
+}
+
+function updateActiveSiteFromSummary(obj) {
+  const rawRoleName = String(obj.roleName ?? obj.name ?? "").trim();
+  const normalizedRoleName = normalizeSiteName(rawRoleName);
+  const all = Number(obj.all_device ?? obj.allDevice ?? obj.all ?? 0);
+  const connect = Number(obj.connect ?? obj.connected ?? 0);
+  const disconnect = Number(obj.disconnect ?? obj.disconnected ?? 0);
+
+  const looksEmpty =
+    !rawRoleName ||
+    normalizedRoleName === "unknown" ||
+    normalizedRoleName === "<unknown>";
+
+  if (looksEmpty) {
+    clearActiveSiteSummary("view_update_Page has no active site");
+    return;
+  }
+
+  setActiveSiteSummaryDom(rawRoleName, { all, connect, disconnect }, "view_update_Page");
 }
 
 function syncTransmitterOption(index, stationName, visible) {
@@ -127,9 +183,37 @@ function syncTransmitterOption(index, stationName, visible) {
     const matched = Array.from(selectEl.options).filter((opt) => String(opt.value) === txId);
 
     if (!visible) {
+      if (isSiteDeleteTransmitterHideGuardActive()) {
+        let option = matched[0];
+        if (!option) {
+          option = document.createElement("option");
+          option.value = txId;
+          selectEl.appendChild(option);
+        }
+
+        option.textContent = label;
+
+        if (matched.length > 1) {
+          matched.slice(1).forEach((opt) => opt.remove());
+        }
+
+        console.warn("[SITE DELETE GUARD] keep transmitter option although visible=false", {
+          txId,
+          label,
+          selectId: selectEl.id,
+          reason: siteDeleteTxHideGuardReason
+        });
+        return;
+      }
+
       const wasSelected = String(selectEl.value) === txId;
       matched.forEach((opt) => opt.remove());
       if (wasSelected) selectEl.value = "0";
+      console.warn("[TRANSMITTER OPTION] removed because backend sent visible=false", {
+        txId,
+        label,
+        selectId: selectEl.id
+      });
       return;
     }
 
@@ -148,6 +232,140 @@ function syncTransmitterOption(index, stationName, visible) {
   });
 }
 
+function sendWsJson(obj, reason = "") {
+  if (ws?.readyState === WebSocket.OPEN || ws?.readyState === 1) {
+    ws.send(JSON.stringify(obj));
+    if (reason) {
+      console.log("[WS SEND]", reason, obj);
+    }
+    return true;
+  }
+
+  console.warn("[WS SEND] skipped, websocket not ready", { reason, obj });
+  return false;
+}
+
+function requestSiteDataRefresh(reason = "manual", delayMs = 0) {
+  const run = () => {
+    console.log("[SITE REFRESH] request", reason);
+    sendWsJson({ menuID: "getRole" }, reason + ": getRole");
+    sendWsJson({ menuID: "getMonitorPage" }, reason + ": getMonitorPage");
+    sendWsJson({ menuID: "getThruLan" }, reason + ": getThruLan");
+  };
+
+  if (delayMs > 0) {
+    window.setTimeout(run, delayMs);
+  } else {
+    run();
+  }
+}
+
+function requestSiteDataRefreshNowAndLater(reason = "manual") {
+  if (activeRoleRefreshTimer) {
+    window.clearTimeout(activeRoleRefreshTimer);
+    activeRoleRefreshTimer = null;
+  }
+
+  requestSiteDataRefresh(reason + " immediate", 0);
+
+  activeRoleRefreshTimer = window.setTimeout(() => {
+    requestSiteDataRefresh(reason + " delayed", 0);
+    activeRoleRefreshTimer = null;
+  }, 250);
+}
+
+function requestSiteOnlyRefresh(reason = "manual", delayMs = 0) {
+  const run = () => {
+    console.log("[SITE REFRESH] site-only request", reason);
+    sendWsJson({ menuID: "getRole" }, reason + ": getRole");
+    sendWsJson({ menuID: "getMonitorPage" }, reason + ": getMonitorPage");
+  };
+
+  if (delayMs > 0) {
+    window.setTimeout(run, delayMs);
+  } else {
+    run();
+  }
+}
+
+function requestSiteOnlyRefreshNowAndLater(reason = "manual") {
+  if (activeRoleRefreshTimer) {
+    window.clearTimeout(activeRoleRefreshTimer);
+    activeRoleRefreshTimer = null;
+  }
+
+  requestSiteOnlyRefresh(reason + " immediate", 0);
+
+  activeRoleRefreshTimer = window.setTimeout(() => {
+    requestSiteOnlyRefresh(reason + " delayed", 0);
+    activeRoleRefreshTimer = null;
+  }, 250);
+}
+
+function armSiteDeleteTransmitterHideGuard(reason = "site delete", durationMs = 3000) {
+  siteDeleteTxHideGuardUntil = Date.now() + durationMs;
+  siteDeleteTxHideGuardReason = reason;
+
+  console.warn("[SITE DELETE GUARD] armed", {
+    reason,
+    durationMs,
+    until: new Date(siteDeleteTxHideGuardUntil).toISOString()
+  });
+}
+
+function isSiteDeleteTransmitterHideGuardActive() {
+  return Date.now() < siteDeleteTxHideGuardUntil;
+}
+
+function getRoleNameById(roleID) {
+  const cardEl = document.getElementById("cardTxId" + roleID);
+  const cardName = getSiteCardName(cardEl);
+  const formName = document.getElementById("roleName")?.value || "";
+
+  return String(cardName || formName || "").trim();
+}
+
+function countSelectedTransmittersFromForm() {
+  const ids = new Set();
+
+  forEachChId((selectEl) => {
+    const value = Number(selectEl.value);
+    if (Number.isFinite(value) && value > 0) {
+      ids.add(value);
+    }
+  });
+
+  return ids.size;
+}
+
+function markActiveSiteImmediately(roleID, reason = "selected") {
+  const numericRoleID = Number(roleID);
+  const roleName = getRoleNameById(numericRoleID);
+  const all = countSelectedTransmittersFromForm();
+
+  if (!numericRoleID || numericRoleID <= 0 || !roleName) {
+    clearActiveSiteSummary(reason + ": invalid selected site");
+    return;
+  }
+
+  document.querySelectorAll('.cardTxTab[id^="cardTxId"]').forEach((cardEl) => {
+    const isCurrent = cardEl.id === "cardTxId" + numericRoleID;
+    cardEl.dataset.currentActive = isCurrent ? "1" : "0";
+    const cardRoleName = cardEl.dataset.roleName || getSiteCardName(cardEl);
+    syncSiteCardHighlight(cardEl, cardRoleName, isCurrent);
+  });
+
+  setActiveSiteSummaryDom(roleName, { all, connect: 0, disconnect: 0 }, reason + " optimistic");
+}
+
+function isActiveSiteRole(roleID, roleName = "") {
+  const cardEl = document.getElementById("cardTxId" + roleID);
+  const activeFromCard = cardEl?.dataset?.currentActive === "1";
+  const activeFromName = !!activeRoleName && normalizeSiteName(roleName || getRoleNameById(roleID)) === activeRoleName;
+
+  return !!activeFromCard || !!activeFromName;
+}
+
 // ==========================
 // WebSocket bootstrap
 // ==========================
@@ -164,9 +382,7 @@ function WebSocketTest() {
         card0.style.backgroundColor = "rgba(0, 255, 0, 0.6)";
         card0.classList.remove("is-active-site", "is-editing-site");
       }
-      ws.send('{"menuID":"getRole"}');
-      ws.send('{"menuID":"getMonitorPage"}');
-      ws.send('{"menuID":"getThruLan"}');
+      requestSiteDataRefresh("websocket open");
     };
 
     ws.onmessage = function (evt) {
@@ -267,6 +483,7 @@ function newRole() {
   if (sure) {
     if (ws?.readyState === 1) {
       ws.send(jsonMessage);
+      requestSiteDataRefreshNowAndLater(isUpdate ? "role updated" : "role added");
       // console.log(jsonMessage);
     } else {
       alert("ERROR! Connection is closed...");
@@ -362,40 +579,70 @@ function setCurrentID(newID) {
 }
 
 function removeRole() {
+  const removeID = Number(currentID) || 0;
+  const removeName = getRoleNameById(removeID);
+  const removingActiveSite = isActiveSiteRole(removeID, removeName);
+
   if (confirm("Remove Site, Please confirm!") === true) {
-    var msg = { menuID: "removeRole", id: currentID };
+    var msg = { menuID: "removeRole", id: removeID };
     if (ws?.readyState === 1) {
+      /*
+       * Deleting a Site must not delete/hide Transmitters in this page.
+       * Some backend builds temporarily broadcast listTransmitter visible=false
+       * while clearing the selected Site mapping. During this short window,
+       * keep transmitter options alive in chId1..chId16.
+       */
+      armSiteDeleteTransmitterHideGuard("removeRole id=" + removeID, 3000);
+
       ws.send(JSON.stringify(msg));
+
+      if (removingActiveSite) {
+        clearActiveSiteSummary("active site removed: " + (removeName || removeID));
+      }
+
+      /*
+       * Refresh only Site data here. Do not request getThruLan immediately after
+       * removeRole, because getThruLan can replay visible=false transmitter states
+       * from the Site-delete path and make transmitter options disappear.
+       */
+      requestSiteOnlyRefreshNowAndLater("role removed");
     } else {
       alert("ERROR! Connection is closed...");
     }
 
     setCurrentID(0); // reset currentID หลังลบ
   } else {
-    if (ws?.readyState === 1) {
-      ws.send('{"menuID":"getRole"}');
-    } else {
-      alert("ERROR! Connection is closed...");
-    }
+    requestSiteDataRefreshNowAndLater("remove role canceled");
   }
 }
 
 
 function selectedRole() {
+  const selectedID = Number(currentID) || 0;
+
+  if (selectedID <= 0) {
+    clearActiveSiteSummary("selectedRole called without site");
+    requestSiteDataRefreshNowAndLater("selectedRole no site");
+    setCurrentID(0);
+    return;
+  }
+
   if (confirm("Selected Site, Please confirm!") === true) {
-    var msg = { menuID: "selectedRole", id: currentID };
+    var msg = { menuID: "selectedRole", id: selectedID };
     if (ws?.readyState === 1) {
       ws.send(JSON.stringify(msg));
+
+      // Update the selected-site card immediately so the UI does not stay as <unknown>.
+      // The backend summary will overwrite this optimistic value after getMonitorPage responds.
+      markActiveSiteImmediately(selectedID, "selectedRole");
+      requestSiteDataRefreshNowAndLater("selectedRole");
     } else {
       alert("ERROR! Connection is closed...");
     }
   } else {
-    if (ws?.readyState === 1) {
-      ws.send('{"menuID":"getRole"}');
-    } else {
-      alert("ERROR! Connection is closed...");
-    }
+    requestSiteDataRefreshNowAndLater("selectedRole canceled");
   }
+
   setCurrentID(0);
 }
 
@@ -462,6 +709,8 @@ function processMsg(message) {
      * Do not only set display:none, because hidden role cards may keep old selected state.
      */
     if (!visible) {
+      const wasActiveSite = isActiveSiteRole(index, roleName);
+
       if (elementExists) {
         elementExists.remove();
       }
@@ -469,6 +718,11 @@ function processMsg(message) {
       if (currentID == index) {
         currentID = 0;
         clearRoleForm();
+      }
+
+      if (wasActiveSite) {
+        clearActiveSiteSummary("active site hidden by listRole: " + (roleName || index));
+        requestSiteDataRefreshNowAndLater("active site hidden");
       }
   
       return;
@@ -527,6 +781,9 @@ function processMsg(message) {
       }
   
       syncSiteCardHighlight(elementExists, roleName, obj.currentActive);
+      if (obj.currentActive && !activeRoleName) {
+        setActiveSiteSummaryDom(roleName, activeRoleSummary, "listRole currentActive existing");
+      }
       elementExists.style.display = "block";
     }
   
@@ -564,6 +821,9 @@ function processMsg(message) {
         ? "rgba(0, 255, 0, 0.3)"
         : "rgba(0, 0, 0, 0.1)";
       syncSiteCardHighlight(cardTxId, roleName, obj.currentActive);
+      if (obj.currentActive && !activeRoleName) {
+        setActiveSiteSummaryDom(roleName, activeRoleSummary, "listRole currentActive new");
+      }
   
       card0.appendChild(cardTxId);
     }
