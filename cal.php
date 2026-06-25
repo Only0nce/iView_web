@@ -68,11 +68,11 @@ include('ListAudioGain.php')
 				<h3 class="cal-page-title">CAL Profile</h3>
 				<div class="cal-page-subtitle">Select a device card to open CAL page on its own IP.</div>
 			</div>
-			<div class="cal-page-count" aria-label="CAL device capacity">12 Devices</div>
+			<div class="cal-page-count" aria-label="CAL device capacity">16 Devices</div>
 		</div>
 		<div class="device-card-grid" id="deviceCardGrid">
 			<?php
-			for ($i = 1; $i <= 12; $i++)
+			for ($i = 1; $i <= 16; $i++)
 			{
 				echo '<button type="button" class="device-card" id="cardTxId'.$i.'" data-device-index="'.$i.'" onclick="openDeviceCal('.$i.')" aria-label="Open CAL for device '.$i.'">';
 				echo '  <div class="device-card-visual" aria-hidden="true">';

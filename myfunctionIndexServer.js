@@ -35,7 +35,183 @@ const setStyle = (id, prop, val) => { const el = $(id); if (el) el.style[prop] =
 const setWidth = (id, pct) => { const el = $(id); if (el) el.style.width = pct; };
 
 // ===== Threshold helpers =====
-const thresholdMap = Object.create(null); // key = id (index/databaseId), value = { fwd:{warn,alert}, rssi:{warn,alert}, vswr:{warn,alert} }
+// key = webIndex/dashboard slot (card1..card16), NOT txIndex/databaseId.
+const thresholdMap = Object.create(null); // value = { fwd:{warn,alert}, rssi:{warn,alert}, vswr:{warn,alert} }
+
+
+// ===== Index device visibility source =====
+// listTransmitter = configuration source (which device should exist on dashboard)
+// view_transmitter_list = live telemetry source (values/status/name source of truth)
+const indexDeviceConfigMap = Object.create(null); // key = dashboard id 1..16
+const indexDeviceLiveMap = Object.create(null);   // key = dashboard id 1..16
+
+function isTruthyFlag(value) {
+  if (value === true || value === 1) return true;
+  if (value === false || value === 0) return false;
+  const text = String(value ?? '').trim().toLowerCase();
+  if (!text) return null;
+  if (['1', 'true', 'on', 'yes', 'y', 'enable', 'enabled', 'active', 'show', 'visible'].includes(text)) return true;
+  if (['0', 'false', 'off', 'no', 'n', 'disable', 'disabled', 'inactive', 'hide', 'hidden'].includes(text)) return false;
+  return null;
+}
+
+function normalizeIndexWebIndexId(raw) {
+  if (raw === undefined || raw === null || raw === '') return '';
+
+  const n = Number(String(raw).trim());
+  if (!Number.isFinite(n)) return '';
+
+  // webIndex is a 1-based display order: 1,2,3,...
+  // Do not add +1 here and do not use txIndex/databaseId as a dashboard slot.
+  const intValue = Math.trunc(n);
+  if (intValue <= 0) return '';
+
+  const id = String(intValue);
+  if ($("card" + id) || $("card_plot" + id) || $("deviceDashboard" + id)) return id;
+  return '';
+}
+
+function resolveIndexDeviceId(obj) {
+  const id = normalizeIndexWebIndexId(obj?.webIndex ?? obj?.webindex);
+  if (id) return id;
+
+  // Temporary compatibility for older payloads that used display-style names.
+  // Do NOT fallback to txIndex/radioID/databaseId because those are database/device ids, not card slots.
+  return normalizeIndexWebIndexId(obj?.displayIndex ?? obj?.dashboardIndex ?? obj?.slotIndex ?? obj?.index);
+}
+
+function resolveIndexLiveDeviceId(obj) {
+  return resolveIndexDeviceId(obj);
+}
+
+function updateIndexDeviceHeaderFromLive(id, obj) {
+  const rawStationName = String(obj?.stationName ?? obj?.deviceName ?? obj?.name ?? '').trim();
+  const rawFrequency = Number(obj?.frequency || obj?.freq || 0);
+  const frequencyText = rawFrequency > 0
+    ? ((rawFrequency > 1000000 ? rawFrequency / 1e6 : rawFrequency).toFixed(4) + " MHz")
+    : "-- MHz";
+
+  const titleEl = $("title" + id);
+  const deviceNameEl = $("deviceName" + id);
+  const deviceFrequencyEl = $("deviceFrequency" + id);
+  const safeName = rawStationName || "RF Device " + id;
+  const safeTitle = (safeName + (frequencyText !== "-- MHz" ? " " + frequencyText : '')).trim();
+
+  if (titleEl) {
+    titleEl.setAttribute("aria-label", safeTitle);
+    titleEl.removeAttribute("title");
+    titleEl.removeAttribute("data-full-title");
+    titleEl.dataset.nameSource = "view_transmitter_list";
+  }
+  if (deviceNameEl) {
+    deviceNameEl.textContent = safeName;
+    deviceNameEl.dataset.nameSource = "view_transmitter_list";
+  }
+  if (deviceFrequencyEl) {
+    deviceFrequencyEl.textContent = frequencyText;
+    deviceFrequencyEl.dataset.nameSource = "view_transmitter_list";
+  }
+
+  indexDeviceLiveMap[id] = indexDeviceLiveMap[id] || {};
+  indexDeviceLiveMap[id].hasLiveName = true;
+  indexDeviceLiveMap[id].liveName = safeName;
+  indexDeviceLiveMap[id].liveFrequency = frequencyText;
+}
+
+function resolveIndexDeviceEnabled(obj, defaultValue) {
+  const keys = [
+    'visible', 'enable', 'enabled', 'receive_enable', 'receiveEnable',
+    'rxEnabled', 'active', 'isActive', 'status', 'deviceEnable', 'deviceEnabled'
+  ];
+
+  for (const key of keys) {
+    if (Object.prototype.hasOwnProperty.call(obj || {}, key)) {
+      const value = isTruthyFlag(obj[key]);
+      if (value !== null) return value;
+    }
+  }
+  return defaultValue;
+}
+
+function isIndexDeviceConfiguredVisible(id, liveObj) {
+  const cfg = indexDeviceConfigMap[id];
+  if (cfg && cfg.enabled === false) return false;
+  if (cfg && cfg.enabled === true) return true;
+  return resolveIndexDeviceEnabled(liveObj || {}, false) === true;
+}
+
+function setIndexDeviceVisible(id, visible) {
+  const show = !!visible;
+  const cardEl = $("card" + id);
+  const plotEl = $("card_plot" + id);
+  const dashEl = $("deviceDashboard" + id);
+
+  if (cardEl) cardEl.style.display = show ? "block" : "none";
+  if (plotEl) {
+    const wasVisible = plotEl.dataset.rfVisible === "1";
+    plotEl.style.display = show ? "block" : "none";
+    plotEl.dataset.rfVisible = show ? "1" : "0";
+    if (show && !wasVisible) scheduleIndexPlotRedraw(id);
+  }
+  if (dashEl) dashEl.style.display = show ? "block" : "none";
+  if (show) setTrendOfflineState(id, true);
+}
+
+function updateIndexDeviceHeaderFromConfig(id, obj) {
+  // listTransmitter may arrive repeatedly. Use it only as a temporary placeholder.
+  // Once view_transmitter_list has supplied the live stationName for this dashboard slot,
+  // never let config overwrite that live name.
+  if (indexDeviceLiveMap[id]?.hasLiveName === true) return;
+
+  const rawStationName = String(obj?.stationName ?? obj?.deviceName ?? obj?.name ?? '').trim();
+  const rawFrequency = Number(obj?.frequency || obj?.freq || 0);
+  const frequencyText = rawFrequency > 0
+    ? ((rawFrequency > 1000000 ? rawFrequency / 1e6 : rawFrequency).toFixed(4) + " MHz")
+    : "-- MHz";
+
+  const titleEl = $("title" + id);
+  const deviceNameEl = $("deviceName" + id);
+  const deviceFrequencyEl = $("deviceFrequency" + id);
+  const safeName = rawStationName || "RF Device " + id;
+  const safeTitle = (safeName + (frequencyText !== "-- MHz" ? " " + frequencyText : '')).trim();
+
+  if (titleEl) {
+    titleEl.setAttribute("aria-label", safeTitle);
+    titleEl.removeAttribute("title");
+    titleEl.removeAttribute("data-full-title");
+  }
+  if (deviceNameEl) deviceNameEl.textContent = safeName;
+  if (deviceFrequencyEl) deviceFrequencyEl.textContent = frequencyText;
+}
+
+function renderIndexConfiguredDevice(id, obj) {
+  const enabled = resolveIndexDeviceEnabled(obj, true);
+  indexDeviceConfigMap[id] = {
+    enabled: enabled,
+    name: String(obj?.stationName ?? obj?.deviceName ?? obj?.name ?? '').trim(),
+    frequency: obj?.frequency ?? obj?.freq ?? ''
+  };
+
+  updateIndexDeviceHeaderFromConfig(id, obj || {});
+  setIndexDeviceVisible(id, enabled);
+
+  const hasLive = !!indexDeviceLiveMap[id];
+  const connectionStatus = hasLive && indexDeviceLiveMap[id].connectionStatus === true;
+  const dis1 = $("cardDisconnect" + id);
+  const dis2 = $("cardplotDisconnect" + id);
+  if (dis1) dis1.style.display = connectionStatus ? "none" : "block";
+  if (dis2) dis2.style.display = connectionStatus ? "none" : "block";
+  setDatasetState("deviceDashboard" + id, connectionStatus ? "online" : "offline");
+  syncDashboardDensity();
+}
+
+function debugIndexDeviceCount(reason) {
+  const rows = Array.from(document.querySelectorAll('.rf-device-row'));
+  const visibleRows = rows.filter(isDashboardDeviceVisible).length;
+  const configEnabled = Object.keys(indexDeviceConfigMap).filter(id => indexDeviceConfigMap[id]?.enabled === true).length;
+  const liveReceived = Object.keys(indexDeviceLiveMap).length;
+  // console.log('[INDEX DEVICE COUNT]', reason, 'configEnabled=', configEnabled, 'liveReceived=', liveReceived, 'visibleRows=', visibleRows);
+}
 
 /** mode:
  *  'low-bad'  => ค่ายิ่งต่ำยิ่งแย่ (เช่น FWD Power, RSSI)
@@ -415,10 +591,12 @@ function processMsg(message) {
   else if (obj.menuID == "view_transmitter_list") {
     // ---- ไม่มี return กลางทาง ----
     try {
-      // ใช้ index ที่แม็ปกับ id ใน PHP (card1..card12 / myPlot1..myPlot12)
-      const id = String(
-        obj.webindex ?? obj.index ?? obj.radioID ?? obj.databaseId ?? 0
-      );
+      // ใช้ webIndex/webindex เป็นลำดับ DOM จริงใน PHP (card1..card16 / myPlot1..myPlot16)
+      const id = resolveIndexLiveDeviceId(obj);
+      if (!id) {
+        console.warn("[INDEX] ignored view_transmitter_list because webIndex/webindex does not match any dashboard card", obj);
+        return;
+      }
   
       // คำนวณค่า
       let swrmax = 2;
@@ -436,8 +614,14 @@ function processMsg(message) {
       const swr    = Number((obj.vswr*1.0).toFixed(3));
       const rssiDb = Number(obj.rssi);
   
-      const visible = (obj.visible == 1 || obj.visible === true || obj.visible === "1");
-      const connectionStatus = (obj.connectionStatus == 1);
+      const liveVisible = resolveIndexDeviceEnabled(obj, false);
+      const visible = isIndexDeviceConfiguredVisible(id, obj) || liveVisible === true;
+      const connectionStatus = (obj.connectionStatus == 1 || obj.connectionStatus === true || String(obj.connectionStatus).toLowerCase() === "true");
+      indexDeviceLiveMap[id] = Object.assign(indexDeviceLiveMap[id] || {}, {
+        connectionStatus: connectionStatus,
+        visible: visible,
+        lastPayload: obj
+      });
   
       // อ้างอิง element id ให้สอดคล้องกับ PHP
       const ids = {
@@ -472,39 +656,23 @@ function processMsg(message) {
         visible: visible
       });
   
-      // อัปเดตชื่อการ์ด: แยกชื่ออุปกรณ์และความถี่คนละบรรทัด + hover แสดงชื่อเต็ม
-      const titleEl = get(ids.title);
-      const deviceNameEl = get("deviceName" + id);
-      const deviceFrequencyEl = get("deviceFrequency" + id);
-      if (titleEl) {
-        const safeTitle = stationName || "RF Device " + id;
-        titleEl.setAttribute("aria-label", safeTitle);
-        titleEl.removeAttribute("title");
-        titleEl.removeAttribute("data-full-title");
-
-        if (deviceNameEl || deviceFrequencyEl) {
-          if (deviceNameEl) deviceNameEl.textContent = rawStationName || "RF Device " + id;
-          if (deviceFrequencyEl) deviceFrequencyEl.textContent = frequencyText || "-- MHz";
-        } else {
-          titleEl.textContent = safeTitle;
-        }
-      }
+      // ชื่อบนหน้า index ต้องอิงจาก live payload นี้เป็นหลัก
+      // listTransmitter ใช้ช่วยให้ card แสดงครบเท่านั้น ไม่ใช่ source สุดท้ายของชื่อ
+      updateIndexDeviceHeaderFromLive(id, obj);
+      // console.log("[INDEX NAME] source=view_transmitter_list id=", id,
+      //   "webIndex=", obj.webIndex ?? obj.webindex,
+      //   "txIndex=", obj.txIndex ?? obj.radioID,
+      //   "index=", obj.index,
+      //   "stationName=", rawStationName,
+      //   "frequency=", frequencyText || "-- MHz");
   
       // normalize max
       if (fwd > fwdmax) fwdmax = fwd;
       if (rwd > rwdmax) rwdmax = rwd;
       if (swr > swrmax) swrmax = swr;
   
-      // แสดง/ซ่อนการ์ดตาม visible โดยไม่ออกจากฟังก์ชัน
-      const cardEl = get(ids.currentCard);
-      const plotEl = get(ids.plotCard);
-      if (cardEl) cardEl.style.display = visible ? "block" : "none";
-      if (plotEl) {
-        const wasVisible = plotEl.dataset.rfVisible === "1";
-        plotEl.style.display = visible ? "block" : "none";
-        plotEl.dataset.rfVisible = visible ? "1" : "0";
-        if (visible && !wasVisible) scheduleIndexPlotRedraw(id);
-      }
+      // แสดง/ซ่อนการ์ดตาม config ก่อน ถ้า config enabled แล้ว live ขาดก็ยังต้องแสดง Offline
+      setIndexDeviceVisible(id, visible);
   
       // การเชื่อมต่อ: โชว์/ซ่อนป้ายน็อตคอนเนค
       const dis1 = get(ids.cardDisconnect);
@@ -605,15 +773,10 @@ function processMsg(message) {
         }
       }
   
-      // ปิดท้าย: ย้ำการมองเห็นตาม visible อีกครั้ง (idempotent)
-      const cardEl2 = document.getElementById(ids.currentCard);
-      const plotEl2 = document.getElementById(ids.plotCard);
-      if (cardEl2) cardEl2.style.display = visible ? "block" : "none";
-      if (plotEl2) {
-        plotEl2.style.display = visible ? "block" : "none";
-        plotEl2.dataset.rfVisible = visible ? "1" : "0";
-        if (visible) scheduleIndexPlotResize(document.getElementById(ids.plotDiv));
-      }
+      // ปิดท้าย: ย้ำการมองเห็นตาม config/live อีกครั้ง (idempotent)
+      setIndexDeviceVisible(id, visible);
+      if (visible) scheduleIndexPlotResize(document.getElementById(ids.plotDiv));
+      debugIndexDeviceCount('after view_transmitter_list id=' + id);
     } catch (e) {
       // จับ error ไม่ให้ฟังก์ชันหลุด (ยังคงวนต่อไปได้)
       console.warn("view_transmitter_list error:", e);
@@ -621,14 +784,23 @@ function processMsg(message) {
   }
   
   
-// เมื่อได้รับ listTransmitter สะสม threshold ไว้ก่อน
+// เมื่อได้รับ listTransmitter ให้ใช้เป็น config source ว่า device ไหนควรแสดงบนหน้า index
 else if (obj.menuID === 'listTransmitter') {
-  const id = String(obj.index); // หรือ databaseId ตามหน้า
+  const id = resolveIndexDeviceId(obj);
+  if (!id) {
+    console.warn("[INDEX] ignored listTransmitter because webIndex/webindex does not match any dashboard card", obj);
+    return;
+  }
+
   thresholdMap[id] = {
     fwd:  { warn: Number(obj.warningFwdPowerWatt), alert: Number(obj.alertFwdPowerWatt) },     // low-bad
     rssi: { warn: Number(obj.warningRssi),         alert: Number(obj.alertRssi) },              // low-bad
     vswr: { warn: Number(obj.warningVSWR),         alert: Number(obj.alertVSWR) }               // high-bad
   };
+
+  renderIndexConfiguredDevice(id, obj);
+  // console.log("[INDEX DEVICE] listTransmitter id=", id, "enabled=", indexDeviceConfigMap[id]?.enabled, obj);
+  debugIndexDeviceCount('after listTransmitter id=' + id);
 }
 
   else if (obj.menuID == "update") {

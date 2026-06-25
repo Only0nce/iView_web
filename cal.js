@@ -28,6 +28,75 @@
   var DEVICE_CAL_BASIC_PASS = "";
 
   var deviceState = {};
+  var MAX_CAL_DEVICES = 16;
+  var CAL_DEVICE_ID_KEYS = ["webindex", "index", "radioID", "txIndex", "deviceIndex", "databaseId", "id"];
+  var CAL_ENABLE_KEYS = ["receive_enable", "receiveEnable", "rxEnabled", "enable", "enabled", "active", "isActive"];
+  var CAL_CONNECTED_KEYS = ["connectionStatus", "connected", "connect", "online", "isConnected", "status"];
+
+  function normalizeFlag(value, defaultValue) {
+    if (typeof value === "undefined" || value === null || value === "") {
+      return !!defaultValue;
+    }
+    if (typeof value === "boolean") {
+      return value;
+    }
+    if (typeof value === "number") {
+      return value !== 0;
+    }
+
+    var text = String(value).trim().toLowerCase();
+    if (!text) {
+      return !!defaultValue;
+    }
+    if (["0", "false", "off", "no", "n", "disabled", "disable", "inactive", "hidden", "hide", "offline", "disconnect", "disconnected"].indexOf(text) >= 0) {
+      return false;
+    }
+    if (["1", "true", "on", "yes", "y", "enabled", "enable", "active", "visible", "show", "online", "connect", "connected"].indexOf(text) >= 0) {
+      return true;
+    }
+
+    var numeric = Number(text);
+    if (Number.isFinite(numeric)) {
+      return numeric !== 0;
+    }
+    return !!defaultValue;
+  }
+
+  function firstOwnValue(obj, keys) {
+    if (!obj) {
+      return undefined;
+    }
+    for (var i = 0; i < keys.length; i++) {
+      if (Object.prototype.hasOwnProperty.call(obj, keys[i])) {
+        return obj[keys[i]];
+      }
+    }
+    return undefined;
+  }
+
+  function resolvePayloadVisible(obj, defaultValue) {
+    var visibleValue = Object.prototype.hasOwnProperty.call(obj, "visible") ? obj.visible : undefined;
+    var visible = normalizeFlag(visibleValue, defaultValue);
+    var enableValue = firstOwnValue(obj, CAL_ENABLE_KEYS);
+    var enabled = normalizeFlag(enableValue, true);
+    return visible && enabled;
+  }
+
+  function resolvePayloadConnected(obj, defaultValue) {
+    var rawValue = firstOwnValue(obj, CAL_CONNECTED_KEYS);
+    if (typeof rawValue === "undefined") {
+      return !!defaultValue;
+    }
+    return normalizeFlag(rawValue, defaultValue);
+  }
+
+  function logCalDeviceCount() {
+    var visibleCards = document.querySelectorAll('.device-card[style*="block"]').length;
+    var configuredVisible = Object.keys(deviceState).filter(function (key) {
+      return deviceState[key] && deviceState[key].visible;
+    }).length;
+    console.log("[CAL DEVICE COUNT] visibleCards=", visibleCards, "configuredVisible=", configuredVisible, "state=", deviceState);
+  }
 
   function init() {
     connectWebSocket();
@@ -44,6 +113,7 @@
 
     ws.onopen = function () {
       ws.send('{"menuID":"getMonitorPage"}');
+      ws.send('{"menuID":"getThruLan"}');
     };
 
     ws.onmessage = function (evt) {
@@ -72,20 +142,19 @@
     }
 
     if (obj.menuID === "view_transmitter_list") {
-      updateCardFromPayload(obj);
+      updateCardFromPayload(obj, true);
     }
     else if (obj.menuID === "listTransmitter") {
-      updateCardFromPayload(obj);
+      updateCardFromPayload(obj, false);
     }
   }
 
   function resolveDeviceId(obj) {
-    var keys = ["webindex", "index", "databaseId", "radioID", "id"];
     var i;
 
-    for (i = 0; i < keys.length; i++) {
-      var value = parseInt(obj[keys[i]], 10);
-      if (Number.isFinite(value) && value > 0 && document.getElementById("cardTxId" + value)) {
+    for (i = 0; i < CAL_DEVICE_ID_KEYS.length; i++) {
+      var value = parseInt(obj[CAL_DEVICE_ID_KEYS[i]], 10);
+      if (Number.isFinite(value) && value >= 1 && value <= MAX_CAL_DEVICES && document.getElementById("cardTxId" + value)) {
         return value;
       }
     }
@@ -93,9 +162,10 @@
     return 0;
   }
 
-  function updateCardFromPayload(obj) {
+  function updateCardFromPayload(obj, isLivePayload) {
     var id = resolveDeviceId(obj);
     if (!id) {
+      console.warn("[CAL] ignored transmitter payload because no matching card id was found", obj);
       return;
     }
 
@@ -104,10 +174,16 @@
       return;
     }
 
-    var stationName = String(obj.stationName || "Device " + id);
+    var stationName = String(obj.stationName || obj.deviceName || obj.name || "Device " + id);
     var frequency = formatFrequency(obj.frequency);
-    var visible = (obj.visible === undefined) ? true : (obj.visible === true || obj.visible === 1 || obj.visible === "1");
-    var connected = (obj.connectionStatus === undefined) ? true : (obj.connectionStatus === true || obj.connectionStatus === 1 || obj.connectionStatus === "1");
+    var visible = resolvePayloadVisible(obj, true);
+    var hasConnectionStatus = typeof firstOwnValue(obj, CAL_CONNECTED_KEYS) !== "undefined";
+    var previousConnected = deviceState[id] && deviceState[id].liveSeen && deviceState[id].connected;
+    var connected = resolvePayloadConnected(obj, isLivePayload ? false : previousConnected);
+
+    if (!isLivePayload && !hasConnectionStatus && previousConnected) {
+      connected = true;
+    }
 
     var ip = resolveDeviceIp(id, stationName, obj.ipAddress || obj.ipaddress || obj.host || obj.address);
 
@@ -117,7 +193,8 @@
       frequency: frequency,
       ip: ip,
       connected: connected,
-      visible: visible
+      visible: visible,
+      liveSeen: isLivePayload || (deviceState[id] && deviceState[id].liveSeen) || hasConnectionStatus
     };
 
     card.style.display = visible ? "block" : "none";
@@ -130,6 +207,9 @@
 
     card.dataset.deviceIp = ip || "";
     card.dataset.deviceName = stationName;
+
+    console.log("[CAL DEVICE]", { id: id, visible: visible, connected: connected, menuID: obj.menuID, raw: obj });
+    logCalDeviceCount();
   }
 
   function setText(elementId, text) {
