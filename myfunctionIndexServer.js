@@ -26,6 +26,26 @@ window.vswrArrMap = window.vswrArrMap || {};
 window.rssiArrMap = window.rssiArrMap || {};   // ✅ เพิ่ม rssi
 window.canvasTrendChartMap = window.canvasTrendChartMap || {};
 
+window.canvasTrendDataMap = window.canvasTrendDataMap || {};
+
+// ===== Index performance guards =====
+// หน้า index มีกราฟสูงสุด 16 ตัว ถ้าสร้าง CanvasJS.Chart ใหม่ทุก payload
+// และเรียก resize หลาย timeout ต่อ payload จะค่อย ๆ หน่วง/ค้างเมื่อเปิดไว้นาน ๆ
+const INDEX_MAX_TREND_POINTS = 600;          // ประมาณ 20 นาทีที่ sample 2 วินาที
+const INDEX_PLOT_RENDER_MIN_MS = 900;        // จำกัด render กราฟต่อช่องไม่เกิน ~1 fps
+const INDEX_PLOT_RESIZE_MIN_MS = 1500;       // จำกัด resize/render จาก resize ไม่ให้ถี่เกิน
+const indexPlotRenderPendingMap = Object.create(null);
+const indexPlotRenderTimerMap = Object.create(null);
+const indexPlotLastRenderMap = Object.create(null);
+const indexPlotResizePendingMap = Object.create(null);
+const indexPlotResizeTimerMap = Object.create(null);
+const indexPlotLastResizeMap = Object.create(null);
+const indexPlotRedrawPendingMap = Object.create(null);
+let indexDensityScheduled = false;
+let indexDensityForceCount = null;
+let indexWsReconnectTimer = null;
+let indexWsManualClose = false;
+
 
 // --- Safe DOM helpers (กัน null ทุกครั้ง) ---
 const $ = (id) => document.getElementById(id);
@@ -35,7 +55,7 @@ const setStyle = (id, prop, val) => { const el = $(id); if (el) el.style[prop] =
 const setWidth = (id, pct) => { const el = $(id); if (el) el.style.width = pct; };
 
 // ===== Threshold helpers =====
-// key = webIndex/dashboard slot (card1..card16), NOT txIndex/databaseId.
+// key = dashboard slot (card1..card16). Use databaseId first because Qt server already sends it as 1..16.
 const thresholdMap = Object.create(null); // value = { fwd:{warn,alert}, rssi:{warn,alert}, vswr:{warn,alert} }
 
 
@@ -55,14 +75,14 @@ function isTruthyFlag(value) {
   return null;
 }
 
-function normalizeIndexWebIndexId(raw) {
+function normalizeIndexDashboardId(raw) {
   if (raw === undefined || raw === null || raw === '') return '';
 
   const n = Number(String(raw).trim());
   if (!Number.isFinite(n)) return '';
 
-  // webIndex is a 1-based display order: 1,2,3,...
-  // Do not add +1 here and do not use txIndex/databaseId as a dashboard slot.
+  // databaseId/webIndex is a 1-based display order: 1,2,3,...
+  // Do not add +1 here and do not use txIndex/radioID as a dashboard slot.
   const intValue = Math.trunc(n);
   if (intValue <= 0) return '';
 
@@ -72,12 +92,16 @@ function normalizeIndexWebIndexId(raw) {
 }
 
 function resolveIndexDeviceId(obj) {
-  const id = normalizeIndexWebIndexId(obj?.webIndex ?? obj?.webindex);
+  // Qt server already sends databaseId as the current dashboard order (1..16).
+  // Prefer databaseId now, while keeping webIndex/webindex for future DB-backed ordering.
+  let id = normalizeIndexDashboardId(obj?.databaseId);
   if (id) return id;
 
-  // Temporary compatibility for older payloads that used display-style names.
-  // Do NOT fallback to txIndex/radioID/databaseId because those are database/device ids, not card slots.
-  return normalizeIndexWebIndexId(obj?.displayIndex ?? obj?.dashboardIndex ?? obj?.slotIndex ?? obj?.index);
+  id = normalizeIndexDashboardId(obj?.webIndex ?? obj?.webindex);
+  if (id) return id;
+
+  // Compatibility for payloads that used display-style names.
+  return normalizeIndexDashboardId(obj?.displayIndex ?? obj?.dashboardIndex ?? obj?.slotIndex ?? obj?.index);
 }
 
 function resolveIndexLiveDeviceId(obj) {
@@ -142,19 +166,30 @@ function isIndexDeviceConfiguredVisible(id, liveObj) {
 
 function setIndexDeviceVisible(id, visible) {
   const show = !!visible;
-  const cardEl = $("card" + id);
-  const plotEl = $("card_plot" + id);
-  const dashEl = $("deviceDashboard" + id);
+  const key = String(id);
+  const cardEl = $("card" + key);
+  const plotEl = $("card_plot" + key);
+  const dashEl = $("deviceDashboard" + key);
 
   if (cardEl) cardEl.style.display = show ? "block" : "none";
   if (plotEl) {
     const wasVisible = plotEl.dataset.rfVisible === "1";
     plotEl.style.display = show ? "block" : "none";
     plotEl.dataset.rfVisible = show ? "1" : "0";
-    if (show && !wasVisible) scheduleIndexPlotRedraw(id);
+    if (show && !wasVisible) scheduleIndexPlotRedraw(key);
   }
   if (dashEl) dashEl.style.display = show ? "block" : "none";
-  if (show) setTrendOfflineState(id, true);
+
+  // Do not force the trend panel back to OFFLINE every time the card is shown.
+  // view_transmitter_list updates connectionStatus first, then calls this function again.
+  // The old unconditional setTrendOfflineState(id, true) re-enabled the OFFLINE overlay
+  // even when connectionStatus=1 and graph data was already arriving.
+  if (show) {
+    const live = indexDeviceLiveMap[key];
+    setTrendOfflineState(key, !(live && live.connectionStatus === true));
+  } else {
+    setTrendOfflineState(key, false);
+  }
 }
 
 function updateIndexDeviceHeaderFromConfig(id, obj) {
@@ -428,18 +463,40 @@ function isDashboardDeviceVisible(row) {
 }
 
 function syncDashboardDensity(forceCount) {
-  const rows = Array.from(document.querySelectorAll('.rf-device-row'));
-  const visibleCount = Number.isFinite(Number(forceCount)) && Number(forceCount) > 0
-    ? Number(forceCount)
-    : rows.filter(isDashboardDeviceVisible).length;
+  if (Number.isFinite(Number(forceCount)) && Number(forceCount) > 0) {
+    indexDensityForceCount = Number(forceCount);
+  }
 
-  // Always keep the index page in 2 columns x 8 rows layout without compact shrinking.
-  // rf-dashboard-wall is intentionally removed because it is the old compressed wall mode.
-  document.body.classList.remove('rf-dashboard-wall');
-  document.body.classList.add('rf-dashboard-2x8');
-  document.body.style.setProperty('--rf-visible-devices', String(visibleCount));
+  if (indexDensityScheduled) return;
+  indexDensityScheduled = true;
+
+  requestAnimationFrame(function () {
+    indexDensityScheduled = false;
+
+    const rows = Array.from(document.querySelectorAll('.rf-device-row'));
+    const visibleCount = Number.isFinite(Number(indexDensityForceCount)) && Number(indexDensityForceCount) > 0
+      ? Number(indexDensityForceCount)
+      : rows.filter(isDashboardDeviceVisible).length;
+    indexDensityForceCount = null;
+
+    // Always keep the index page in 2 columns x 8 rows layout without compact shrinking.
+    // rf-dashboard-wall is intentionally removed because it is the old compressed wall mode.
+    document.body.classList.remove('rf-dashboard-wall');
+    document.body.classList.add('rf-dashboard-2x8');
+    document.body.style.setProperty('--rf-visible-devices', String(visibleCount));
+  });
 }
 
+
+
+function scheduleIndexWebSocketReconnect() {
+  if (indexWsManualClose) return;
+  if (indexWsReconnectTimer) clearTimeout(indexWsReconnectTimer);
+  indexWsReconnectTimer = setTimeout(function () {
+    indexWsReconnectTimer = null;
+    WebSocketTest();
+  }, 2000);
+}
 
 WebSocketTest();
 // window.onload = function(){
@@ -450,8 +507,13 @@ WebSocketTest();
 // }
 
 function WebSocketTest() {
+  if (ws && (ws.readyState === WebSocket.OPEN || ws.readyState === WebSocket.CONNECTING)) {
+    return;
+  }
+
   if ("WebSocket" in window) {
     wsUri = "ws://" + location.host + ":1234";
+    indexWsManualClose = false;
     ws = new WebSocket(wsUri);
 
     ws.onopen = function () {
@@ -466,9 +528,14 @@ function WebSocketTest() {
       processMsg(received_msg);
     };
 
+    ws.onerror = function () {
+      // Let onclose handle reconnect. Avoid alert() because it blocks the UI thread.
+      try { ws.close(); } catch (e) {}
+    };
+
     ws.onclose = function () {
-      // websocket is closed.
-      alert("Connection is closed...");
+      // Reconnect quietly instead of showing alert dialogs that freeze long-running dashboards.
+      scheduleIndexWebSocketReconnect();
     };
   } else {
     alert("WebSocket NOT supported by your Browser!");
@@ -591,10 +658,11 @@ function processMsg(message) {
   else if (obj.menuID == "view_transmitter_list") {
     // ---- ไม่มี return กลางทาง ----
     try {
-      // ใช้ webIndex/webindex เป็นลำดับ DOM จริงใน PHP (card1..card16 / myPlot1..myPlot16)
+      // ใช้ databaseId เป็นลำดับ DOM จริงใน PHP (card1..card16 / myPlot1..myPlot16)
+      // และยังรองรับ webIndex/webindex ไว้เป็น fallback
       const id = resolveIndexLiveDeviceId(obj);
       if (!id) {
-        console.warn("[INDEX] ignored view_transmitter_list because webIndex/webindex does not match any dashboard card", obj);
+        console.warn("[INDEX] ignored view_transmitter_list because databaseId/webIndex does not match any dashboard card", obj);
         return;
       }
   
@@ -763,7 +831,7 @@ function processMsg(message) {
           vswrArrMap[id].push(swr);
           rssiArrMap[id].push(Number.isNaN(rssiDb) ? null : rssiDb);
   
-          if (timeArrMap[id].length > 1000) {
+          if (timeArrMap[id].length > INDEX_MAX_TREND_POINTS) {
             timeArrMap[id].shift(); fwdArrMap[id].shift(); rwdArrMap[id].shift(); vswrArrMap[id].shift(); rssiArrMap[id].shift();
           }
   
@@ -775,7 +843,10 @@ function processMsg(message) {
   
       // ปิดท้าย: ย้ำการมองเห็นตาม config/live อีกครั้ง (idempotent)
       setIndexDeviceVisible(id, visible);
-      if (visible) scheduleIndexPlotResize(document.getElementById(ids.plotDiv));
+      if (visible && !indexDeviceLiveMap[id].plotInitialResizeDone) {
+        indexDeviceLiveMap[id].plotInitialResizeDone = true;
+        scheduleIndexPlotResize(document.getElementById(ids.plotDiv));
+      }
       debugIndexDeviceCount('after view_transmitter_list id=' + id);
     } catch (e) {
       // จับ error ไม่ให้ฟังก์ชันหลุด (ยังคงวนต่อไปได้)
@@ -788,7 +859,7 @@ function processMsg(message) {
 else if (obj.menuID === 'listTransmitter') {
   const id = resolveIndexDeviceId(obj);
   if (!id) {
-    console.warn("[INDEX] ignored listTransmitter because webIndex/webindex does not match any dashboard card", obj);
+    console.warn("[INDEX] ignored listTransmitter because databaseId/webIndex does not match any dashboard card", obj);
     return;
   }
 
@@ -1362,29 +1433,89 @@ function getIndexPlotSize(targetEl) {
   return { width, height };
 }
 
+function renderIndexChartNow(id, chart) {
+  const key = String(id);
+  if (!chart || typeof chart.render !== 'function') return;
+  try {
+    chart.render();
+    indexPlotLastRenderMap[key] = Date.now();
+  } catch (e) {
+    console.warn('CanvasJS render skipped:', e);
+  }
+}
+
+function scheduleIndexChartRender(id, chart, force) {
+  const key = String(id);
+  if (!chart || typeof chart.render !== 'function') return;
+
+  // Do not spend CPU rendering hidden browser tabs; data continues to be buffered.
+  // When the tab becomes visible again, setupIndexVisibilityResume() redraws visible plots once.
+  if (document.hidden) return;
+
+  const now = Date.now();
+  const last = indexPlotLastRenderMap[key] || 0;
+  const elapsed = now - last;
+
+  if (force || elapsed >= INDEX_PLOT_RENDER_MIN_MS) {
+    if (indexPlotRenderTimerMap[key]) {
+      clearTimeout(indexPlotRenderTimerMap[key]);
+      indexPlotRenderTimerMap[key] = null;
+    }
+    if (indexPlotRenderPendingMap[key]) return;
+    indexPlotRenderPendingMap[key] = true;
+    requestAnimationFrame(function () {
+      indexPlotRenderPendingMap[key] = false;
+      renderIndexChartNow(key, chart);
+    });
+    return;
+  }
+
+  if (indexPlotRenderTimerMap[key]) return;
+  indexPlotRenderTimerMap[key] = setTimeout(function () {
+    indexPlotRenderTimerMap[key] = null;
+    scheduleIndexChartRender(key, chart, true);
+  }, Math.max(80, INDEX_PLOT_RENDER_MIN_MS - elapsed));
+}
+
 function resizeIndexPlot(targetEl) {
   if (!targetEl) return;
   const id = String(targetEl.id || '').replace('myPlot', '');
   const chart = window.canvasTrendChartMap && window.canvasTrendChartMap[id];
   if (chart && typeof chart.render === 'function') {
-    try { chart.render(); } catch (e) {}
+    scheduleIndexChartRender(id, chart, true);
   }
 }
 
-
 function scheduleIndexPlotResize(targetEl) {
   if (!targetEl) return;
-  requestAnimationFrame(function () { resizeIndexPlot(targetEl); });
-  setTimeout(function () { resizeIndexPlot(targetEl); }, 80);
-  setTimeout(function () { resizeIndexPlot(targetEl); }, 260);
+  const id = String(targetEl.id || '').replace('myPlot', '');
+  const now = Date.now();
+  const last = indexPlotLastResizeMap[id] || 0;
+
+  if ((now - last) < INDEX_PLOT_RESIZE_MIN_MS) {
+    clearTimeout(indexPlotResizeTimerMap[id]);
+    indexPlotResizeTimerMap[id] = setTimeout(function () {
+      indexPlotLastResizeMap[id] = Date.now();
+      resizeIndexPlot(targetEl);
+    }, INDEX_PLOT_RESIZE_MIN_MS - (now - last));
+    return;
+  }
+
+  if (indexPlotResizePendingMap[id]) return;
+  indexPlotResizePendingMap[id] = true;
+  indexPlotLastResizeMap[id] = now;
+  requestAnimationFrame(function () {
+    indexPlotResizePendingMap[id] = false;
+    resizeIndexPlot(targetEl);
+  });
 }
 
-function redrawIndexPlotById(id) {
+function redrawIndexPlotById(id, force) {
   const key = String(id);
   const targetEl = document.getElementById('myPlot' + key);
   if (!targetEl) return;
   if (timeArrMap[key] && timeArrMap[key].length && typeof drawMyPlot === 'function') {
-    drawMyPlot(fwdArrMap[key] || [], rwdArrMap[key] || [], vswrArrMap[key] || [], timeArrMap[key] || [], key, dBUnit, rssiArrMap[key] || []);
+    drawMyPlot(fwdArrMap[key] || [], rwdArrMap[key] || [], vswrArrMap[key] || [], timeArrMap[key] || [], key, dBUnit, rssiArrMap[key] || [], { forceRender: !!force });
   } else {
     renderEmptyTrend('myPlot' + key);
   }
@@ -1392,9 +1523,13 @@ function redrawIndexPlotById(id) {
 }
 
 function scheduleIndexPlotRedraw(id) {
-  requestAnimationFrame(function () { redrawIndexPlotById(id); });
-  setTimeout(function () { redrawIndexPlotById(id); }, 100);
-  setTimeout(function () { redrawIndexPlotById(id); }, 320);
+  const key = String(id);
+  if (indexPlotRedrawPendingMap[key]) return;
+  indexPlotRedrawPendingMap[key] = true;
+  requestAnimationFrame(function () {
+    indexPlotRedrawPendingMap[key] = false;
+    redrawIndexPlotById(key, false);
+  });
 }
 
 function refreshIndexPlotsForTheme() {
@@ -1402,7 +1537,7 @@ function refreshIndexPlotsForTheme() {
     for (let id = 1; id <= 16; id++) {
       const plotCard = document.getElementById('card_plot' + id);
       const isVisible = plotCard && plotCard.style.display !== 'none';
-      if (isVisible) redrawIndexPlotById(id);
+      if (isVisible) redrawIndexPlotById(id, true);
     }
   } catch (e) {
     console.warn('Plot theme refresh skipped:', e);
@@ -1413,9 +1548,7 @@ function setupIndexPlotThemeObserver() {
   if (window.__indexPlotThemeObserverInstalled) return;
   window.__indexPlotThemeObserverInstalled = true;
   const refreshSoon = function () {
-    refreshIndexPlotsForTheme();
-    setTimeout(refreshIndexPlotsForTheme, 80);
-    setTimeout(refreshIndexPlotsForTheme, 260);
+    requestAnimationFrame(refreshIndexPlotsForTheme);
   };
   const observer = new MutationObserver(refreshSoon);
   observer.observe(document.documentElement, { attributes: true, attributeFilter: ['data-rf-theme'] });
@@ -1430,6 +1563,14 @@ function setupIndexPlotThemeObserver() {
   }
 })();
 
+(function setupIndexVisibilityResume() {
+  if (window.__indexVisibilityResumeInstalled) return;
+  window.__indexVisibilityResumeInstalled = true;
+  document.addEventListener('visibilitychange', function () {
+    if (!document.hidden) requestAnimationFrame(refreshIndexPlotsForTheme);
+  });
+})();
+
 function toCanvasPoint(xValue, yValue) {
   const x = normalizePlotTimeValue(xValue);
   const xDate = x ? new Date(x) : new Date();
@@ -1440,70 +1581,15 @@ function toCanvasPoint(xValue, yValue) {
   };
 }
 
-function drawMyPlot(fwd, rwd, vswr, time, id, dBUnit) {
-  const targetId = `myPlot${id}`;
-  const targetEl = document.getElementById(targetId);
-  if (!targetEl) return;
+function applyIndexChartOptions(chart, targetId, id, forwardPoints, reflectedPoints, vswrPoints, plotTheme, tooltipBg, tooltipBorder, powerUnit) {
+  const commonLine = {
+    type: 'line',
+    showInLegend: true,
+    lineThickness: 2,
+    markerSize: 0
+  };
 
-  if (typeof CanvasJS === 'undefined') {
-    targetEl.innerHTML = '<div class="rf-trend-empty-state">' +
-      '<span class="rf-trend-empty-title">CanvasJS not loaded</span>' +
-      '<small>Check local canvasjs.min.js</small>' +
-      '</div>';
-    return;
-  }
-
-  if (!Array.isArray(time) || time.length === 0) {
-    renderEmptyTrend(targetId);
-    return;
-  }
-
-  let powerUnit = dBUnit ? "dBm" : "W";
-  const normalizedTimes = time.map(normalizePlotTimeValue);
-  let latest = new Date(normalizedTimes[normalizedTimes.length - 1] || Date.now());
-  if (Number.isNaN(latest.getTime())) latest = new Date();
-  const earliest = new Date(latest.getTime() - 10 * 60 * 1000);
-
-  let forwardPoints = [];
-  let reflectedPoints = [];
-  let vswrPoints = [];
-
-  for (let i = 0; i < normalizedTimes.length; i++) {
-    if (!normalizedTimes[i]) continue;
-    const t = new Date(normalizedTimes[i]);
-    if (!Number.isNaN(t.getTime()) && t >= earliest) {
-      forwardPoints.push(toCanvasPoint(normalizedTimes[i], fwd[i]));
-      reflectedPoints.push(toCanvasPoint(normalizedTimes[i], rwd[i]));
-      vswrPoints.push(toCanvasPoint(normalizedTimes[i], vswr[i]));
-    }
-  }
-
-  if (forwardPoints.length === 0) {
-    const startIndex = Math.max(0, normalizedTimes.length - 60);
-    for (let i = startIndex; i < normalizedTimes.length; i++) {
-      if (!normalizedTimes[i]) continue;
-      forwardPoints.push(toCanvasPoint(normalizedTimes[i], fwd[i]));
-      reflectedPoints.push(toCanvasPoint(normalizedTimes[i], rwd[i]));
-      vswrPoints.push(toCanvasPoint(normalizedTimes[i], vswr[i]));
-    }
-  }
-
-  if (forwardPoints.length === 0) {
-    renderEmptyTrend(targetId);
-    return;
-  }
-
-  const plotTheme = getIndexPlotTheme();
-  const isLight = document.documentElement.getAttribute('data-rf-theme') === 'light';
-  const tooltipBg = isLight ? '#ffffff' : '#0b1420';
-  const tooltipBorder = isLight ? '#9fb6cc' : '#29435e';
-
-  targetEl.classList.add('rf-plot-rendered', 'rf-canvasjs-plot');
-  targetEl.style.visibility = 'visible';
-  targetEl.style.opacity = '1';
-  targetEl.innerHTML = '';
-
-  const chart = new CanvasJS.Chart(targetId, {
+  const options = {
     animationEnabled: false,
     zoomEnabled: false,
     backgroundColor: plotTheme.plot,
@@ -1513,7 +1599,7 @@ function drawMyPlot(fwd, rwd, vswr, time, id, dBUnit) {
       horizontalAlign: 'center',
       verticalAlign: 'top',
       fontColor: plotTheme.text,
-      fontSize: 12,
+      fontSize: 11,
       cursor: 'pointer'
     },
     toolTip: {
@@ -1564,53 +1650,132 @@ function drawMyPlot(fwd, rwd, vswr, time, id, dBUnit) {
       includeZero: false
     },
     data: [
-      {
-        type: 'line',
+      Object.assign({}, commonLine, {
         name: 'Forward',
-        showInLegend: true,
         color: plotTheme.forwardColor,
-        lineThickness: 3,
-        markerSize: 5,
         markerColor: plotTheme.forwardColor,
         markerBorderColor: plotTheme.markerBorder,
         markerBorderThickness: 1,
         dataPoints: forwardPoints
-      },
-      {
-        type: 'line',
+      }),
+      Object.assign({}, commonLine, {
         name: 'Reflected',
-        showInLegend: true,
         color: plotTheme.reflectedColor,
-        lineThickness: 3,
-        markerSize: 5,
         markerColor: plotTheme.reflectedColor,
         markerBorderColor: plotTheme.markerBorder,
         markerBorderThickness: 1,
         dataPoints: reflectedPoints
-      },
-      {
-        type: 'line',
+      }),
+      Object.assign({}, commonLine, {
         name: 'VSWR',
         axisYType: 'secondary',
-        showInLegend: true,
         color: plotTheme.vswrColor,
-        lineThickness: 3,
-        markerSize: 5,
         markerColor: plotTheme.vswrColor,
         markerBorderColor: plotTheme.markerBorder,
         markerBorderThickness: 1,
         dataPoints: vswrPoints
-      }
+      })
     ]
-  });
+  };
 
-  window.canvasTrendChartMap[String(id)] = chart;
-  try {
-    chart.render();
-  } catch (e) {
-    console.warn('CanvasJS render skipped:', e);
+  // CanvasJS exposes .options; updating it avoids constructing thousands of chart objects.
+  chart.options = options;
+  return chart;
+}
+
+function buildIndexTrendPoints(fwd, rwd, vswr, time) {
+  const normalizedTimes = time.map(normalizePlotTimeValue);
+  let latest = new Date(normalizedTimes[normalizedTimes.length - 1] || Date.now());
+  if (Number.isNaN(latest.getTime())) latest = new Date();
+  const earliest = new Date(latest.getTime() - 10 * 60 * 1000);
+
+  const forwardPoints = [];
+  const reflectedPoints = [];
+  const vswrPoints = [];
+
+  for (let i = 0; i < normalizedTimes.length; i++) {
+    if (!normalizedTimes[i]) continue;
+    const t = new Date(normalizedTimes[i]);
+    if (!Number.isNaN(t.getTime()) && t >= earliest) {
+      forwardPoints.push(toCanvasPoint(normalizedTimes[i], fwd[i]));
+      reflectedPoints.push(toCanvasPoint(normalizedTimes[i], rwd[i]));
+      vswrPoints.push(toCanvasPoint(normalizedTimes[i], vswr[i]));
+    }
   }
-  scheduleIndexPlotResize(targetEl);
+
+  if (forwardPoints.length === 0) {
+    const startIndex = Math.max(0, normalizedTimes.length - 60);
+    for (let i = startIndex; i < normalizedTimes.length; i++) {
+      if (!normalizedTimes[i]) continue;
+      forwardPoints.push(toCanvasPoint(normalizedTimes[i], fwd[i]));
+      reflectedPoints.push(toCanvasPoint(normalizedTimes[i], rwd[i]));
+      vswrPoints.push(toCanvasPoint(normalizedTimes[i], vswr[i]));
+    }
+  }
+
+  return { forwardPoints, reflectedPoints, vswrPoints };
+}
+
+function drawMyPlot(fwd, rwd, vswr, time, id, dBUnit, rssiSeries, options) {
+  const targetId = `myPlot${id}`;
+  const key = String(id);
+  const targetEl = document.getElementById(targetId);
+  if (!targetEl) return;
+
+  if (typeof CanvasJS === 'undefined') {
+    targetEl.innerHTML = '<div class="rf-trend-empty-state">' +
+      '<span class="rf-trend-empty-title">CanvasJS not loaded</span>' +
+      '<small>Check local canvasjs.min.js</small>' +
+      '</div>';
+    return;
+  }
+
+  if (!Array.isArray(time) || time.length === 0) {
+    renderEmptyTrend(targetId);
+    return;
+  }
+
+  const powerUnit = dBUnit ? "dBm" : "W";
+  const points = buildIndexTrendPoints(fwd, rwd, vswr, time);
+
+  if (points.forwardPoints.length === 0) {
+    renderEmptyTrend(targetId);
+    return;
+  }
+
+  const plotTheme = getIndexPlotTheme();
+  const isLight = document.documentElement.getAttribute('data-rf-theme') === 'light';
+  const tooltipBg = isLight ? '#ffffff' : '#0b1420';
+  const tooltipBorder = isLight ? '#9fb6cc' : '#29435e';
+
+  targetEl.classList.add('rf-plot-rendered', 'rf-canvasjs-plot');
+  targetEl.style.visibility = 'visible';
+  targetEl.style.opacity = '1';
+
+  let chart = window.canvasTrendChartMap[key];
+  const isNewChart = !chart;
+
+  if (isNewChart) {
+    targetEl.innerHTML = '';
+    chart = new CanvasJS.Chart(targetId, {});
+    window.canvasTrendChartMap[key] = chart;
+  }
+
+  applyIndexChartOptions(
+    chart,
+    targetId,
+    key,
+    points.forwardPoints,
+    points.reflectedPoints,
+    points.vswrPoints,
+    plotTheme,
+    tooltipBg,
+    tooltipBorder,
+    powerUnit
+  );
+
+  scheduleIndexChartRender(key, chart, !!(options && options.forceRender) || isNewChart);
+  if (isNewChart) scheduleIndexPlotResize(targetEl);
 }
 
 
