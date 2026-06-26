@@ -47,6 +47,7 @@ window.transmitterThresholdMap = new Map();
 window.transmitterThresholdStationMap = new Map();
 window.transmitterThresholdStationOnlyMap = new Map();
 window.transmitterThresholdList = [];
+window.transmitterWebIndexMap = new Map();
 window.defaultTransmitterThreshold = null;
 window.logxDebugThreshold = true;
 
@@ -169,12 +170,43 @@ function getStationName(row) {
   return safeText(pickFirst(row.stationName, row.station_name, row.station));
 }
 
-function getDeviceIndex(row) {
+function normalizePositiveInt(value) {
+  const n = Number(value);
+  return Number.isFinite(n) && n > 0 ? Math.trunc(n) : null;
+}
+
+function getRawTransmitterIndex(row) {
   return safeText(pickFirst(row.txIndex, row.tx_index, row.deviceIndex, row.device_id, row.deviceId));
 }
 
+function getMappedWebIndex(txIndex) {
+  const raw = normalizePositiveInt(txIndex);
+  if (!raw || !window.transmitterWebIndexMap) return null;
+
+  const mapped = window.transmitterWebIndexMap.get("tx:" + raw);
+  const display = normalizePositiveInt(mapped);
+  return display || null;
+}
+
+function getDeviceIndex(row) {
+  // User-facing device number. Prefer listTransmitter.webindex over real txIndex.
+  // Example from server: index=8, webindex=5 => show/filter as Device 5.
+  const rawTxIndex = getRawTransmitterIndex(row);
+  const mapped = getMappedWebIndex(rawTxIndex);
+  if (mapped) return safeText(mapped);
+
+  // Some future rows may already include webindex/webIndex directly.
+  const directWebIndex = normalizePositiveInt(pickFirst(row.webindex, row.webIndex));
+  if (directWebIndex) return safeText(directWebIndex);
+
+  // Fallback only when the server has not sent listTransmitter yet.
+  return safeText(rawTxIndex);
+}
+
 function getDeviceKey(row) {
-  const tx = getDeviceIndex(row);
+  // Identity key must remain the real transmitter index, not webindex.
+  // This prevents two renamed/reordered display slots from mixing historical log rows.
+  const tx = getRawTransmitterIndex(row);
   const station = getStationName(row);
   const freq = getFrequencyMHz(row);
 
@@ -184,10 +216,10 @@ function getDeviceKey(row) {
 }
 
 function getDeviceLabel(row) {
-  const tx = getDeviceIndex(row);
+  const displayIndex = getDeviceIndex(row);
   const station = getStationName(row) || "Unnamed Device";
   const freq = getFrequencyMHz(row);
-  const prefix = tx ? "Device " + tx : "Device";
+  const prefix = displayIndex ? "Device " + displayIndex : "Device";
   return freq ? `${prefix} — ${station} • ${freq} MHz` : `${prefix} — ${station}`;
 }
 
@@ -427,9 +459,11 @@ function stationFrequencyThresholdKey(stationName, frequency) {
 }
 
 function buildThresholdConfigFromListTransmitter(obj) {
-  const txIndex = Number(obj.index);
+  const txIndex = normalizePositiveInt(obj.index);
+  const webIndex = normalizePositiveInt(pickFirst(obj.webindex, obj.webIndex));
   return {
-    txIndex: Number.isFinite(txIndex) && txIndex > 0 ? txIndex : null,
+    txIndex: txIndex,
+    webIndex: webIndex,
     alertRssi: Number(obj.alertRssi),
     warningRssi: Number(obj.warningRssi),
     alertVSWR: Number(obj.alertVSWR),
@@ -445,6 +479,10 @@ function registerTransmitterThreshold(cfg) {
   if (!cfg) return;
 
   window.defaultTransmitterThreshold = cfg;
+
+  if (cfg.txIndex && cfg.webIndex) {
+    window.transmitterWebIndexMap.set("tx:" + cfg.txIndex, cfg.webIndex);
+  }
 
   if (cfg.txIndex) {
     window.transmitterThresholdMap.set("tx:" + cfg.txIndex, cfg);
@@ -472,7 +510,7 @@ function registerTransmitterThreshold(cfg) {
 }
 
 function getThresholdConfigForRow(row) {
-  const tx = getDeviceIndex(row);
+  const tx = getRawTransmitterIndex(row);
   if (tx) {
     const byTx = window.transmitterThresholdMap.get("tx:" + tx);
     if (byTx) return byTx;
@@ -1093,7 +1131,7 @@ function processMsg(message) {
   if (obj.menuID === "listTransmitter") {
     const cfg = buildThresholdConfigFromListTransmitter(obj);
     registerTransmitterThreshold(cfg);
-    console.log("[THRESHOLD MAP]", cfg);
+    console.log("[THRESHOLD MAP]", cfg, "displayDevice", cfg.webIndex || cfg.txIndex);
     renderTable();
     return;
   }
