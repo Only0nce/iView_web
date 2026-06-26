@@ -28,9 +28,28 @@
   var DEVICE_CAL_BASIC_PASS = "";
 
   var deviceState = {};
+  // Stable map from real transmitter ID (txIndex/radioID) to CAL card slot.
+  // listTransmitter sends: index = real txIndex, webindex = global display slot.
+  // listRole(currentActive) sends: chId1..chId16 = selected site slot mapping.
+  // view_transmitter_list sends: radioID = real txIndex, databaseId = compact live slot.
+  // CAL must follow the selected Site slot mapping, not compact databaseId, otherwise
+  // disabled qwert/THRULAN slots are overwritten by the next live device.
+  var calSlotByTxIdentity = {};
+  var calActiveRoleKnown = false;
+  var calActiveRoleSlots = {};
+  var calTxCatalogByIdentity = {};
+  var calGlobalSlotCatalog = {};
+  var calRoleRenderTimer = null;
   var MAX_CAL_DEVICES = 16;
-  var CAL_DEVICE_ID_KEYS = ["webindex", "index", "radioID", "txIndex", "deviceIndex", "databaseId", "id"];
-  var CAL_ENABLE_KEYS = ["receive_enable", "receiveEnable", "rxEnabled", "enable", "enabled", "active", "isActive"];
+  var calConfiguredTxCount = 0;
+  var calRenderedOnce = false;
+  // databaseId is the display slot used by index.php/card1..card16.
+  // txIndex/radioID are real DB/device IDs and must not be used as the card slot
+  // when databaseId/webIndex is available.
+  var CAL_DEVICE_ID_KEYS = ["databaseId", "webIndex", "webindex", "displayIndex", "dashboardIndex", "slotIndex", "index", "deviceIndex", "id"];
+  // Do not use receive_enable here. In this project receive_enable means RX/SNMP
+  // receive feature, not whether the transmitter/device card should be visible.
+  var CAL_ENABLE_KEYS = ["enable", "enabled", "active", "isActive"];
   var CAL_CONNECTED_KEYS = ["connectionStatus", "connected", "connect", "online", "isConnected", "status"];
 
   function normalizeFlag(value, defaultValue) {
@@ -75,6 +94,9 @@
   }
 
   function resolvePayloadVisible(obj, defaultValue) {
+    // For CAL page, visibility should follow the transmitter/card visibility only.
+    // Do not hide the CAL card when receive_enable/rxEnabled is 0, because that
+    // field is used for RX/SNMP status and many valid devices have it disabled.
     var visibleValue = Object.prototype.hasOwnProperty.call(obj, "visible") ? obj.visible : undefined;
     var visible = normalizeFlag(visibleValue, defaultValue);
     var enableValue = firstOwnValue(obj, CAL_ENABLE_KEYS);
@@ -91,7 +113,18 @@
   }
 
   function logCalDeviceCount() {
-    var visibleCards = document.querySelectorAll('.device-card[style*="block"]').length;
+    // Keep this lightweight. The previous version logged the entire state on every
+    // WebSocket payload, which made CAL slower when many devices updated often.
+    if (!window.CAL_DEBUG) {
+      return;
+    }
+    var visibleCards = 0;
+    for (var i = 1; i <= MAX_CAL_DEVICES; i++) {
+      var card = document.getElementById("cardTxId" + i);
+      if (card && card.style.display !== "none") {
+        visibleCards++;
+      }
+    }
     var configuredVisible = Object.keys(deviceState).filter(function (key) {
       return deviceState[key] && deviceState[key].visible;
     }).length;
@@ -112,6 +145,10 @@
     ws = new WebSocket(wsUri);
 
     ws.onopen = function () {
+      // getRole is required here because CAL card order must match the selected Site
+      // page slots chId1..chId16. getMonitorPage/getThruLan alone only provide
+      // compact live order and global transmitter order.
+      ws.send('{"menuID":"getRole"}');
       ws.send('{"menuID":"getMonitorPage"}');
       ws.send('{"menuID":"getThruLan"}');
     };
@@ -145,25 +182,363 @@
       updateCardFromPayload(obj, true);
     }
     else if (obj.menuID === "listTransmitter") {
-      updateCardFromPayload(obj, false);
+      rememberTransmitterCatalog(obj);
+
+      if (calActiveRoleKnown) {
+        scheduleRenderActiveRoleSlots();
+      }
+      else {
+        // Temporary fallback before the selected-role slot map arrives.
+        // Use the listTransmitter order/count sent by the server, not station name.
+        updateCardFromPayload(obj, false);
+        calConfiguredTxCount = countVisibleCatalogTransmitters();
+        updateCalDeviceCount(calConfiguredTxCount);
+      }
+    }
+    else if (obj.menuID === "listRole") {
+      updateActiveRoleSlotMap(obj);
     }
   }
 
-  function resolveDeviceId(obj) {
-    var i;
+  function normalizeCalDeviceId(value) {
+    var id = parseInt(value, 10);
+    if (!Number.isFinite(id) || id < 1 || id > MAX_CAL_DEVICES) {
+      return 0;
+    }
+    return document.getElementById("cardTxId" + id) ? id : 0;
+  }
 
-    for (i = 0; i < CAL_DEVICE_ID_KEYS.length; i++) {
-      var value = parseInt(obj[CAL_DEVICE_ID_KEYS[i]], 10);
-      if (Number.isFinite(value) && value >= 1 && value <= MAX_CAL_DEVICES && document.getElementById("cardTxId" + value)) {
-        return value;
+  function getRealTxIdentity(obj) {
+    if (!obj) {
+      return "";
+    }
+
+    // For listTransmitter, "index" is the real txIndex.
+    // For view_transmitter_list, "radioID" is the real txIndex.
+    var candidates = [obj.radioID, obj.txIndex, obj.index];
+    for (var i = 0; i < candidates.length; i++) {
+      var value = candidates[i];
+      if (typeof value === "undefined" || value === null || value === "") {
+        continue;
       }
+      var id = parseInt(value, 10);
+      if (Number.isFinite(id) && id > 0) {
+        return String(id);
+      }
+    }
+    return "";
+  }
+
+  function rememberCalSlotForPayload(obj, slotId) {
+    var txIdentity = getRealTxIdentity(obj);
+    if (!txIdentity || !slotId) {
+      return;
+    }
+    calSlotByTxIdentity[txIdentity] = slotId;
+  }
+
+  function resolveDisplaySlotFromPayload(obj) {
+    if (!obj) {
+      return 0;
+    }
+
+    // Preferred display-slot fields. Do not include plain "index" here because
+    // listTransmitter uses index as txIndex, not display index.
+    var slotKeys = ["webIndex", "webindex", "databaseId", "displayIndex", "dashboardIndex", "slotIndex", "deviceIndex", "id"];
+    for (var i = 0; i < slotKeys.length; i++) {
+      var id = normalizeCalDeviceId(obj[slotKeys[i]]);
+      if (id) {
+        return id;
+      }
+    }
+    return 0;
+  }
+
+  function getRoleSlotTxId(obj, slotId) {
+    if (!obj) {
+      return 0;
+    }
+
+    var keys = [
+      "chId" + slotId,
+      "txID" + slotId,
+      "txId" + slotId,
+      "tx" + slotId
+    ];
+
+    for (var i = 0; i < keys.length; i++) {
+      if (!Object.prototype.hasOwnProperty.call(obj, keys[i])) {
+        continue;
+      }
+      var value = parseInt(obj[keys[i]], 10);
+      return Number.isFinite(value) && value > 0 ? value : 0;
     }
 
     return 0;
   }
 
+  function rememberTransmitterCatalog(obj) {
+    var txIdentity = getRealTxIdentity(obj);
+    var displaySlot = resolveDisplaySlotFromPayload(obj);
+
+    var catalog = {
+      txIdentity: txIdentity,
+      name: String(obj.stationName || obj.deviceName || obj.name || (displaySlot ? "Device " + displaySlot : "Device")),
+      frequency: formatFrequency(obj.frequency),
+      rawFrequency: obj.frequency,
+      ip: normalizeHost(obj.ipAddress || obj.ipaddress || obj.host || obj.address),
+      visible: resolvePayloadVisible(obj, true)
+    };
+
+    if (txIdentity) {
+      calTxCatalogByIdentity[txIdentity] = catalog;
+    }
+
+    if (displaySlot) {
+      calGlobalSlotCatalog[displaySlot] = catalog;
+    }
+  }
+
+  function isActiveRolePayload(obj) {
+    if (!obj || obj.menuID !== "listRole") {
+      return false;
+    }
+
+    // Newer backend may send currentActive/selected/active.
+    if (Object.prototype.hasOwnProperty.call(obj, "currentActive")) {
+      return normalizeFlag(obj.currentActive, false);
+    }
+    if (Object.prototype.hasOwnProperty.call(obj, "selected")) {
+      return normalizeFlag(obj.selected, false);
+    }
+    if (Object.prototype.hasOwnProperty.call(obj, "active")) {
+      return normalizeFlag(obj.active, false);
+    }
+    if (Object.prototype.hasOwnProperty.call(obj, "isActive")) {
+      return normalizeFlag(obj.isActive, false);
+    }
+
+    // Current Qt5 backend getMonitorPage() sends only the selected role and uses
+    // currentRoleSelected instead of currentActive. Treat that payload as active
+    // only when its role index matches currentRoleSelected.
+    if (Object.prototype.hasOwnProperty.call(obj, "currentRoleSelected")) {
+      var selectedId = parseInt(obj.currentRoleSelected, 10);
+      var roleId = parseInt(obj.index, 10);
+      if (Number.isFinite(selectedId) && selectedId > 0) {
+        return !Number.isFinite(roleId) || roleId === selectedId;
+      }
+    }
+
+    return false;
+  }
+
+  function updateActiveRoleSlotMap(obj) {
+    if (!isActiveRolePayload(obj)) {
+      return;
+    }
+
+    calActiveRoleKnown = true;
+    calActiveRoleSlots = {};
+    calSlotByTxIdentity = {};
+
+    for (var slotId = 1; slotId <= MAX_CAL_DEVICES; slotId++) {
+      var txId = getRoleSlotTxId(obj, slotId);
+      var txIdentity = txId > 0 ? String(txId) : "";
+
+      calActiveRoleSlots[slotId] = {
+        slotId: slotId,
+        txIdentity: txIdentity,
+        enabled: !!txIdentity
+      };
+
+      if (txIdentity) {
+        calSlotByTxIdentity[txIdentity] = slotId;
+      }
+    }
+
+    renderActiveRoleSlots();
+  }
+
+  function scheduleRenderActiveRoleSlots() {
+    if (calRoleRenderTimer !== null) {
+      return;
+    }
+
+    calRoleRenderTimer = window.setTimeout(function () {
+      calRoleRenderTimer = null;
+      renderActiveRoleSlots();
+    }, 120);
+  }
+
+  function getCatalogForSlot(slotId, txIdentity) {
+    if (txIdentity && calTxCatalogByIdentity[txIdentity]) {
+      return calTxCatalogByIdentity[txIdentity];
+    }
+    if (calGlobalSlotCatalog[slotId]) {
+      return calGlobalSlotCatalog[slotId];
+    }
+    return null;
+  }
+
+  function updateCalDeviceCount(activeCount) {
+    var count = Number(activeCount);
+    if (!Number.isFinite(count) || count < 0) {
+      count = 0;
+    }
+    count = Math.min(MAX_CAL_DEVICES, Math.trunc(count));
+
+    var element = document.getElementById("calDeviceCount");
+    if (element) {
+      element.textContent = count + (count === 1 ? " Device" : " Devices");
+      element.setAttribute("aria-label", "CAL active device count: " + count);
+    }
+  }
+
+  function countActiveRoleSlots() {
+    var count = 0;
+    for (var slotId = 1; slotId <= MAX_CAL_DEVICES; slotId++) {
+      var slot = calActiveRoleSlots[slotId];
+      if (slot && slot.enabled && slot.txIdentity) {
+        count++;
+      }
+    }
+    return count;
+  }
+
+  function countVisibleCatalogTransmitters() {
+    var seen = {};
+    var count = 0;
+    Object.keys(calTxCatalogByIdentity).forEach(function (key) {
+      var item = calTxCatalogByIdentity[key];
+      if (!seen[key] && item && item.visible) {
+        seen[key] = true;
+        count++;
+      }
+    });
+    return count;
+  }
+
+  function renderActiveRoleSlots() {
+    if (!calActiveRoleKnown) {
+      return;
+    }
+
+    for (var slotId = 1; slotId <= MAX_CAL_DEVICES; slotId++) {
+      var slot = calActiveRoleSlots[slotId] || { slotId: slotId, txIdentity: "", enabled: false };
+      var catalog = getCatalogForSlot(slotId, slot.txIdentity);
+
+      if (!slot.enabled) {
+        renderDisabledRoleSlot(slotId, catalog);
+        continue;
+      }
+
+      renderConfiguredRoleSlot(slotId, slot, catalog);
+    }
+
+    calConfiguredTxCount = countActiveRoleSlots();
+    calRenderedOnce = true;
+    updateCalDeviceCount(calConfiguredTxCount);
+  }
+
+  function renderDisabledRoleSlot(slotId, catalog) {
+    // Disabled site slots must stay disabled. Do not borrow the transmitter name
+    // from the same global slot, otherwise Device 5 can show qwert even when
+    // chId5 is 0 / Disable.
+    deviceState[slotId] = {
+      name: "Disable",
+      frequency: "-",
+      ip: "",
+      connected: false,
+      visible: true,
+      liveSeen: false,
+      disabledBySite: true,
+      txIdentity: ""
+    };
+
+    applyCardState(slotId, deviceState[slotId]);
+  }
+
+  function renderConfiguredRoleSlot(slotId, slot, catalog) {
+    var previous = deviceState[slotId] || {};
+    // Catalog from listTransmitter is the source of truth for transmitter name/IP.
+    // Prefer it over previous UI state to avoid stale qwert/THRULAN labels after
+    // changing selected Site mapping.
+    var name = (catalog && catalog.name) || previous.name || ("Device " + slotId);
+    var frequency = (catalog && catalog.frequency) || previous.frequency || "-";
+    var ip = (catalog && catalog.ip) || previous.ip || "";
+
+    deviceState[slotId] = {
+      name: name,
+      frequency: frequency,
+      ip: ip,
+      connected: !!previous.connected,
+      visible: true,
+      liveSeen: !!previous.liveSeen,
+      disabledBySite: false,
+      txIdentity: slot.txIdentity
+    };
+
+    applyCardState(slotId, deviceState[slotId]);
+  }
+
+  function applyCardState(id, state) {
+    var card = document.getElementById("cardTxId" + id);
+    if (!card || !state) {
+      return;
+    }
+
+    card.style.display = state.visible ? "block" : "none";
+    card.classList.toggle("connected", !!state.connected);
+
+    setText("cardNameId" + id, state.name || ("Device " + id));
+    setText("cardFreqId" + id, "Frequency: " + (state.frequency || "-"));
+    setText("cardIpId" + id, state.ip ? ("IP: " + state.ip) : "IP: Not configured");
+    setText("cardStatusId" + id, state.connected ? "Online" : "Offline");
+
+    card.dataset.deviceIp = state.ip || "";
+    card.dataset.deviceName = state.name || "";
+    card.dataset.txIdentity = state.txIdentity || "";
+    card.dataset.disabledBySite = state.disabledBySite ? "1" : "0";
+  }
+
+  function resolveDeviceId(obj, isLivePayload) {
+    if (!obj) {
+      return 0;
+    }
+
+    var txIdentity = getRealTxIdentity(obj);
+
+    // After selected Site mapping is known, live telemetry must only update the
+    // slot where that txIndex is selected. If the txIndex is not selected, ignore it.
+    // This prevents compact databaseId from moving an online qwert/THRULAN into a
+    // disabled slot.
+    if (isLivePayload && calActiveRoleKnown) {
+      return txIdentity && calSlotByTxIdentity[txIdentity] ? calSlotByTxIdentity[txIdentity] : 0;
+    }
+
+    if (isLivePayload && txIdentity && calSlotByTxIdentity[txIdentity]) {
+      return calSlotByTxIdentity[txIdentity];
+    }
+
+    var displaySlot = resolveDisplaySlotFromPayload(obj);
+    if (displaySlot) {
+      if (!isLivePayload) {
+        rememberCalSlotForPayload(obj, displaySlot);
+      }
+      return displaySlot;
+    }
+
+    // Legacy fallback only if the backend does not send display-slot fields.
+    // This is intentionally last because current txIndex/radioID values can be 4..19.
+    var legacySlot = normalizeCalDeviceId(obj.radioID || obj.txIndex || obj.index);
+    if (legacySlot && !isLivePayload) {
+      rememberCalSlotForPayload(obj, legacySlot);
+    }
+    return legacySlot;
+  }
+
   function updateCardFromPayload(obj, isLivePayload) {
-    var id = resolveDeviceId(obj);
+    var id = resolveDeviceId(obj, isLivePayload);
     if (!id) {
       console.warn("[CAL] ignored transmitter payload because no matching card id was found", obj);
       return;
@@ -186,30 +561,26 @@
     }
 
     var ip = resolveDeviceIp(id, stationName, obj.ipAddress || obj.ipaddress || obj.host || obj.address);
+    var txIdentity = getRealTxIdentity(obj);
 
-    // console.log("Updating device card:",obj , " each value", { id, stationName, frequency, ip, visible, connected });   
+    // console.log("Updating device card:",obj , " each value", { id, stationName, frequency, ip, visible, connected });
     deviceState[id] = {
       name: stationName,
       frequency: frequency,
       ip: ip,
       connected: connected,
       visible: visible,
-      liveSeen: isLivePayload || (deviceState[id] && deviceState[id].liveSeen) || hasConnectionStatus
+      liveSeen: isLivePayload || (deviceState[id] && deviceState[id].liveSeen) || hasConnectionStatus,
+      disabledBySite: false,
+      txIdentity: txIdentity
     };
 
-    card.style.display = visible ? "block" : "none";
-    card.classList.toggle("connected", connected);
+    applyCardState(id, deviceState[id]);
 
-    setText("cardNameId" + id, stationName);
-    setText("cardFreqId" + id, "Frequency: " + frequency);
-    setText("cardIpId" + id, ip ? ("IP: " + ip) : "IP: Not configured");
-    setText("cardStatusId" + id, connected ? "Online" : "Offline");
-
-    card.dataset.deviceIp = ip || "";
-    card.dataset.deviceName = stationName;
-
-    console.log("[CAL DEVICE]", { id: id, visible: visible, connected: connected, menuID: obj.menuID, raw: obj });
-    logCalDeviceCount();
+    if (window.CAL_DEBUG) {
+      console.log("[CAL DEVICE]", { id: id, txIdentity: txIdentity, txMap: calSlotByTxIdentity, activeRoleKnown: calActiveRoleKnown, visible: visible, connected: connected, menuID: obj.menuID, raw: obj });
+      logCalDeviceCount();
+    }
   }
 
   function setText(elementId, text) {

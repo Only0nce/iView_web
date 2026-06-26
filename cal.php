@@ -68,7 +68,7 @@ include('ListAudioGain.php')
 				<h3 class="cal-page-title">CAL Profile</h3>
 				<div class="cal-page-subtitle">Select a device card to open CAL page on its own IP.</div>
 			</div>
-			<div class="cal-page-count" aria-label="CAL device capacity">16 Devices</div>
+			<div class="cal-page-count" id="calDeviceCount" aria-label="CAL device capacity">0 Devices</div>
 		</div>
 		<div class="device-card-grid" id="deviceCardGrid">
 			<?php

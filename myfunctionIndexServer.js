@@ -65,6 +65,81 @@ const thresholdMap = Object.create(null); // value = { fwd:{warn,alert}, rssi:{w
 const indexDeviceConfigMap = Object.create(null); // key = dashboard id 1..16
 const indexDeviceLiveMap = Object.create(null);   // key = dashboard id 1..16
 
+// ===== Header SITE summary state =====
+// Keep this lightweight. The dashboard can receive many live payloads per second,
+// so we do not recalculate/repaint the header for every device message.
+const INDEX_SITE_SUMMARY_UPDATE_MS = 900;
+const indexRoleSummaryState = {
+  roleName: "--",
+  allDevice: 0,
+  connect: 0,
+  disconnect: 0,
+  lastRenderedSignature: "",
+  updateTimer: null,
+  pendingReason: ""
+};
+
+function isIndexConnectionOnline(value) {
+  if (value === true || value === 1) return true;
+  if (value === false || value === 0) return false;
+
+  const text = String(value ?? '').trim().toLowerCase();
+  return ['1', 'true', 'online', 'connected', 'connect', 'active', 'ok'].includes(text);
+}
+
+function getIndexVisibleConfigIds() {
+  return Object.keys(indexDeviceConfigMap).filter(function (id) {
+    if (!normalizeIndexDashboardId(id)) return false;
+    return indexDeviceConfigMap[id]?.enabled !== false;
+  });
+}
+
+function renderIndexRoleSummaryFromLive(reason) {
+  const liveIds = Object.keys(indexDeviceLiveMap).filter(function (id) {
+    return !!normalizeIndexDashboardId(id);
+  });
+  const configIds = getIndexVisibleConfigIds();
+  const serverAll = Number(indexRoleSummaryState.allDevice || 0);
+
+  let total = Math.max(serverAll, configIds.length, liveIds.length);
+  let connect = Number(indexRoleSummaryState.connect || 0);
+  let disconnect = Number(indexRoleSummaryState.disconnect || 0);
+
+  if (liveIds.length > 0) {
+    connect = 0;
+    for (let n = 1; n <= total; n++) {
+      const live = indexDeviceLiveMap[String(n)];
+      if (!live) continue;
+      if (live.visible === false) continue;
+      if (isIndexConnectionOnline(live.connectionStatus)) connect++;
+    }
+    disconnect = Math.max(0, total - connect);
+  } else {
+    if (!total) total = Number(connect) + Number(disconnect);
+    disconnect = Math.max(0, total - connect);
+  }
+
+  const roleName = indexRoleSummaryState.roleName || "--";
+  const signature = roleName + "|" + total + "|" + connect + "|" + disconnect;
+  if (signature === indexRoleSummaryState.lastRenderedSignature) return;
+
+  indexRoleSummaryState.lastRenderedSignature = signature;
+  setHTML("roleNameDisplay", roleName);
+  setHTML("roleDeviceSummary", "All: " + total + " | Connect: " + connect + " | Disconnect: " + disconnect);
+}
+
+function scheduleIndexRoleSummaryFromLive(reason) {
+  indexRoleSummaryState.pendingReason = reason || indexRoleSummaryState.pendingReason || 'live';
+  if (indexRoleSummaryState.updateTimer) return;
+
+  indexRoleSummaryState.updateTimer = setTimeout(function () {
+    indexRoleSummaryState.updateTimer = null;
+    const pendingReason = indexRoleSummaryState.pendingReason;
+    indexRoleSummaryState.pendingReason = "";
+    renderIndexRoleSummaryFromLive(pendingReason);
+  }, INDEX_SITE_SUMMARY_UPDATE_MS);
+}
+
 function isTruthyFlag(value) {
   if (value === true || value === 1) return true;
   if (value === false || value === 0) return false;
@@ -186,7 +261,7 @@ function setIndexDeviceVisible(id, visible) {
   // even when connectionStatus=1 and graph data was already arriving.
   if (show) {
     const live = indexDeviceLiveMap[key];
-    setTrendOfflineState(key, !(live && live.connectionStatus === true));
+    setTrendOfflineState(key, !(live && isIndexConnectionOnline(live.connectionStatus)));
   } else {
     setTrendOfflineState(key, false);
   }
@@ -450,9 +525,14 @@ function updateRoleSummaryPanel(obj) {
   const connect = Number(obj.connect ?? 0);
   const disconnect = Number(obj.disconnect ?? 0);
 
-  setHTML("roleNameDisplay", roleName || "--");
-  setHTML("roleDeviceSummary", "All: " + allDevice + " | Connect: " + connect + " | Disconnect: " + disconnect);
-  syncDashboardDensity(allDevice);
+  indexRoleSummaryState.roleName = roleName || "--";
+  indexRoleSummaryState.allDevice = Number.isFinite(allDevice) ? allDevice : 0;
+  indexRoleSummaryState.connect = Number.isFinite(connect) ? connect : 0;
+  indexRoleSummaryState.disconnect = Number.isFinite(disconnect) ? disconnect : 0;
+
+  // Render once immediately for startup, then live telemetry will update it throttled.
+  renderIndexRoleSummaryFromLive('view_update_Page');
+  syncDashboardDensity(indexRoleSummaryState.allDevice);
 }
 
 
@@ -688,8 +768,10 @@ function processMsg(message) {
       indexDeviceLiveMap[id] = Object.assign(indexDeviceLiveMap[id] || {}, {
         connectionStatus: connectionStatus,
         visible: visible,
-        lastPayload: obj
+        lastPayload: obj,
+        lastSeenAt: Date.now()
       });
+      scheduleIndexRoleSummaryFromLive('view_transmitter_list');
   
       // อ้างอิง element id ให้สอดคล้องกับ PHP
       const ids = {
@@ -870,6 +952,7 @@ else if (obj.menuID === 'listTransmitter') {
   };
 
   renderIndexConfiguredDevice(id, obj);
+  scheduleIndexRoleSummaryFromLive('listTransmitter');
   // console.log("[INDEX DEVICE] listTransmitter id=", id, "enabled=", indexDeviceConfigMap[id]?.enabled, obj);
   debugIndexDeviceCount('after listTransmitter id=' + id);
 }
