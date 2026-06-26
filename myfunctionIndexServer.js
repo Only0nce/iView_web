@@ -65,6 +65,26 @@ const thresholdMap = Object.create(null); // value = { fwd:{warn,alert}, rssi:{w
 const indexDeviceConfigMap = Object.create(null); // key = dashboard id 1..16
 const indexDeviceLiveMap = Object.create(null);   // key = dashboard id 1..16
 
+// ===== Stable transmitter identity mapping =====
+// listTransmitter from Qt server is the authoritative config payload:
+//   index    = real transmitter txIndex
+//   webindex = display slot/card number
+// view_transmitter_list is live telemetry:
+//   radioID/txIndex = real transmitter txIndex
+//   databaseId may be a compact/live order and must NOT be trusted as a stable slot
+// for devices after disabled/offline transmitters.
+const indexTxToSlotMap = Object.create(null);     // key = real txIndex/radioID, value = dashboard slot
+const indexSlotToTxMap = Object.create(null);     // key = dashboard slot, value = real txIndex/radioID
+
+// ===== Active SITE slot mapping =====
+// SITE page owns the real display order through listRole chId1..chId16.
+// listTransmitter.webindex is only the default/catalog order. When an active
+// SITE is selected, index must follow chId slot order exactly.
+let indexActiveSiteSlotKnown = false;
+let indexActiveSiteSlotSignature = '';
+const indexActiveSlotToTxMap = Object.create(null);       // key = slot 1..16, value = real txIndex/radioID
+const indexTransmitterCatalogMap = Object.create(null);   // key = real txIndex/radioID, value = last listTransmitter payload
+
 // ===== Header SITE summary state =====
 // Keep this lightweight. The dashboard can receive many live payloads per second,
 // so we do not recalculate/repaint the header for every device message.
@@ -166,22 +186,232 @@ function normalizeIndexDashboardId(raw) {
   return '';
 }
 
+function normalizeIndexTxIdentity(raw) {
+  if (raw === undefined || raw === null || raw === '') return '';
+
+  const n = Number(String(raw).trim());
+  if (!Number.isFinite(n)) return '';
+
+  const intValue = Math.trunc(n);
+  return intValue > 0 ? String(intValue) : '';
+}
+
 function resolveIndexDeviceId(obj) {
-  // Qt server already sends databaseId as the current dashboard order (1..16).
-  // Prefer databaseId now, while keeping webIndex/webindex for future DB-backed ordering.
-  let id = normalizeIndexDashboardId(obj?.databaseId);
+  // Config payload (listTransmitter) owns the stable display slot.
+  // Prefer webindex/webIndex because `index` is the real txIndex, not the card slot.
+  let id = normalizeIndexDashboardId(obj?.webindex ?? obj?.webIndex);
   if (id) return id;
 
-  id = normalizeIndexDashboardId(obj?.webIndex ?? obj?.webindex);
+  // Compatibility for older payloads that used databaseId/display-style names.
+  id = normalizeIndexDashboardId(obj?.databaseId);
   if (id) return id;
 
-  // Compatibility for payloads that used display-style names.
-  return normalizeIndexDashboardId(obj?.displayIndex ?? obj?.dashboardIndex ?? obj?.slotIndex ?? obj?.index);
+  return normalizeIndexDashboardId(obj?.displayIndex ?? obj?.dashboardIndex ?? obj?.slotIndex);
 }
 
 function resolveIndexLiveDeviceId(obj) {
-  return resolveIndexDeviceId(obj);
+  // Live telemetry must follow the real transmitter identity from the server.
+  // Active SITE chId1..chId16 is authoritative. If tx is not selected in the
+  // active SITE, do not place it by compact databaseId.
+  const txIdentity = normalizeIndexTxIdentity(obj?.radioID ?? obj?.txIndex ?? obj?.index);
+
+  if (indexActiveSiteSlotKnown) {
+    if (txIdentity && indexTxToSlotMap[txIdentity]) {
+      return normalizeIndexDashboardId(indexTxToSlotMap[txIdentity]);
+    }
+    return '';
+  }
+
+  if (txIdentity && indexTxToSlotMap[txIdentity]) {
+    return normalizeIndexDashboardId(indexTxToSlotMap[txIdentity]);
+  }
+
+  // If the server already sends a stable display slot, use it.
+  let id = normalizeIndexDashboardId(obj?.webIndex ?? obj?.webindex);
+  if (id) return id;
+
+  // Temporary startup fallback only. Once listTransmitter/listRole arrives,
+  // txIdentity mapping wins.
+  id = normalizeIndexDashboardId(obj?.databaseId);
+  if (id) return id;
+
+  return normalizeIndexDashboardId(obj?.displayIndex ?? obj?.dashboardIndex ?? obj?.slotIndex);
 }
+
+
+function clearObjectKeys(obj) {
+  Object.keys(obj).forEach(function (key) { delete obj[key]; });
+}
+
+function getIndexRoleSlotTxId(obj, slotId) {
+  if (!obj) return '';
+
+  const keys = [
+    'chId' + slotId,
+    'txID' + slotId,
+    'txId' + slotId,
+    'tx' + slotId
+  ];
+
+  for (const key of keys) {
+    if (!Object.prototype.hasOwnProperty.call(obj, key)) continue;
+    return normalizeIndexTxIdentity(obj[key]);
+  }
+
+  return '';
+}
+
+function isIndexActiveRolePayload(obj) {
+  if (!obj || obj.menuID !== 'listRole') return false;
+
+  if (Object.prototype.hasOwnProperty.call(obj, 'currentActive')) {
+    return isTruthyFlag(obj.currentActive) === true;
+  }
+  if (Object.prototype.hasOwnProperty.call(obj, 'selected')) {
+    return isTruthyFlag(obj.selected) === true;
+  }
+  if (Object.prototype.hasOwnProperty.call(obj, 'active')) {
+    return isTruthyFlag(obj.active) === true;
+  }
+  if (Object.prototype.hasOwnProperty.call(obj, 'isActive')) {
+    return isTruthyFlag(obj.isActive) === true;
+  }
+
+  // Some Qt5 builds send only the currently selected role and use
+  // currentRoleSelected instead of currentActive. Treat the payload as active
+  // when index matches currentRoleSelected.
+  if (Object.prototype.hasOwnProperty.call(obj, 'currentRoleSelected')) {
+    const selectedId = Number(obj.currentRoleSelected);
+    const roleId = Number(obj.index);
+    if (Number.isFinite(selectedId) && selectedId > 0) {
+      return !Number.isFinite(roleId) || roleId === selectedId;
+    }
+  }
+
+  return false;
+}
+
+function resetIndexLiveSlot(slotId, makeOffline) {
+  const id = normalizeIndexDashboardId(slotId);
+  if (!id) return;
+
+  delete indexDeviceLiveMap[id];
+  delete window.timeArrMap[id];
+  delete window.fwdArrMap[id];
+  delete window.rwdArrMap[id];
+  delete window.vswrArrMap[id];
+  delete window.rssiArrMap[id];
+
+  if (makeOffline) {
+    setTrendOfflineState(id, true);
+    const dis1 = $('cardDisconnect' + id);
+    const dis2 = $('cardplotDisconnect' + id);
+    if (dis1) dis1.style.display = 'block';
+    if (dis2) dis2.style.display = 'block';
+    setHTML('lastUpdate' + id, '--:--:--');
+    setDatasetState('deviceDashboard' + id, 'offline');
+  }
+}
+
+function renderIndexSiteSlotFromCatalog(slotId, txIdentity) {
+  const id = normalizeIndexDashboardId(slotId);
+  if (!id) return;
+
+  const tx = normalizeIndexTxIdentity(txIdentity);
+  if (!tx) {
+    indexDeviceConfigMap[id] = { enabled: false, txIdentity: '', name: '', frequency: '' };
+    resetIndexLiveSlot(id, false);
+    setIndexDeviceVisible(id, false);
+    return;
+  }
+
+  const oldTx = indexDeviceConfigMap[id]?.txIdentity || '';
+  if (oldTx && oldTx !== tx) {
+    resetIndexLiveSlot(id, true);
+  }
+
+  const catalog = indexTransmitterCatalogMap[tx] || {
+    index: tx,
+    stationName: 'Device ' + id,
+    frequency: '',
+    visible: 1
+  };
+
+  indexDeviceConfigMap[id] = {
+    enabled: true,
+    txIdentity: tx,
+    name: String(catalog.stationName ?? catalog.deviceName ?? catalog.name ?? '').trim(),
+    frequency: catalog.frequency ?? catalog.freq ?? ''
+  };
+
+  // The SITE slot is authoritative. Force config text for the selected slot
+  // until the live payload for the same tx arrives.
+  if (oldTx !== tx && indexDeviceLiveMap[id]) {
+    delete indexDeviceLiveMap[id].hasLiveName;
+  }
+  updateIndexDeviceHeaderFromConfig(id, catalog || {});
+  setIndexDeviceVisible(id, true);
+}
+
+function applyIndexActiveSiteSlots(obj) {
+  if (!isIndexActiveRolePayload(obj)) return;
+
+  const roleName = String(obj.name ?? obj.roleName ?? obj.role ?? '').trim();
+  const nextSlotToTx = Object.create(null);
+  const signatureParts = [];
+
+  for (let slotId = 1; slotId <= 16; slotId++) {
+    const txIdentity = getIndexRoleSlotTxId(obj, slotId);
+    nextSlotToTx[String(slotId)] = txIdentity || '';
+    signatureParts.push(txIdentity || '0');
+  }
+
+  const nextSignature = (roleName || '--') + '|' + signatureParts.join(',');
+  const mappingChanged = nextSignature !== indexActiveSiteSlotSignature;
+
+  indexActiveSiteSlotKnown = true;
+  indexActiveSiteSlotSignature = nextSignature;
+
+  if (roleName) {
+    indexRoleSummaryState.roleName = roleName;
+  }
+
+  // Rebuild the authoritative mapping from the active SITE page.
+  clearObjectKeys(indexActiveSlotToTxMap);
+  clearObjectKeys(indexTxToSlotMap);
+  clearObjectKeys(indexSlotToTxMap);
+
+  if (mappingChanged) {
+    // The previous view may have been drawn from listTransmitter.webindex or an
+    // older SITE mapping. Clear all live slots once so stale qwert/THRULAN cards
+    // cannot remain in the wrong position.
+    for (let slotId = 1; slotId <= 16; slotId++) {
+      resetIndexLiveSlot(slotId, true);
+      indexDeviceConfigMap[String(slotId)] = { enabled: false, txIdentity: '', name: '', frequency: '' };
+      setIndexDeviceVisible(String(slotId), false);
+    }
+  }
+
+  for (let slotId = 1; slotId <= 16; slotId++) {
+    const slotKey = String(slotId);
+    const txIdentity = nextSlotToTx[slotKey];
+
+    if (txIdentity) {
+      indexActiveSlotToTxMap[slotKey] = txIdentity;
+      indexTxToSlotMap[txIdentity] = slotKey;
+      indexSlotToTxMap[slotKey] = txIdentity;
+      renderIndexSiteSlotFromCatalog(slotKey, txIdentity);
+    } else {
+      delete indexActiveSlotToTxMap[slotKey];
+      indexDeviceConfigMap[slotKey] = { enabled: false, txIdentity: '', name: '', frequency: '' };
+      setIndexDeviceVisible(slotKey, false);
+    }
+  }
+
+  scheduleIndexRoleSummaryFromLive('listRole active site slots');
+  syncDashboardDensity();
+}
+
 
 function updateIndexDeviceHeaderFromLive(id, obj) {
   const rawStationName = String(obj?.stationName ?? obj?.deviceName ?? obj?.name ?? '').trim();
@@ -730,6 +960,10 @@ function processMsg(message) {
     }
   }
 
+  else if (obj.menuID === "listRole") {
+    applyIndexActiveSiteSlots(obj);
+  }
+
   else if (obj.menuID == "view_update_Page") {
     updateRoleSummaryPanel(obj);
   }
@@ -738,11 +972,18 @@ function processMsg(message) {
   else if (obj.menuID == "view_transmitter_list") {
     // ---- ไม่มี return กลางทาง ----
     try {
-      // ใช้ databaseId เป็นลำดับ DOM จริงใน PHP (card1..card16 / myPlot1..myPlot16)
-      // และยังรองรับ webIndex/webindex ไว้เป็น fallback
+      // view_transmitter_list ต้อง map จาก radioID/txIndex จริง -> webindex ที่ได้จาก listTransmitter
+      // databaseId ใช้เป็น fallback ชั่วคราวเท่านั้น เพราะบางกรณี server ส่งเป็นลำดับ live แบบ compact
       const id = resolveIndexLiveDeviceId(obj);
       if (!id) {
-        console.warn("[INDEX] ignored view_transmitter_list because databaseId/webIndex does not match any dashboard card", obj);
+        console.warn("[INDEX] ignored view_transmitter_list because radioID/txIndex cannot map to a dashboard card", {
+          radioID: obj.radioID,
+          txIndex: obj.txIndex,
+          databaseId: obj.databaseId,
+          webIndex: obj.webIndex,
+          webindex: obj.webindex,
+          payload: obj
+        });
         return;
       }
   
@@ -765,7 +1006,9 @@ function processMsg(message) {
       const liveVisible = resolveIndexDeviceEnabled(obj, false);
       const visible = isIndexDeviceConfiguredVisible(id, obj) || liveVisible === true;
       const connectionStatus = (obj.connectionStatus == 1 || obj.connectionStatus === true || String(obj.connectionStatus).toLowerCase() === "true");
+      const liveTxIdentity = normalizeIndexTxIdentity(obj.radioID ?? obj.txIndex ?? obj.index);
       indexDeviceLiveMap[id] = Object.assign(indexDeviceLiveMap[id] || {}, {
+        txIdentity: liveTxIdentity,
         connectionStatus: connectionStatus,
         visible: visible,
         lastPayload: obj,
@@ -939,22 +1182,59 @@ function processMsg(message) {
   
 // เมื่อได้รับ listTransmitter ให้ใช้เป็น config source ว่า device ไหนควรแสดงบนหน้า index
 else if (obj.menuID === 'listTransmitter') {
-  const id = resolveIndexDeviceId(obj);
-  if (!id) {
-    console.warn("[INDEX] ignored listTransmitter because databaseId/webIndex does not match any dashboard card", obj);
+  const fallbackSlot = resolveIndexDeviceId(obj);
+  const txIdentity = normalizeIndexTxIdentity(obj.index ?? obj.txIndex ?? obj.radioID);
+
+  if (txIdentity) {
+    indexTransmitterCatalogMap[txIdentity] = obj;
+  }
+
+  // Thresholds follow the slot where this transmitter is actually displayed.
+  function rememberThresholdForSlot(slotId) {
+    const id = normalizeIndexDashboardId(slotId);
+    if (!id) return;
+    thresholdMap[id] = {
+      fwd:  { warn: Number(obj.warningFwdPowerWatt), alert: Number(obj.alertFwdPowerWatt) },
+      rssi: { warn: Number(obj.warningRssi),         alert: Number(obj.alertRssi) },
+      vswr: { warn: Number(obj.warningVSWR),         alert: Number(obj.alertVSWR) }
+    };
+  }
+
+  if (indexActiveSiteSlotKnown) {
+    const roleSlot = txIdentity ? normalizeIndexDashboardId(indexTxToSlotMap[txIdentity]) : '';
+    if (roleSlot) {
+      rememberThresholdForSlot(roleSlot);
+      renderIndexSiteSlotFromCatalog(roleSlot, txIdentity);
+    }
+    // When active SITE is known, ignore fallback webindex for transmitters that
+    // are not selected by chId1..chId16. This prevents qwert/THRULAN from being
+    // rendered in the wrong SITE slot.
+    scheduleIndexRoleSummaryFromLive('listTransmitter catalog with active site');
+    debugIndexDeviceCount('after listTransmitter catalog tx=' + (txIdentity || '?'));
     return;
   }
 
-  thresholdMap[id] = {
-    fwd:  { warn: Number(obj.warningFwdPowerWatt), alert: Number(obj.alertFwdPowerWatt) },     // low-bad
-    rssi: { warn: Number(obj.warningRssi),         alert: Number(obj.alertRssi) },              // low-bad
-    vswr: { warn: Number(obj.warningVSWR),         alert: Number(obj.alertVSWR) }               // high-bad
-  };
+  if (!fallbackSlot) {
+    console.warn("[INDEX] ignored listTransmitter because webindex/webIndex does not match any dashboard card", obj);
+    return;
+  }
 
-  renderIndexConfiguredDevice(id, obj);
-  scheduleIndexRoleSummaryFromLive('listTransmitter');
-  // console.log("[INDEX DEVICE] listTransmitter id=", id, "enabled=", indexDeviceConfigMap[id]?.enabled, obj);
-  debugIndexDeviceCount('after listTransmitter id=' + id);
+  if (txIdentity) {
+    indexTxToSlotMap[txIdentity] = fallbackSlot;
+    indexSlotToTxMap[fallbackSlot] = txIdentity;
+
+    Object.keys(indexDeviceLiveMap).forEach(function (liveSlot) {
+      if (liveSlot !== fallbackSlot && indexDeviceLiveMap[liveSlot]?.txIdentity === txIdentity) {
+        delete indexDeviceLiveMap[liveSlot];
+        setTrendOfflineState(liveSlot, true);
+      }
+    });
+  }
+
+  rememberThresholdForSlot(fallbackSlot);
+  renderIndexConfiguredDevice(fallbackSlot, obj);
+  scheduleIndexRoleSummaryFromLive('listTransmitter fallback order');
+  debugIndexDeviceCount('after listTransmitter fallback id=' + fallbackSlot);
 }
 
   else if (obj.menuID == "update") {
