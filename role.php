@@ -23,7 +23,6 @@ include('ListAudioGain.php')
   <meta name="keywords" content="ED137, SIP" />
   <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
   <link rel="stylesheet" type="text/css" href="style.css" title="style" />
-  <link rel="stylesheet" type="text/css" href="rf-console.css?v=<?php echo time(); ?>" />
   <link rel="icon" type="image/png" href="favicon.ico" sizes="16x16" />
   <script src="jquery.min.js"></script>
   <script type="text/javascript" src="jquery-latest.min.js"></script>
@@ -34,9 +33,24 @@ include('ListAudioGain.php')
   <script type = "text/javascript">
 	  
   </script>
+
+  <style>
+	.role-card {
+    	background-color: rgba(0,0,0,0.2);
+		transition: background-color 0.3s;
+	}
+
+	.role-card.selected {
+		background-color: rgba(0,0,0,0.6);
+	}
+
+	.role-card.active {
+		background-color: rgba(0,255,0,0.6);
+	}
+  </style>
 </head>
 
-<body class="rf-console rf-console-editor rf-console-role">
+<body>
 <div id="header">
   <div id="logo">
 	<div id="logo_text">
@@ -121,7 +135,7 @@ include('ListAudioGain.php')
 
 	<div class="container8">
 		<div class="card" id="card" name="card" style="display: block; background-color: rgba(0, 0, 0, 0.0)">
-			<div class="selected_list"> <span>Role Name</span>
+		<div class="selected_list" style="display: show"> <span>Device Name</span>
 			<input class="form-control" type="text" id="roleName" name="roleName"  placeholder="Role Name" value=''/>			
 		</div>
 		</div>
@@ -129,7 +143,7 @@ include('ListAudioGain.php')
 	<div class="container9">
 		<div class="card" id="card0" name="card0" style="display: block; background-color: rgba(0, 0, 0, 0.0)">
 			<div class="cardRole" id="cardRoleId1" name="cardRoleId1" style="display: block; background-color: rgba(0, 0, 0, 0.1)">
-					<div class="cardRoleTextID"> <span>1</span></div>
+				<div class="cardRoleTextID" style="display: show"> <span>1</span></div>
 			  <select id="chId1" name="chId1" class="selectedTrueLan" ><option selected value='0'>Disable</option></select>
 				<img class="cardRoleTabImage" src="img/radioIcon.png" alt="Flowers in Chania">
 				<div class="cardRoleCheckbox" style="display: none">
@@ -142,40 +156,40 @@ include('ListAudioGain.php')
 				</div>
 			</div>
 			<div class="cardRole" id="cardRoleId3" name="cardRoleId3" style="display: block; background-color: rgba(0, 0, 0, 0.1)">
-					<div class="cardRoleTextID"> <span>3</span></div>
+				<div class="cardRoleTextID" style="display: show"> <span>3</span></div>
 			  <select id="chId3" name="chId3" class="selectedTrueLan" ><option selected value='0'>Disable</option></select>
 				<img class="cardRoleTabImage" src="img/radioIcon.png" alt="Flowers in Chania"></div>
 			<div class="cardRole" id="cardRoleId5" name="cardRoleId5" style="display: block; background-color: rgba(0, 0, 0, 0.1)">
-					<div class="cardRoleTextID"> <span>5</span></div>
+				<div class="cardRoleTextID" style="display: show"> <span>5</span></div>
 			  <select id="chId5" name="chId5" class="selectedTrueLan" ><option selected value='0'>Disable</option></select>
 				<img class="cardRoleTabImage" src="img/radioIcon.png" alt="Flowers in Chania"></div>
 			<div class="cardRole" id="cardRoleId7" name="cardRoleId7" style="display: block; background-color: rgba(0, 0, 0, 0.1)">
-					<div class="cardRoleTextID"> <span>7</span></div>
+				<div class="cardRoleTextID" style="display: show"> <span>7</span></div>
 			  <select id="chId7" name="chId7" class="selectedTrueLan" ><option selected value='0'>Disable</option></select>
 				<img class="cardRoleTabImage" src="img/radioIcon.png" alt="Flowers in Chania"></div>
 			<div class="cardRole" id="cardRoleId9" name="cardRoleId9" style="display: block; background-color: rgba(0, 0, 0, 0.1)">
-					<div class="cardRoleTextID"> <span>9</span></div>
+				<div class="cardRoleTextID" style="display: show"> <span>9</span></div>
 			  <select id="chId9" name="chId9" class="selectedTrueLan" ><option selected value='0'>Disable</option></select>
 				<img class="cardRoleTabImage" src="img/radioIcon.png" alt="Flowers in Chania"></div>
 			<div class="cardRole" id="cardRoleId11" name="cardRoleId11" style="display: block; background-color: rgba(0, 0, 0, 0.1)">
-					<div class="cardRoleTextID"> <span>11</span></div>
+				<div class="cardRoleTextID" style="display: show"> <span>11</span></div>
 			  <select id="chId11" name="chId11" class="selectedTrueLan" ><option selected value='0'>Disable</option></select>
 				<img class="cardRoleTabImage" src="img/radioIcon.png" alt="Flowers in Chania"></div>
 			<div class="cardRole" id="cardRoleId13" name="cardRoleId13" style="display: block; background-color: rgba(0, 0, 0, 0.1)">
-					<div class="cardRoleTextID"> <span>13</span></div>
+				<div class="cardRoleTextID" style="display: show"> <span>13</span></div>
 			  <select id="chId13" name="chId13" class="selectedTrueLan" ><option selected value='0'>Disable</option></select>
 				<img class="cardRoleTabImage" src="img/radioIcon.png" alt="Flowers in Chania"></div>
 			<div class="cardRole" id="cardRoleId15" name="cardRoleId15" style="display: block; background-color: rgba(0, 0, 0, 0.1)">
-					<div class="cardRoleTextID"> <span>15</span></div>
+				<div class="cardRoleTextID" style="display: show"> <span>15</span></div>
 			  <select id="chId15" name="chId15" class="selectedTrueLan" ><option selected value='0'>Disable</option></select>
 				<img class="cardRoleTabImage" src="img/radioIcon.png" alt="Flowers in Chania"></div>
 			<div class="cardRole" id="cardButton" style="display: block; background-color: rgba(0, 0, 0, 0.0)">
-						<button class="button button2" type="button" id="removerolebutton" style="margin-top: 10px; display: none;" onClick="removeRole();">REMOVE</button>
+					<button class="button button2" id="removerolebutton" style="margin-top: 10px; display: none;" onClick="removeRole();">REMOVE</button>
 			</div>
 			</div>
 		<div class="card" id="card0" name="card0" style="display: block; background-color: rgba(0, 0, 0, 0.0)">
 			<div class="cardRole" id="cardRoleId2" name="cardRoleId2" style="display: block; background-color: rgba(0, 0, 0, 0.1)">
-					<div class="cardRoleTextID"> <span>2</span></div>
+				<div class="cardRoleTextID" style="display: show"> <span>2</span></div>
 			  <select id="chId2" name="chId2" class="selectedTrueLan" ><option selected value='0'>Disable</option></select>
 				<img class="cardRoleTabImage" src="img/radioIcon.png" alt="Flowers in Chania"></div>
 				<div class="cardRoleCheckbox" style="display: none">
@@ -187,36 +201,36 @@ include('ListAudioGain.php')
 				</section>
 				</div>
 			<div class="cardRole" id="cardRoleId4" name="cardRoleId4" style="display: block; background-color: rgba(0, 0, 0, 0.1)">
-					<div class="cardRoleTextID"> <span>4</span></div>
+				<div class="cardRoleTextID" style="display: show"> <span>4</span></div>
 			  <select id="chId4" name="chId4" class="selectedTrueLan" ><option selected value='0'>Disable</option></select>
 				<img class="cardRoleTabImage" src="img/radioIcon.png" alt="Flowers in Chania"></div>
 			<div class="cardRole" id="cardRoleId6" name="cardRoleId6" style="display: block; background-color: rgba(0, 0, 0, 0.1)">
-					<div class="cardRoleTextID"> <span>6</span></div>
+				<div class="cardRoleTextID" style="display: show"> <span>6</span></div>
 			  <select id="chId6" name="chId6" class="selectedTrueLan" ><option selected value='0'>Disable</option></select>
 				<img class="cardRoleTabImage" src="img/radioIcon.png" alt="Flowers in Chania"></div>
 			<div class="cardRole" id="cardRoleId8" name="cardRoleId8" style="display: block; background-color: rgba(0, 0, 0, 0.1)">
-					<div class="cardRoleTextID"> <span>8</span></div>
+				<div class="cardRoleTextID" style="display: show"> <span>8</span></div>
 			  <select id="chId8" name="chId8" class="selectedTrueLan" ><option selected value='0'>Disable</option></select>
 				<img class="cardRoleTabImage" src="img/radioIcon.png" alt="Flowers in Chania"></div>
 			<div class="cardRole" id="cardRoleId10" name="cardRoleId10" style="display: block; background-color: rgba(0, 0, 0, 0.1)">
-					<div class="cardRoleTextID"> <span>10</span></div>
+				<div class="cardRoleTextID" style="display: show"> <span>10</span></div>
 			  <select id="chId10" name="chId11" class="selectedTrueLan" ><option selected value='0'>Disable</option></select>
 				<img class="cardRoleTabImage" src="img/radioIcon.png" alt="Flowers in Chania"></div>
 			<div class="cardRole" id="cardRoleId12" name="cardRoleId12" style="display: block; background-color: rgba(0, 0, 0, 0.1)">
-					<div class="cardRoleTextID"> <span>12</span></div>
+				<div class="cardRoleTextID" style="display: show"> <span>12</span></div>
 			  <select id="chId12" name="chId12" class="selectedTrueLan" ><option selected value='0'>Disable</option></select>
 				<img class="cardRoleTabImage" src="img/radioIcon.png" alt="Flowers in Chania"></div>
 			<div class="cardRole" id="cardRoleId14" name="cardRoleId14" style="display: block; background-color: rgba(0, 0, 0, 0.1)">
-					<div class="cardRoleTextID"> <span>14</span></div>
+				<div class="cardRoleTextID" style="display: show"> <span>14</span></div>
 			  <select id="chId14" name="chId14" class="selectedTrueLan" ><option selected value='0'>Disable</option></select>
 				<img class="cardRoleTabImage" src="img/radioIcon.png" alt="Flowers in Chania"></div>
 			<div class="cardRole" id="cardRoleId16" name="cardRoleId16" style="display: block; background-color: rgba(0, 0, 0, 0.1)">
-					<div class="cardRoleTextID"> <span>16</span></div>
+				<div class="cardRoleTextID" style="display: show"> <span>16</span></div>
 			  <select id="chId16" name="chId16" class="selectedTrueLan" ><option selected value='0'>Disable</option></select>
 				<img class="cardRoleTabImage" src="img/radioIcon.png" alt="Flowers in Chania"></div>
 			<div class="cardRole" id="cardButton" style="display: block; background-color: rgba(0, 0, 0, 0.0)">
-						<button class="button button2" type="button" id="saverolebutton" style="margin-top: 10px;" onClick="newRole();">NEW</button>
-						<button class="button button2" type="button" id="selectrolebutton" style="margin-top: 10px; display: none;" onClick="selectedRole();">SELECT</button>
+					<button class="button button2" id="saverolebutton" style="margin-top: 10px;" onClick="newRole();">NEW</button>
+					<button class="button button2" id="selectrolebutton" style="margin-top: 10px; display: none;" onClick="selectedRole();">SELECT</button>
 			</div>
 		</div>
 	</div>

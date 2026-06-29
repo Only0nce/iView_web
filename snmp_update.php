@@ -23,7 +23,6 @@ include('ListAudioGain.php')
   <meta name="keywords" content="ED137, SIP" />
   <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
   <link rel="stylesheet" type="text/css" href="style.css" title="style" />
-  <link rel="stylesheet" type="text/css" href="rf-console.css?v=<?php echo time(); ?>" />
   <link rel="icon" type="image/png" href="favicon.ico" sizes="16x16" />
   <script src="jquery.min.js"></script>
   <script type="text/javascript" src="jquery-latest.min.js"></script>
@@ -36,7 +35,7 @@ include('ListAudioGain.php')
   </script>
 </head>
 
-<body class="rf-console rf-console-editor rf-console-snmp">
+<body>
 <div id="header">
   <div id="logo">
 	<div id="logo_text">
@@ -122,41 +121,41 @@ include('ListAudioGain.php')
 
 	<div class="container7">
 		<div class="card" id="card" name="card" style="display: block; background-color: rgba(0, 0, 0, 0.0)">
-			<div class="selected_list"> <span>Device Name</span>
+			<div class="selected_list" style="display: show"> <span>Device Name</span>
 			<input class="form-control" type="text" id="deviceName" name="deviceName"  placeholder="Device Name" value=''/>			
 			</div>
-			<div class="selected_list"> <span>SNMP Community</span>
+			<div class="selected_list" style="display: show"> <span>SNMP Community</span>
 			<input class="form-control" type="text" id="snmpCommunity" name="snmpCommunity"  placeholder="Default: public" value='public'/>			
 			</div>
-			<div class="selected_list"> <span>SNMP Port</span>
+			<div class="selected_list" style="display: show"> <span>SNMP Port</span>
 			<input class="form-control" type="text" id="snmpPort" name="snmpPort"  placeholder="Default: 161" value='161'/>			
 			</div>
-			<div class="selected_list"> <span>Poll Interval (ms)</span>
+			<div class="selected_list" style="display: show"> <span>Poll Interval (ms)</span>
 			<input class="form-control" type="text" id="pollInterval" name="pollInterval"  placeholder="Example: 2000 = poll every 2 seconds" value='2000'/>			
 			</div>
-			<div class="selected_list"> <span>OID Frequency</span>
+			<div class="selected_list" style="display: show"> <span>OID Frequency</span>
 			<input class="form-control" type="text" id="oid_freq" name="oid_freq"  placeholder="OID Frequency" value=''/>			
 			</div>
-			<div class="selected_list"> <span>OID RSSI</span>
+			<div class="selected_list" style="display: show"> <span>OID RSSI</span>
 			<input class="form-control" type="text" id="oid_rssi" name="oid_rssi"  placeholder="OID RSSI" value=''/>					
 			</div>
-			<div class="selected_list"> <span>OID Radio Status</span>
+			<div class="selected_list" style="display: show"> <span>OID Radio Status</span>
 			<input class="form-control" type="text" id="oid_radiostatus" name="oid_radiostatus"  placeholder="OID Radio Status" value=''/>					
 			</div>
-			<div class="selected_list"> <span>OID Radio SQL Level</span>
+			<div class="selected_list" style="display: show"> <span>OID Radio SQL Level</span>
 			<input class="form-control" type="text" id="oid_sqllevel" name="oid_sqllevel"  placeholder="OID Radio SQL Level" value=''/>					
 			</div>
-			<div class="selected_list"><span></span>
-			<button class="button button2" type="button" id="newtruelanbutton" onClick="updateTrueLan()">NEW</button>
+			<div class="selected_list" style="display: show"><span></span>
+			<button class="button button2" id="newtruelanbutton" onClick="updateTrueLan()">NEW</button>
 			</div>
-			<div class="selected_list"><span></span>
-			<button class="button button2" type="button" id="deletetruelanbutton" onClick="deleteTrueLan()" style="display: none; background-color: #ff2222aa; ">REMOVE</button>
+			<div class="selected_list" style="display: show"><span></span>
+			<button class="button button2" id="deletetruelanbutton" onClick="deleteTrueLan()" style="display: none; background-color: #ff2222aa; ">REMOVE</button>
 			</div>
-			<div class="selected_list"><span></span>
-			<button class="button button2" type="button" id="exportsnmpbutton" onClick="exportSnmpProfiles()">EXPORT</button>
+			<div class="selected_list" style="display: show"><span></span>
+			<button class="button button2" id="exportsnmpbutton" onClick="exportSnmpProfiles()">EXPORT</button>
 			</div>
-			<div class="selected_list"><span></span>
-			<button class="button button2" type="button" id="importsnmpbutton" onClick="openSnmpImportFile()">IMPORT</button>
+			<div class="selected_list" style="display: show"><span></span>
+			<button class="button button2" id="importsnmpbutton" onClick="openSnmpImportFile()">IMPORT</button>
 			<input class="form-control" type="file" id="snmpImportFile" accept=".json,application/json" style="display: none" onchange="importSnmpProfiles(event)" />
 			</div>
 	  </div>

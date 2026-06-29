@@ -28,7 +28,6 @@ header("Pragma: no-cache");
     <meta name="keywords" content="ED137, SIP" />
     <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
     <link rel="stylesheet" type="text/css" href="style.css" title="style" />
-    <link rel="stylesheet" type="text/css" href="rf-console.css?v=<?php echo time(); ?>" />
     <link rel="icon" type="image/png" href="favicon.ico" sizes="16x16" />
     <script src="jquery.min.js"></script>
     <script type="text/javascript" src="jquery-latest.min.js"></script>
@@ -39,9 +38,11 @@ header("Pragma: no-cache");
 
     </script>
 
+    <style>
+    </style>
 </head>
 
-<body class="rf-console rf-console-home">
+<body>
     <div id="header">
         <div id="logo">
             <div id="logo_text">
@@ -97,10 +98,10 @@ header("Pragma: no-cache");
 
         <div class="container">
             <h3 class="truelanLabel">THRULAN RF POWER SENSOR</h3>
-            <button id="unitWattActive" name="unitWattActive" type="button" onclick="setUnit(false)"
+            <button id="unitWattActive" name="unitWattActive" onclick="setUnit(false)"
                 style="left: calc(100% - 80px); background-color: #009688FF;"
                 class="w3-button w3-teal w3-large w3-padding-large">W</button>
-            <button id="unitDBActive" name="unitDBActive" type="button" onclick="setUnit(true)"
+            <button id="unitDBActive" name="unitDBActive" onclick="setUnit(true)"
                 style="left: calc(100% - 160px); background-color: #00968840;"
                 class="w3-button w3-teal w3-large w3-padding-large">dBm</button>
         </div>
@@ -170,26 +171,26 @@ for ($i = 1; $i <= 16; $i++) {
                 </div>
 
                 <div class="divPowerButton">
-                    <button class="powerButton" type="button" id="setl1power<?php echo $i; ?>" name="setl1power<?php echo $i; ?>"
+                    <button class="powerButton" id="setl1power<?php echo $i; ?>" name="setl1power<?php echo $i; ?>"
                         onclick="setl1power(<?php echo $i; ?>)">L1</button>
-                    <button class="powerButton" type="button" id="setl2power<?php echo $i; ?>" name="setl2power<?php echo $i; ?>"
+                    <button class="powerButton" id="setl2power<?php echo $i; ?>" name="setl2power<?php echo $i; ?>"
                         onclick="setl2power(<?php echo $i; ?>)">L2</button>
-                    <button class="powerButton" type="button" id="sethipower<?php echo $i; ?>" name="sethipower<?php echo $i; ?>"
+                    <button class="powerButton" id="sethipower<?php echo $i; ?>" name="sethipower<?php echo $i; ?>"
                         onclick="sethipower(<?php echo $i; ?>)">H</button>
                 </div>
 
                 <div class="divCHSelect">
-                    <button class="upDownButton" type="button" onclick="decChannel(<?php echo $i; ?>)">-</button>
+                    <button class="upDownButton" onclick="decChannel(<?php echo $i; ?>)">-</button>
                     <button class="contentButton" id="chSel<?php echo $i; ?>" name="chSel<?php echo $i; ?>"
                         disabled>CH:0</button>
-                    <button class="upDownButton" type="button" onclick="incChannel(<?php echo $i; ?>)">+</button>
+                    <button class="upDownButton" onclick="incChannel(<?php echo $i; ?>)">+</button>
                 </div>
 
                 <div class="divSQLSelect">
-                    <button class="upDownButton" type="button" onclick="decSqlLevel(<?php echo $i; ?>)">-</button>
+                    <button class="upDownButton" onclick="decSqlLevel(<?php echo $i; ?>)">-</button>
                     <button class="contentButton" id="sqlLevel<?php echo $i; ?>" name="sqlLevel<?php echo $i; ?>"
                         disabled>15</button>
-                    <button class="upDownButton" type="button" onclick="incSqlLevel(<?php echo $i; ?>)">+</button>
+                    <button class="upDownButton" onclick="incSqlLevel(<?php echo $i; ?>)">+</button>
                 </div>
 
                 <div class="divTempShow">

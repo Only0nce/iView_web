@@ -28,7 +28,6 @@ include('timezone.php')
   <meta name="keywords" content="Audio Streamer, Music Streamer" />
   <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
   <link rel="stylesheet" type="text/css" href="style.css" title="style" />
-  <link rel="stylesheet" type="text/css" href="rf-console.css?v=<?php echo time(); ?>" />
   <script src="jquery.min.js"></script>
   <script type="text/javascript" src="jquery-latest.min.js"></script>
   <script type="text/javascript" src="jquery-ui.js"></script>
@@ -36,9 +35,16 @@ include('timezone.php')
   <link rel="stylesheet" type="text/css" href="jquery.datetimepicker.css">
   <script type="text/javascript" src="jquery.js"></script>
   <script type="text/javascript" src="jquery.datetimepicker.js"></script>
+  <style type="text/css">
+/*
+  .selected_list {
+}
+*/
+  </style>
 </head>
+</style>
 
-<body class="rf-console rf-console-config rf-console-system">
+<body>
   <div id="main">
     <div id="header">
       <div id="logo">
@@ -190,7 +196,7 @@ include('timezone.php')
 			<?php
 				if (file_exists('uploads/update.tar')){
 					echo('<h5>Found update file, Pls update your system.</h5>');
-					echo('<button class="button button2" type="button" id="update" name="update" onClick="systemupdate()">Update System</button>');
+					echo('<button class="button button2" type="submit" id="update" name="update" onClick="systemupdate()">Update System</button>');
 				}
 			?>
 		</div>
@@ -211,7 +217,7 @@ include('timezone.php')
 				echo '<input class="form-control"  type="text" name="startdate" value="" id="startdate" />';
 				echo '</div>';
 				echo '<div class="selected_list" ><span></span>';
-				echo '<button class="button button2" type="button" id="updateDateTime" name="updateDateTime" onClick="updateTime()">Setup Date Time</button>';
+				echo '<button class="button button2" type="submit" id="updateDateTime" name="updateDateTime" onClick="updateTime()">Setup Date Time</button>';
 				echo '</div>';
 				echo '</div>';
 				echo '<script type="text/javascript">';
@@ -225,7 +231,7 @@ include('timezone.php')
 				echo '<input class="form-control" type="text" id="ntpserver4" name="ntpserver4"  value="" placeholder="ntpServer4"/>';
 				echo '</div>';
 				echo '<div class="selected_list"><span></span>';
-				echo '<button class="button button2" type="button" id="updateNTP" name="updateNTP"  onClick="updateNTPServer()">Update NTP Server</button>';
+				echo '<button class="button button2" type="submit" id="updateNTP" name="updateNTP"  onClick="updateNTPServer()">Update NTP Server</button>';
 				echo '</div>';
 				echo '</div>';
 				echo '<div class="selected_list" > <span>Location</span>';

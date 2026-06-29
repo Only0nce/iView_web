@@ -1,10 +1,9 @@
 <html>
 <head>
 	<link rel="stylesheet" type="text/css" href="style.css" title="style" />
-	<link rel="stylesheet" type="text/css" href="rf-console.css?v=<?php echo time(); ?>" />
 <title>iView</title>
 </head>
-<body class="rf-console rf-console-auth rf-console-login">
+<body>
 
 <div class="login-page">
   <div class="form">

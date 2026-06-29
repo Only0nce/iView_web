@@ -1,116 +1,51 @@
-# -----------------------------------------------------------------------------
-# .gitignore for web_iview / remote PHP Web UI project
-# Project type detected: PHP + HTML + CSS + JavaScript static assets
-# -----------------------------------------------------------------------------
-
-# Git repository data accidentally copied by rsync/archive
-.git/
-
-# OS generated files
+# OS / editor
 .DS_Store
-.AppleDouble
-.LSOverride
-._*
 Thumbs.db
-Desktop.ini
-
-# Editor / IDE temporary files
 *.swp
 *.swo
-*.swn
-.*.swp
 *~
-*.bak
-*.backup
-*.orig
-*.rej
-*.tmp
-*.temp
-
-# Local IDE/workspace settings
 .vscode/
 .idea/
-*.code-workspace
 
-# Logs / runtime output
+# Logs
 *.log
 logs/
-log/
-
-# Environment files and local secrets
-.env
-.env.*
-!.env.example
-*.local
-*.local.php
-config.local.php
-dbConfig.local.php
-dbconnect.local.php
-
-# Credentials / certificates / private keys
-*.pem
-*.key
-*.p12
-*.pfx
-*.crt
-*.csr
-id_rsa*
-id_ed25519*
-
-# PHP dependency directory, if Composer is added later
-vendor/
-
-# JavaScript dependency/cache directories, if npm/yarn/pnpm is added later
-node_modules/
-.npm/
-.yarn/
-.pnpm-store/
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
-pnpm-debug.log*
 
-# Build/cache directories
-.cache/
-.tmp/
+# Runtime / cache / temp
+cache/
 tmp/
 temp/
-build/
-dist/
-coverage/
+sessions/
+uploads/tmp/
 
-# Database dumps / local databases
-*.sql
+# Dependencies
+node_modules/
+vendor/
+
+# Environment / secrets
+.env
+.env.*
+!.env.example
+
+# Archives / backups
+*.tar
+*.tar.gz
+*.tar.xz
+*.zip
+*.rar
+*.7z
+*.bak
+*.backup
+*.old
+
+# Local database
 *.sqlite
 *.sqlite3
 *.db
 
-# Upload/runtime-generated files
-# Keep the directory by committing a .gitkeep file if needed.
-uploads/*
-!uploads/.gitkeep
-
-# Timestamp-named uploaded/generated images found in this project.
-# Do not ignore img/ because it contains real UI assets.
-image/*
-!image/.gitkeep
-
-# Firmware/update/export artifacts
-*.tar
-*.tar.gz
-*.tgz
-*.tar.xz
-*.zip
-*.7z
-*.rar
-*.bin
-*.img
-*.iso
-
-# Local tool/AI assistant generated folders found in the archive
-.agents/
-.impeccable/
-.codex
-
-# Impeccable local config, in case .impeccable is intentionally tracked later
-.impeccable/config.local.json
+# Build / generated
+dist/
+build/
