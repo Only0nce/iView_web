@@ -3,6 +3,10 @@
   const WS_PORT_HOTSPOT = 3278;
   const RECONNECT_MS = 3000;
   const BANNER_HIDE_MS = 8000;
+  const IVIEW_FEATURES = window.iviewFeatures || {};
+  const HAS_WIFI = !!IVIEW_FEATURES.wifi;
+  const HAS_HOTSPOT = !!IVIEW_FEATURES.hotspot;
+  const HAS_5G = !!IVIEW_FEATURES.cellular5g;
   let refs = {};
 
   let wsWifi = null;
@@ -228,6 +232,10 @@
   }
 
   function toggleHotspot() {
+    if (!HAS_HOTSPOT) {
+      showBanner('Hotspot is not available on this hardware profile.', 'warning');
+      return false;
+    }
     if (hotspotToggleInFlight) return false;
 
     const currentState = getCurrentHotspotState();
@@ -383,6 +391,10 @@
   }
 
   function sendCommand(menuID, payload, bannerMessage, tone) {
+    if (!HAS_WIFI) {
+      showBanner('Wi‑Fi is not available on this hardware profile.', 'warning');
+      return false;
+    }
     const cmd = String(menuID || '').trim();
     if (!cmd) return false;
 
@@ -408,6 +420,10 @@
   }
 
   function sendHotspotCommand(menuID, payload, bannerMessage, tone) {
+    if (!HAS_HOTSPOT) {
+      showBanner('Hotspot is not available on this hardware profile.', 'warning');
+      return false;
+    }
     const cmd = String(menuID || '').trim();
     if (!cmd) return false;
 
@@ -458,11 +474,13 @@
   }
 
   function requestWiFiPage() {
+    if (!HAS_WIFI) return;
     sendCommand('getWiFiPage');
     sendCommand('initNetwork');
   }
 
   function connectWifiSocket() {
+    if (!HAS_WIFI) return;
     if (wsWifi && (wsWifi.readyState === WebSocket.OPEN || wsWifi.readyState === WebSocket.CONNECTING)) {
       return;
     }
@@ -499,6 +517,7 @@
   }
 
   function connectHotspotSocket() {
+    if (!HAS_HOTSPOT) return;
     if (wsHotspot && (wsHotspot.readyState === WebSocket.OPEN || wsHotspot.readyState === WebSocket.CONNECTING)) {
       return;
     }
@@ -537,6 +556,7 @@
   }
 
   function scheduleWifiReconnect() {
+    if (!HAS_WIFI) return;
     if (reconnectWifiTimer) return;
     reconnectWifiTimer = setTimeout(() => {
       reconnectWifiTimer = null;
@@ -545,6 +565,7 @@
   }
 
   function scheduleHotspotReconnect() {
+    if (!HAS_HOTSPOT) return;
     if (reconnectHotspotTimer) return;
     reconnectHotspotTimer = setTimeout(() => {
       reconnectHotspotTimer = null;
@@ -765,7 +786,7 @@
     if (refs.toggleBtn) {
       refs.toggleBtn.addEventListener('click', () => {
         // Always turn hotspot off first before toggling Wi‑Fi.
-        if (wsHotspot && wsHotspot.readyState === WebSocket.OPEN) {
+        if (HAS_HOTSPOT && wsHotspot && wsHotspot.readyState === WebSocket.OPEN) {
           const offHotspotPayload = { menuID: 'offhotspot' };
           wsHotspot.send(JSON.stringify(offHotspotPayload));
           console.log('Sent hotspot command:', offHotspotPayload);
@@ -954,6 +975,30 @@
     initialized = true;
     cacheRefs();
 
+    if (!HAS_WIFI) {
+      wifiEnabled = false;
+      setStatus(false);
+      if (refs.reloadBtn) refs.reloadBtn.disabled = true;
+      if (refs.toggleBtn) refs.toggleBtn.disabled = true;
+      if (refs.hotspotToggleBtn) refs.hotspotToggleBtn.disabled = true;
+      renderEmptyState('Wi‑Fi is not available', 'This hardware profile was built without Wi‑Fi support.');
+      showBanner('Wi‑Fi is disabled by hardware profile.', 'warning');
+      window.sendWifiCommand = () => false;
+      window.sendHotspotCommand = () => false;
+      window.hotspotControl = {
+        on: () => false,
+        off: () => false,
+        delete: () => false,
+        configure: () => false,
+        setSsid: () => false
+      };
+      return;
+    }
+
+    if (!HAS_HOTSPOT && refs.hotspotToggleBtn) {
+      refs.hotspotToggleBtn.disabled = true;
+    }
+
     initEvents();
     bindDataCommandButtons();
     window.sendWifiCommand = (menuID, payload) => sendCommand(menuID, payload);
@@ -975,7 +1020,7 @@
     updateHotspotToggleButton();
     renderEmptyState('Connecting to backend...', 'Please wait while Wi‑Fi backend becomes available.');
     connectWifiSocket();
-    connectHotspotSocket();
+    if (HAS_HOTSPOT) connectHotspotSocket();
 
     window.addEventListener('beforeunload', () => {
       if (reconnectWifiTimer) clearTimeout(reconnectWifiTimer);

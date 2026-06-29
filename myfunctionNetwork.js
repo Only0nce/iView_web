@@ -1,8 +1,14 @@
 // =============================
 // Network Page (eth0 / wlan0 / Hotspot)
+// Hardware feature-aware version
 // =============================
 var wsUri;
 var ws;
+
+var IVIEW_FEATURES = window.iviewFeatures || {};
+var HAS_WIFI = !!IVIEW_FEATURES.wifi;
+var HAS_HOTSPOT = !!IVIEW_FEATURES.hotspot;
+var HAS_5G = !!IVIEW_FEATURES.cellular5g;
 
 // ---------- Boot ----------
 WebSocketTest();
@@ -12,6 +18,7 @@ function WebSocketTest() {
     alert("WebSocket NOT supported by your Browser!");
     return;
   }
+
   wsUri = "ws://" + location.host + ":1234";
   ws = new WebSocket(wsUri);
 
@@ -28,29 +35,78 @@ function WebSocketTest() {
   };
 }
 
-// --- Helpers: ใช้ชุดเดียวพอ ---
+// ---------- Feature Guards ----------
+function featureUnavailable(featureName) {
+  alert(featureName + " is not available on this hardware profile.");
+}
+
+function canUseWifi(showAlert) {
+  if (HAS_WIFI) return true;
+  if (showAlert) featureUnavailable("Wi-Fi");
+  return false;
+}
+
+function canUseHotspot(showAlert) {
+  if (HAS_HOTSPOT) return true;
+  if (showAlert) featureUnavailable("Hotspot");
+  return false;
+}
+
+// ---------- Helpers ----------
+function byId(id) {
+  return document.getElementById(id);
+}
+
 function setDisplay(id, show) {
-	const el = document.getElementById(id);
-	if (el) el.style.display = show ? "block" : "none";
+  var el = byId(id);
+  if (el) el.style.display = show ? "block" : "none";
+}
+
+function setVisibility(ids, visible) {
+  ids.forEach(function (id) {
+    var el = byId(id);
+    if (el) el.style.visibility = visible ? "visible" : "hidden";
+  });
+}
+
+function setValue(id, v) {
+  var el = byId(id);
+  if (el) el.value = (v ?? "");
+}
+
+function getValue(id) {
+  var el = byId(id);
+  return el ? el.value : "";
+}
+
+function sendPayload(payload, successText) {
+  if (ws && ws.readyState === WebSocket.OPEN) {
+    ws.send(JSON.stringify(payload));
+    if (successText) alert(successText);
+    return true;
   }
-  function setVisibility(ids, visible) {
-	ids.forEach(id => {
-	  const el = document.getElementById(id);
-	  if (el) el.style.visibility = visible ? "visible" : "hidden";
-	});
+
+  alert("Connection is closed...");
+  return false;
+}
+
+function hasOption(selId, value) {
+  var sel = byId(selId);
+  if (!sel) return false;
+  for (var i = 0; i < sel.options.length; i += 1) {
+    if (String(sel.options[i].value) === String(value)) return true;
   }
-  function setValue(id, v) {
-	const el = document.getElementById(id);
-	if (el) el.value = (v ?? "");
-  }
-  function wifiApply() { wifiUpdateNetwork(); }
+  return false;
+}
+
 function splitNtpServers(s) {
   if (!s || typeof s !== "string") return [];
   return s.trim().split(/[\s,]+/).filter(Boolean).slice(0, 4);
 }
+
 function fillNtpInputsFromString(s) {
-  const arr = splitNtpServers(s);
-  setValue("ntpserver",  arr[0] || "");
+  var arr = splitNtpServers(s);
+  setValue("ntpserver", arr[0] || "");
   setValue("ntpserver1", arr[1] || "");
   setValue("ntpserver2", arr[2] || "");
   setValue("ntpserver3", arr[3] || "");
@@ -58,268 +114,209 @@ function fillNtpInputsFromString(s) {
 
 // ---------- Eth0 (Local Network) ----------
 function fillEth0(obj) {
-  // console.log("fillEth0",obj)
   setValue("dhcpmethod", obj.dhcpmethod);
-  setValue("ipaddress",  obj.ipaddress);
+  setValue("ipaddress", obj.ipaddress);
 
-  var isStatic = (String(document.getElementById("dhcpmethod").value) === "0");
+  var methodEl = byId("dhcpmethod");
+  var isStatic = methodEl && String(methodEl.value) === "0";
   setDisplay("showIP", isStatic);
-  setVisibility(["ipaddress","subnet","gateway","pridns","secdns"], isStatic);
+  setVisibility(["ipaddress", "subnet", "gateway", "pridns", "secdns"], isStatic);
 
   if (isStatic) {
-    setValue("subnet",  obj.subnet);
+    setValue("subnet", obj.subnet);
     setValue("gateway", obj.gateway);
-    setValue("pridns",  obj.pridns);
-    setValue("secdns",  obj.secdns);
+    setValue("pridns", obj.pridns);
+    setValue("secdns", obj.secdns);
   }
-  // ถ้าฝั่งเซิร์ฟเวอร์ส่ง ntpServer มา ก็เติม 4 ช่องให้ด้วย
+
   if (obj.ntpServer) fillNtpInputsFromString(obj.ntpServer);
 }
 
-// ใช้กับ <select id="dhcpmethod" ...> ของ eth0
 function setdhcpmethod() {
-  var isStatic = (String(document.getElementById("dhcpmethod").value) === "0");
+  var methodEl = byId("dhcpmethod");
+  var isStatic = methodEl && String(methodEl.value) === "0";
   setDisplay("showIP", isStatic);
-  setVisibility(["ipaddress","subnet","gateway","pridns","secdns"], isStatic);
+  setVisibility(["ipaddress", "subnet", "gateway", "pridns", "secdns"], isStatic);
 }
 
 function updateNetwork() {
-	const payload = {
-	  menuID: "updateLocalNetwork",
-	  dhcpmethod: Number(document.getElementById("dhcpmethod").value),
-	  ipaddress:  document.getElementById("ipaddress").value,
-	  subnet:     document.getElementById("subnet").value,
-	  gateway:    document.getElementById("gateway").value,
-	  pridns:     document.getElementById("pridns").value,
-	  secdns:     document.getElementById("secdns").value,
-	  ntpServer:  [
-		document.getElementById("ntpserver")?.value || "",
-		document.getElementById("ntpserver1")?.value || "",
-		document.getElementById("ntpserver2")?.value || "",
-		document.getElementById("ntpserver3")?.value || ""
-	  ].filter(Boolean).join(" "),
-	  phyNetworkName: "eth0"
-	};
-	if (ws && ws.readyState === 1) {
-	  ws.send(JSON.stringify(payload));
-	  alert("Setting up local network...");
-	} else {
-	  alert("Connection is closed...");
-	}
-  }
-  
+  var payload = {
+    menuID: "updateLocalNetwork",
+    dhcpmethod: Number(getValue("dhcpmethod")),
+    ipaddress: getValue("ipaddress"),
+    subnet: getValue("subnet"),
+    gateway: getValue("gateway"),
+    pridns: getValue("pridns"),
+    secdns: getValue("secdns"),
+    ntpServer: [
+      getValue("ntpserver"),
+      getValue("ntpserver1"),
+      getValue("ntpserver2"),
+      getValue("ntpserver3")
+    ].filter(Boolean).join(" "),
+    phyNetworkName: "eth0"
+  };
+
+  sendPayload(payload, "Setting up local network...");
+}
+
 // ---------- Wi-Fi (wlan0) ----------
 function setWifiMethod() {
-  var isStatic = (String(document.getElementById("wifi_dhcpmethod").value) === "0");
-  setDisplay("wifi_showIP", isStatic);
-  setVisibility(["wifi_ipaddress","wifi_subnet","wifi_gateway","wifi_pridns","wifi_secdns"], isStatic);
-}
-function fillWifi(obj) {
-	// console.log("fillWifi",obj)
-  setValue("wifi_dhcpmethod", obj.dhcpmethod);
-  setValue("wifi_ipaddress",  obj.ipaddress || "");
+  if (!canUseWifi(false)) return;
 
-  var isStatic = (String(document.getElementById("wifi_dhcpmethod").value) === "0");
+  var methodEl = byId("wifi_dhcpmethod");
+  var isStatic = methodEl && String(methodEl.value) === "0";
   setDisplay("wifi_showIP", isStatic);
-  setVisibility(["wifi_ipaddress","wifi_subnet","wifi_gateway","wifi_pridns","wifi_secdns"], isStatic);
+  setVisibility(["wifi_ipaddress", "wifi_subnet", "wifi_gateway", "wifi_pridns", "wifi_secdns"], isStatic);
+}
+
+function fillWifi(obj) {
+  if (!canUseWifi(false)) return;
+
+  setValue("wifi_dhcpmethod", obj.dhcpmethod);
+  setValue("wifi_ipaddress", obj.ipaddress || "");
+
+  var methodEl = byId("wifi_dhcpmethod");
+  var isStatic = methodEl && String(methodEl.value) === "0";
+  setDisplay("wifi_showIP", isStatic);
+  setVisibility(["wifi_ipaddress", "wifi_subnet", "wifi_gateway", "wifi_pridns", "wifi_secdns"], isStatic);
 
   if (isStatic) {
-    setValue("wifi_subnet",  obj.subnet  || "");
+    setValue("wifi_subnet", obj.subnet || "");
     setValue("wifi_gateway", obj.gateway || "");
-    setValue("wifi_pridns",  obj.pridns  || "");
-    setValue("wifi_secdns",  obj.secdns  || "");
+    setValue("wifi_pridns", obj.pridns || "");
+    setValue("wifi_secdns", obj.secdns || "");
   }
+
   if (obj.ntpServer) fillNtpInputsFromString(obj.ntpServer);
 }
+
+function wifiApply() {
+  wifiUpdateNetwork();
+}
+
 function wifiUpdateNetwork() {
-  var dhcpmethod = document.getElementById("wifi_dhcpmethod").value;
-  var ipaddress  = document.getElementById("wifi_ipaddress").value;
-  var subnet     = document.getElementById("wifi_subnet").value;
-  var gateway    = document.getElementById("wifi_gateway").value;
-  var pridns     = document.getElementById("wifi_pridns").value;
-  var secdns     = document.getElementById("wifi_secdns").value;
+  if (!canUseWifi(true)) return;
 
-  var jsonMessage =
-    '{"menuID":"updateLocalNetworkWifi","dhcpmethod":' + dhcpmethod +
-    ',"ipaddress":"' + ipaddress +
-    '","subnet":"'   + subnet +
-    '","gateway":"'  + gateway +
-    '","pridns":"'   + pridns +
-    '","secdns":"'   + secdns +
-    '","phyNetworkName":"wlan0"}';
+  var payload = {
+    menuID: "updateLocalNetworkWifi",
+    dhcpmethod: Number(getValue("wifi_dhcpmethod")),
+    ipaddress: getValue("wifi_ipaddress"),
+    subnet: getValue("wifi_subnet"),
+    gateway: getValue("wifi_gateway"),
+    pridns: getValue("wifi_pridns"),
+    secdns: getValue("wifi_secdns"),
+    phyNetworkName: "wlan0"
+  };
 
-  if (ws && ws.readyState === 1) {
-    ws.send(jsonMessage);
-    alert("Setting up Wi-Fi network...");
+  sendPayload(payload, "Setting up Wi-Fi network...");
+}
+
+// ---------- Hotspot (AP) ----------
+function setHotspotMethod() {
+  if (!canUseHotspot(false)) return;
+
+  var v = (getValue("ap_dhcpmethod") || "").toString().toLowerCase();
+  var isStatic = (v === "0" || v === "static" || v === "manual");
+  setDisplay("ap_showIP", isStatic);
+  setVisibility(["ap_ipaddress", "ap_subnet", "ap_gateway", "ap_pridns", "ap_secdns"], isStatic);
+}
+
+function hotspotApply() {
+  if (!canUseHotspot(true)) return;
+
+  var v = (getValue("ap_dhcpmethod") || "").toString().toLowerCase();
+  var dhcpmethod = (v === "0" || v === "static" || v === "manual") ? 0 : 1;
+
+  var payload = {
+    menuID: "updateLocalNetworkHotspot",
+    dhcpmethod: dhcpmethod,
+    ipaddress: getValue("ap_ipaddress"),
+    subnet: getValue("ap_subnet"),
+    gateway: getValue("ap_gateway"),
+    pridns: getValue("ap_pridns"),
+    secdns: getValue("ap_secdns"),
+    ssid: getValue("ssid_hotspot"),
+    password: getValue("password_hotspot"),
+    phyNetworkName: "Hotspot"
+  };
+
+  sendPayload(payload, "Setting up Hotspot network...");
+}
+
+function fillHotspot(obj) {
+  if (!canUseHotspot(false)) return;
+
+  var targetValue;
+  if (String(obj.dhcpmethod) === "0") {
+    targetValue = hasOption("ap_dhcpmethod", "static") ? "static" : "0";
   } else {
-    alert("Connection is closed...");
+    targetValue = hasOption("ap_dhcpmethod", "shared") ? "shared" : "1";
+  }
+
+  var sel = byId("ap_dhcpmethod");
+  if (sel) sel.value = targetValue;
+
+  setHotspotMethod();
+
+  if (String(obj.dhcpmethod) === "0") {
+    setValue("ap_ipaddress", obj.ipaddress || "");
+    setValue("ap_subnet", obj.subnet || "");
+    setValue("ap_gateway", obj.gateway || "");
+    setValue("ap_pridns", obj.pridns || "");
+    setValue("ap_secdns", obj.secdns || "");
+    setValue("ssid_hotspot", obj.ssid || "");
+    setValue("password_hotspot", obj.pwd || obj.password || "");
   }
 }
 
-// ==== Utilities ====
-function hasOption(selId, value){
-	var sel = document.getElementById(selId);
-	if (!sel) return false;
-	for (var i=0;i<sel.options.length;i++){
-	  if (String(sel.options[i].value) === String(value)) return true;
-	}
-	return false;
-  }
-  function setDisplay(id, show){
-	var el = document.getElementById(id);
-	if (el) el.style.display = show ? "block" : "none";
-  }
-  function setVisibility(ids, visible){
-	ids.forEach(function(id){
-	  var el = document.getElementById(id);
-	  if (el) el.style.visibility = visible ? "visible" : "hidden";
-	});
-  }
-  
-  // ==== Hotspot toggle (รองรับ "static"/"shared" และ 0/1) ====
-  function setHotspotMethod(){
-	var v = (document.getElementById("ap_dhcpmethod")?.value || "").toString().toLowerCase();
-	var isStatic = (v === "0" || v === "static" || v === "manual");
-	setDisplay("ap_showIP", isStatic);
-	setVisibility(["ap_ipaddress","ap_subnet","ap_gateway","ap_pridns","ap_secdns"], isStatic);
-  }
-  
-  // ==== ส่งค่า Hotspot เหมือน Local Network ====
-  function hotspotApply(){
-	var v = (document.getElementById("ap_dhcpmethod")?.value || "").toString().toLowerCase();
-	// map → dhcpmethod: 0 = static/manual, 1 = shared/auto
-	var dhcpmethod = (v === "0" || v === "static" || v === "manual") ? 0 : 1;
-  
-	var ipaddress = document.getElementById("ap_ipaddress")?.value || "";
-	var subnet    = document.getElementById("ap_subnet")?.value || "";
-	var gateway   = document.getElementById("ap_gateway")?.value || "";
-	var pridns    = document.getElementById("ap_pridns")?.value || "";
-	var secdns    = document.getElementById("ap_secdns")?.value || "";
-	var ssid    = document.getElementById("ssid_hotspot")?.value || "";
-	var password    = document.getElementById("password_hotspot")?.value || "";
-  
-	var jsonMessage =
-	  '{"menuID":"updateLocalNetworkHotspot","dhcpmethod":'+ dhcpmethod +
-	  ',"ipaddress":"'+ ipaddress +
-	  '","subnet":"'+ subnet +
-	  '","gateway":"'+ gateway +
-	  '","pridns":"'+ pridns +
-	  '","secdns":"'+ secdns +
-	  '","ssid":"'+ ssid +
-	  '","password":"'+ password +
-	  '","phyNetworkName":"Hotspot"}';
-  
-	if (ws && ws.readyState === 1){
-	  ws.send(jsonMessage);
-	  alert("Setting up Hotspot network...");
-	} else {
-	  alert("Connection is closed...");
-	}
-  }
-  
-  // ==== เติมค่าจาก WebSocket (รองรับทั้ง 0/1 และ static/shared) ====
-  function fillHotspot(obj){
-	// console.log("fillHotspot",obj)
-	// เลือก option ให้ตรงกับค่า dhcpmethod ที่ส่งมา
-	var targetValue;
-	if (String(obj.dhcpmethod) === "0") {
-	  // ถ้ามี option "static" ให้เซ็ตเป็น static ไม่งั้นเซ็ตเป็น "0"
-	  targetValue = hasOption("ap_dhcpmethod","static") ? "static" : "0";
-	} else {
-	  // ถ้ามี option "shared" ให้เซ็ตเป็น shared ไม่งั้นเซ็ตเป็น "1"
-	  targetValue = hasOption("ap_dhcpmethod","shared") ? "shared" : "1";
-	}
-	var sel = document.getElementById("ap_dhcpmethod");
-	if (sel) sel.value = targetValue;
-  
-	// toggle ช่องกรอก
-	setHotspotMethod();
-  
-	// ใส่ค่า IP เมื่อเป็น static/manual
-	if (String(obj.dhcpmethod) === "0"){
-	  document.getElementById("ap_ipaddress").value = obj.ipaddress || "";
-	  document.getElementById("ap_subnet").value    = obj.subnet    || "";
-	  document.getElementById("ap_gateway").value   = obj.gateway   || "";
-	  document.getElementById("ap_pridns").value    = obj.pridns    || "";
-	  document.getElementById("ap_secdns").value    = obj.secdns    || "";
-	  document.getElementById("ssid_hotspot").value    = obj.ssid    || "";
-	  document.getElementById("password_hotspot").value    = obj.pwd    || "";
-	}
-  }
-  
 function hotspotUpdateNetwork() {
-  var dhcpmethod = document.getElementById("ap_dhcpmethod").value;
-  var ipaddress  = document.getElementById("ap_ipaddress").value;
-  var subnet     = document.getElementById("ap_subnet").value;
-  var gateway    = document.getElementById("ap_gateway").value;
-  var pridns     = document.getElementById("ap_pridns").value;
-  var secdns     = document.getElementById("ap_secdns").value;
-
-  var jsonMessage =
-    '{"menuID":"updateLocalNetwork","dhcpmethod":' + dhcpmethod +
-    ',"ipaddress":"' + ipaddress +
-    '","subnet":"'   + subnet +
-    '","gateway":"'  + gateway +
-    '","pridns":"'   + pridns +
-    '","secdns":"'   + secdns +
-    '","phyNetworkName":"Hotspot"}';
-
-  if (ws && ws.readyState === 1) {
-    ws.send(jsonMessage);
-    alert("Setting up Hotspot network...");
-  } else {
-    alert("Connection is closed...");
-  }
+  hotspotApply();
 }
 
 // ---------- Common Actions ----------
 function restartnetwork() {
-  var jsonMessage = '{"menuID":"restartnetwork"}';
-  if (ws && ws.readyState === 1) {
-    ws.send(jsonMessage);
-    alert("Restarting local network...");
-  } else {
-    alert("ERROR! Connection is closed...");
-  }
+  var payload = { menuID: "restartnetwork" };
+  sendPayload(payload, "Restarting local network...");
 }
 
 function updateNTPServer() {
-  // รองรับ 4 ช่อง
-  var s0 = document.getElementById("ntpserver")?.value || "";
-  var s1 = document.getElementById("ntpserver1")?.value || "";
-  var s2 = document.getElementById("ntpserver2")?.value || "";
-  var s3 = document.getElementById("ntpserver3")?.value || "";
-  var ntpJoined = [s0, s1, s2, s3].filter(Boolean).join(" ");
+  var ntpJoined = [
+    getValue("ntpserver"),
+    getValue("ntpserver1"),
+    getValue("ntpserver2"),
+    getValue("ntpserver3")
+  ].filter(Boolean).join(" ");
 
-  var jsonMessage = JSON.stringify({
+  var payload = {
     menuID: "updateNTPServer",
-    ntpServer: ntpJoined    // รักษา format เดิม (string) เพื่อเข้ากันได้
-  });
+    ntpServer: ntpJoined
+  };
 
-  if (ws && ws.readyState === 1) {
-    ws.send(jsonMessage);
-    alert("Setting up NTP...");
-  } else {
-    alert("Connection is closed...");
-  }
+  sendPayload(payload, "Setting up NTP...");
 }
 
 // ---------- Message Dispatcher ----------
 function processMsg(message) {
-  var obj = JSON.parse(message);
+  var obj;
+  try {
+    obj = JSON.parse(message);
+  } catch (err) {
+    console.warn("Invalid JSON from WebSocket:", err, message);
+    return;
+  }
 
   if (obj.menuID == "network") {
-	// console.log("obj.phyNetworkName",obj.phyNetworkName)
     if (obj.phyNetworkName == "eth0") {
       fillEth0(obj);
     } else if (obj.phyNetworkName == "wlan0") {
-      fillWifi(obj);
+      if (HAS_WIFI) fillWifi(obj);
     } else if (obj.phyNetworkName == "Hotspot") {
-      fillHotspot(obj);
+      if (HAS_HOTSPOT) fillHotspot(obj);
     }
   }
-  else if(obj.menuID == "configureHotspot"){
-	fillHotspot(obj);
+  else if (obj.menuID == "configureHotspot") {
+    if (HAS_HOTSPOT) fillHotspot(obj);
   }
   else if (obj.menuID == "update") {
     var updateStatus = obj.updateStatus;
@@ -339,7 +336,7 @@ function processMsg(message) {
 
 // ---------- Initial UI sync ----------
 document.addEventListener("DOMContentLoaded", function () {
-  if (document.getElementById("dhcpmethod"))       setdhcpmethod();
-  if (document.getElementById("wifi_dhcpmethod"))  setWifiMethod();
-  if (document.getElementById("ap_dhcpmethod"))    setHotspotMethod();
+  if (byId("dhcpmethod")) setdhcpmethod();
+  if (HAS_WIFI && byId("wifi_dhcpmethod")) setWifiMethod();
+  if (HAS_HOTSPOT && byId("ap_dhcpmethod")) setHotspotMethod();
 });

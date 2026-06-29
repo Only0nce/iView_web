@@ -9,7 +9,8 @@
 	{
 		echo("<script>location.href = '/login.php';</script>");
 	}	
-	$webversion = "16042026-V1.0"
+	$webversion = "16042026-V1.0";
+	require_once __DIR__ . '/hardware_features.php';
 ?>
 <!DOCTYPE HTML>
 <?php
@@ -63,8 +64,8 @@ include('timezone.php')
 			<li><a href="snmp_update.php">Rx SNMP Info</a></li>
     		<li><a href="role.php?id=0">ROLE</a></li>
 			<li><a href="network.php">NETWORK</a></li>
-			<li><a href="wifi.php">WiFi</a></li>
-			<li class="selected"><a href="update.php">SYSTEM</a></li>
+                <?php echo iview_render_wifi_menu_item(false); ?>
+<li class="selected"><a href="update.php">SYSTEM</a></li>
 			<li><a href="logout.php">LOGOUT</a></li>
 			<li><a href="changepass.php">CHANGE PASS.</a></li>
         </ul>

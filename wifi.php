@@ -11,6 +11,8 @@ if($_SESSION['Status'] != "ADMIN")
     echo("<script>location.href = '/login.php';</script>");
     exit;
 }
+	require_once __DIR__ . '/hardware_features.php';
+	iview_ensure_wifi_or_redirect();
 ?>
 <!DOCTYPE HTML>
 <html>
@@ -22,6 +24,7 @@ if($_SESSION['Status'] != "ADMIN")
     <link rel="stylesheet" type="text/css" href="style.css" title="style" />
     <link rel="stylesheet" type="text/css" href="wifi_theme.css?v=<?php echo time(); ?>" />
     <script src="jquery.min.js"></script>
+    <?php iview_print_feature_script(); ?>
     <script type="text/javascript" src="myfunctionWifiManager.js?v=<?php echo time(); ?>" defer></script>
 </head>
 <body>
@@ -41,8 +44,8 @@ if($_SESSION['Status'] != "ADMIN")
                     <li><a href="snmp_update.php">Rx SNMP Info</a></li>
                     <li><a href="role.php?id=0">ROLE</a></li>
                     <li><a href="network.php">NETWORK</a></li>
-                    <li class="selected"><a href="wifi.php">WiFi</a></li>
-                    <li><a href="update.php">SYSTEM</a></li>
+                <?php echo iview_render_wifi_menu_item(true); ?>
+<li><a href="update.php">SYSTEM</a></li>
                     <li><a href="logout.php">LOGOUT</a></li>
                     <li><a href="changepass.php">CHANGE PASS.</a></li>
                 </ul>
@@ -100,6 +103,7 @@ if($_SESSION['Status'] != "ADMIN")
                     </div>
                 </div>
 
+                <?php if (iview_has_hotspot()): ?>
                 <div class="wifi-panel wifi-summary-panel hotspot-summary-panel">
                     <div class="wifi-summary-top">
                         <div class="wifi-summary-main">
@@ -132,6 +136,7 @@ if($_SESSION['Status'] != "ADMIN")
                         </div>
                     </div>
                 </div>
+                <?php endif; ?>
 
                 <div class="wifi-panel wifi-list-panel">
                     <div class="wifi-panel-title-row wifi-panel-title-row-tight">

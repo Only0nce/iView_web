@@ -9,6 +9,7 @@
 	{
 		echo("<script>location.href = '/login.php';</script>");
 	}	
+	require_once __DIR__ . '/hardware_features.php';
 ?>
 <!DOCTYPE HTML>
 <?php
@@ -56,8 +57,8 @@ include('ListAudioGain.php')
 		<li class="selected"><a href="snmp_update.php">Rx SNMP Info</a></li>
 		<li><a href="role.php?id=0">ROLE</a></li>
 		<li><a href="network.php">NETWORK</a></li>
-		<li><a href="wifi.php">WiFi</a></li>
-		<li><a href="update.php">System</a></li>
+                <?php echo iview_render_wifi_menu_item(false); ?>
+<li><a href="update.php">System</a></li>
 		<li><a href="logout.php">LOGOUT</a></li>
 		<li><a href="changepass.php">CHANGE PASS.</a></li>
 	</ul>

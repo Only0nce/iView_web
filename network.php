@@ -9,6 +9,7 @@
 	{
 		echo("<script>location.href = '/login.php';</script>");
 	}	
+	require_once __DIR__ . '/hardware_features.php';
 ?>
 <!DOCTYPE HTML>
 <?php
@@ -27,6 +28,7 @@ include('ListAudioGain.php')
     <script src="jquery.min.js"></script>
     <script type="text/javascript" src="jquery-latest.min.js"></script>
     <script type="text/javascript" src="jquery-ui.js"></script>
+    <?php iview_print_feature_script(); ?>
     <script type="text/javascript" src="myfunctionNetwork.js?v=<?php echo time(); ?>"></script>
     <style type="text/css">
     /*
@@ -54,8 +56,8 @@ include('ListAudioGain.php')
                     <li><a href="snmp_update.php">Rx SNMP Info</a></li>
                     <li><a href="role.php?id=0">ROLE</a></li>
                     <li class="selected"><a href="network.php">NETWORK</a></li>
-                    <li><a href="wifi.php">WiFi</a></li>
-                    <li><a href="update.php">SYSTEM</a></li>
+                <?php echo iview_render_wifi_menu_item(false); ?>
+<li><a href="update.php">SYSTEM</a></li>
                     <li><a href="logout.php">LOGOUT</a></li>
                     <li><a href="changepass.php">CHANGE PASS.</a></li>
                     <!--
@@ -166,6 +168,18 @@ include('ListAudioGain.php')
                         onClick="restartnetwork()">Networking Restart</button>
                 </div>
 
+
+                <?php if (!iview_has_wifi() && !iview_has_hotspot()): ?>
+                <hr>
+                <div class="form-group">
+                    <div class="selected_list">
+                        <strong>Wireless features are disabled for this hardware profile.</strong><br>
+                        <span>This build is running as Ethernet-only. Change hardware_profile.php to enable WiFi/Hotspot.</span>
+                    </div>
+                </div>
+                <?php endif; ?>
+
+                <?php if (iview_has_wifi()): ?>
                 <hr>
                 <h3 align="center">Wi-Fi (Client) Network</h3>
 
@@ -217,6 +231,9 @@ include('ListAudioGain.php')
                         (Wi-Fi)</button>
                 </div>
 
+                <?php endif; ?>
+
+                <?php if (iview_has_hotspot()): ?>
                 <hr>
                 <h3 align="center">Hotspot (AP) Network</h3>
 
@@ -274,6 +291,7 @@ include('ListAudioGain.php')
                     <button class="button button2" type="button" id="ap_apply" onClick="hotspotApply()">Apply
                         (Hotspot)</button>
                 </div>
+                <?php endif; ?>
 <!-- 
 				<div id="footer">
                     <h4>IFZ TECHNOLOGIES CO.,LTD. 36/58-59, KHLONG SONG TON NUN, LAT KRABANG, BANGKOK 10520 TEL
